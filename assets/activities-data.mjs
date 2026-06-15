@@ -70,7 +70,6 @@ export const activities = [
     timing: 'Autumn break, Monday-Friday, 09:00-15:00',
     cost: '€149 per week',
     beginnerFriendly: false,
-    trialAvailability: '',
     contactUrl: 'https://example.org/holiday-circus-camp',
     lastVerified: '2026-05-21',
   },
@@ -86,7 +85,6 @@ export const activities = [
     cost: '€95 for three days',
     beginnerFriendly: true,
     trialAvailability: 'Single-day trial possible if places remain',
-    contactUrl: '',
     lastVerified: '2026-05-23',
   },
   {
@@ -116,7 +114,6 @@ export const activities = [
     cost: '€9 per class',
     beginnerFriendly: true,
     trialAvailability: 'One free drop-in class',
-    contactUrl: '',
     lastVerified: '2026-05-30',
   },
 ];

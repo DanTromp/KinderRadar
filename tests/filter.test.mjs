@@ -52,7 +52,7 @@ test('supports category and beginner-friendly filtering', () => {
   }), false);
 });
 
-test('seed data keeps required fields and allows missing optional values', () => {
+test('validates seed data has required fields and permits optional fields', () => {
   assert.ok(activities.length >= 8);
 
   const missingOptionalFields = activities.filter((activity) => !activity.contactUrl || !activity.trialAvailability);
