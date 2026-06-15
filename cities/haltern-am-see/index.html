@@ -3,24 +3,40 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Child activities in Haltern am See | KinderRadar</title>
+    <title>KinderAktiv Haltern | Local kids activities near Haltern am See</title>
     <meta
       name="description"
-      content="Discover sports, music, swimming, camps, and family-friendly local activities in Haltern am See."
+      content="Discover weekly activities, weekend family ideas, holiday activities, and beginner-friendly trials near Haltern am See."
     />
     <link rel="stylesheet" href="/assets/styles.css" />
   </head>
   <body>
-    <main class="page">
+    <main class="page stack">
       <header class="page-header">
         <a class="back-link" href="/">← Back to homepage</a>
-        <h1>Activities for kids in Haltern am See</h1>
-        <p>Manually curated local options for one pilot region.</p>
+        <p class="eyebrow">KinderAktiv Haltern</p>
+        <h1>Find local activities your child can join, try, or do nearby.</h1>
+        <p>Manually curated options for parents comparing weekly, weekend, holiday, and beginner-friendly activities near Haltern am See.</p>
+        <div class="button-row">
+          <a class="button" href="mailto:hello@kinderradar.local?subject=Get%20updates%20when%20new%20activities%20are%20added">Get updates when new activities are added</a>
+          <a class="button secondary" href="mailto:hello@kinderradar.local?subject=Submit%20or%20update%20an%20activity">Submit or update an activity</a>
+        </div>
       </header>
 
       <section class="panel" aria-labelledby="filter-heading">
         <h2 id="filter-heading">Filter activities</h2>
         <form id="activity-filters" class="filters" novalidate>
+          <label>
+            Town
+            <select name="town">
+              <option value="">All nearby towns</option>
+              <option value="Haltern am See">Haltern am See</option>
+              <option value="Sythen">Sythen</option>
+              <option value="Hullern">Hullern</option>
+              <option value="Lavesum">Lavesum</option>
+            </select>
+          </label>
+
           <label>
             Child age
             <select name="age">
@@ -33,49 +49,17 @@
           </label>
 
           <label>
-            Activity type
-            <select name="type">
-              <option value="">All types</option>
-              <option value="sports clubs">sports clubs</option>
-              <option value="music/dance">music/dance</option>
-              <option value="swimming">swimming</option>
-              <option value="martial arts">martial arts</option>
-              <option value="toddler groups">toddler groups</option>
-              <option value="school holiday camps">school holiday camps</option>
-              <option value="weekend family activities">weekend family activities</option>
-            </select>
-          </label>
-
-          <label>
-            Weekday
-            <select name="weekday">
-              <option value="">Any day</option>
-              <option value="Monday">Monday</option>
-              <option value="Tuesday">Tuesday</option>
-              <option value="Wednesday">Wednesday</option>
-              <option value="Thursday">Thursday</option>
-              <option value="Friday">Friday</option>
-              <option value="Saturday">Saturday</option>
-              <option value="Sunday">Sunday</option>
-            </select>
-          </label>
-
-          <label>
-            Indoor/outdoor
-            <select name="setting">
-              <option value="">Any</option>
-              <option value="indoor">Indoor</option>
-              <option value="outdoor">Outdoor</option>
-              <option value="mixed">Mixed</option>
-            </select>
-          </label>
-
-          <label>
-            Free/paid
-            <select name="cost">
-              <option value="">Any</option>
-              <option value="free">Free</option>
-              <option value="paid">Paid</option>
+            Category
+            <select name="category">
+              <option value="">All categories</option>
+              <option value="Sports">Sports</option>
+              <option value="Arts & crafts">Arts & crafts</option>
+              <option value="Family outing">Family outing</option>
+              <option value="Nature">Nature</option>
+              <option value="Holiday camp">Holiday camp</option>
+              <option value="STEM">STEM</option>
+              <option value="Swimming">Swimming</option>
+              <option value="Music">Music</option>
             </select>
           </label>
 
@@ -83,8 +67,8 @@
             Beginner-friendly
             <select name="beginnerFriendly">
               <option value="">Any</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
             </select>
           </label>
         </form>
@@ -94,188 +78,140 @@
         No activities match the selected filters yet. Try widening your criteria.
       </p>
 
-      <section class="listing-grid" id="listing-grid" aria-live="polite">
-        <article
-          class="listing"
-          data-age-min="5"
-          data-age-max="12"
-          data-type="sports clubs"
-          data-weekdays="Monday,Wednesday"
-          data-setting="outdoor"
-          data-cost="paid"
-          data-beginner-friendly="yes"
-        >
-          <h2>TuS Haltern Kids Football</h2>
-          <p><strong>Category:</strong> sports clubs</p>
-          <p><strong>Description:</strong> Team-based football training for children with play-focused drills.</p>
-          <p><strong>Age range:</strong> 5-12</p>
-          <p><strong>Location:</strong> Jahnstraße 15, Haltern am See</p>
-          <p><strong>Days/times:</strong> Monday & Wednesday, 16:30-18:00</p>
-          <p><strong>Cost:</strong> Club membership from €18/month</p>
-          <p><strong>Trial availability:</strong> Two free trial sessions</p>
-          <p><strong>Contact:</strong> <a href="https://example.org/tus-haltern-football">Organizer website</a></p>
-          <p><strong>Last verified:</strong> 2026-05-22</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+      <section class="panel" data-section aria-labelledby="weekly-activities-heading">
+        <h2 id="weekly-activities-heading">Weekly activities</h2>
+        <p class="section-intro">Recurring local options for families who want a regular activity during the week.</p>
+        <div class="listing-grid">
+          <article class="listing" data-age-min="4" data-age-max="6" data-town="Haltern am See" data-category="Sports" data-beginner-friendly="true">
+            <span class="listing-tag">Weekly</span>
+            <h2>Lakeside Little Kickers</h2>
+            <p><strong>Category:</strong> Sports</p>
+            <p><strong>Age range:</strong> 4-6</p>
+            <p><strong>Town:</strong> Haltern am See</p>
+            <p><strong>When:</strong> Tuesday, 16:00-17:00</p>
+            <p><strong>Cost:</strong> Club membership from €16/month</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> Two trial sessions available</p>
+            <p><strong>Contact or website:</strong> <a href="https://example.org/lakeside-little-kickers">Organizer website</a></p>
+            <p><strong>Last verified:</strong> 2026-05-28</p>
+          </article>
 
-        <article
-          class="listing"
-          data-age-min="3"
-          data-age-max="7"
-          data-type="music/dance"
-          data-weekdays="Tuesday"
-          data-setting="indoor"
-          data-cost="paid"
-          data-beginner-friendly="yes"
-        >
-          <h2>Klangwerk Mini Dance</h2>
-          <p><strong>Category:</strong> music/dance</p>
-          <p><strong>Description:</strong> Rhythm and movement sessions introducing dance basics through songs.</p>
-          <p><strong>Age range:</strong> 3-7</p>
-          <p><strong>Location:</strong> Mühlenstraße 8, Haltern am See</p>
-          <p><strong>Days/times:</strong> Tuesday, 15:45-16:30</p>
-          <p><strong>Cost:</strong> €11 per class</p>
-          <p><strong>Trial availability:</strong> First class free</p>
-          <p><strong>Contact:</strong> <a href="https://example.org/klangwerk-dance">Organizer website</a></p>
-          <p><strong>Last verified:</strong> 2026-05-20</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+          <article class="listing" data-age-min="6" data-age-max="10" data-town="Sythen" data-category="Arts & crafts" data-beginner-friendly="true">
+            <span class="listing-tag">Weekly</span>
+            <h2>Creative Kids Atelier</h2>
+            <p><strong>Category:</strong> Arts & crafts</p>
+            <p><strong>Age range:</strong> 6-10</p>
+            <p><strong>Town:</strong> Sythen</p>
+            <p><strong>When:</strong> Wednesday, 15:30-17:00</p>
+            <p><strong>Cost:</strong> €14 per session</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> First workshop discounted</p>
+            <p><strong>Contact or website:</strong> <a href="https://example.org/creative-kids-atelier">Organizer website</a></p>
+            <p><strong>Last verified:</strong> 2026-05-26</p>
+          </article>
+        </div>
+      </section>
 
-        <article
-          class="listing"
-          data-age-min="4"
-          data-age-max="12"
-          data-type="swimming"
-          data-weekdays="Thursday,Saturday"
-          data-setting="indoor"
-          data-cost="paid"
-          data-beginner-friendly="yes"
-        >
-          <h2>Aquafit Water Starters</h2>
-          <p><strong>Category:</strong> swimming</p>
-          <p><strong>Description:</strong> Confidence-building swim lessons grouped by comfort level.</p>
-          <p><strong>Age range:</strong> 4-12</p>
-          <p><strong>Location:</strong> Hallenbad Haltern, Schüttenwall 1</p>
-          <p><strong>Days/times:</strong> Thursday, 17:00-18:00; Saturday, 10:00-11:00</p>
-          <p><strong>Cost:</strong> From €24/month</p>
-          <p><strong>Trial availability:</strong> Trial class on request</p>
-          <p><strong>Contact:</strong> <a href="https://example.org/aquafit-haltern">Organizer website</a></p>
-          <p><strong>Last verified:</strong> 2026-05-19</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+      <section class="panel" data-section aria-labelledby="weekend-family-ideas-heading">
+        <h2 id="weekend-family-ideas-heading">Weekend family ideas</h2>
+        <p class="section-intro">Easy weekend options for families looking for a one-off outing nearby.</p>
+        <div class="listing-grid">
+          <article class="listing" data-age-min="3" data-age-max="10" data-town="Hullern" data-category="Family outing" data-beginner-friendly="true">
+            <span class="listing-tag">Weekend</span>
+            <h2>Family Farm Morning</h2>
+            <p><strong>Category:</strong> Family outing</p>
+            <p><strong>Age range:</strong> 3-10</p>
+            <p><strong>Town:</strong> Hullern</p>
+            <p><strong>When:</strong> Saturday, 09:30-12:00</p>
+            <p><strong>Cost:</strong> Free with optional snack donation</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> Drop in when spots are open</p>
+            <p><strong>Contact or website:</strong> <a href="https://example.org/family-farm-morning">Organizer website</a></p>
+            <p><strong>Last verified:</strong> 2026-05-29</p>
+          </article>
 
-        <article
-          class="listing"
-          data-age-min="6"
-          data-age-max="13"
-          data-type="martial arts"
-          data-weekdays="Friday"
-          data-setting="indoor"
-          data-cost="paid"
-          data-beginner-friendly="yes"
-        >
-          <h2>Dojo Haltern Junior Judo</h2>
-          <p><strong>Category:</strong> martial arts</p>
-          <p><strong>Description:</strong> Introductory judo with focus on coordination and respectful play.</p>
-          <p><strong>Age range:</strong> 6-13</p>
-          <p><strong>Location:</strong> Schulstraße 11, Haltern am See</p>
-          <p><strong>Days/times:</strong> Friday, 16:00-17:30</p>
-          <p><strong>Cost:</strong> €20/month</p>
-          <p><strong>Trial availability:</strong> Not specified</p>
-          <p><strong>Contact:</strong> <a href="https://example.org/dojo-haltern">Organizer website</a></p>
-          <p><strong>Last verified:</strong> 2026-05-18</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+          <article class="listing" data-age-min="4" data-age-max="9" data-town="Haltern am See" data-category="Nature" data-beginner-friendly="true">
+            <span class="listing-tag">Weekend</span>
+            <h2>Silbersee Story Walk</h2>
+            <p><strong>Category:</strong> Nature</p>
+            <p><strong>Age range:</strong> 4-9</p>
+            <p><strong>Town:</strong> Haltern am See</p>
+            <p><strong>When:</strong> Sunday, 10:00-11:30</p>
+            <p><strong>Cost:</strong> Free</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> No booking required</p>
+            <p><strong>Contact or website:</strong> <a href="https://example.org/silbersee-story-walk">Organizer website</a></p>
+            <p><strong>Last verified:</strong> 2026-05-24</p>
+          </article>
+        </div>
+      </section>
 
-        <article
-          class="listing"
-          data-age-min="0"
-          data-age-max="3"
-          data-type="toddler groups"
-          data-weekdays="Wednesday"
-          data-setting="indoor"
-          data-cost="free"
-          data-beginner-friendly="yes"
-        >
-          <h2>St. Sixtus Parent & Toddler Circle</h2>
-          <p><strong>Category:</strong> toddler groups</p>
-          <p><strong>Description:</strong> Weekly songs, play mats, and parent networking for little ones.</p>
-          <p><strong>Age range:</strong> 0-3</p>
-          <p><strong>Location:</strong> Pfarrheim, Lippstraße 5</p>
-          <p><strong>Days/times:</strong> Wednesday, 09:30-11:00</p>
-          <p><strong>Cost:</strong> Free</p>
-          <p><strong>Trial availability:</strong> Drop-in anytime</p>
-          <p><strong>Contact:</strong> <a href="mailto:toddler-group@example.org">Email organizer</a></p>
-          <p><strong>Last verified:</strong> 2026-05-25</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+      <section class="panel" data-section aria-labelledby="school-holiday-activities-heading">
+        <h2 id="school-holiday-activities-heading">School holiday activities</h2>
+        <p class="section-intro">Shortlist camps and holiday clubs for school break planning.</p>
+        <div class="listing-grid">
+          <article class="listing" data-age-min="7" data-age-max="12" data-town="Haltern am See" data-category="Holiday camp" data-beginner-friendly="false">
+            <span class="listing-tag">Holiday</span>
+            <h2>Holiday Circus Camp</h2>
+            <p><strong>Category:</strong> Holiday camp</p>
+            <p><strong>Age range:</strong> 7-12</p>
+            <p><strong>Town:</strong> Haltern am See</p>
+            <p><strong>When:</strong> Autumn break, Monday-Friday, 09:00-15:00</p>
+            <p><strong>Cost:</strong> €149 per week</p>
+            <p><strong>Beginner-friendly:</strong> No</p>
+            <p><strong>Trial availability:</strong> <span class="muted">Not specified</span></p>
+            <p><strong>Contact or website:</strong> <a href="https://example.org/holiday-circus-camp">Organizer website</a></p>
+            <p><strong>Last verified:</strong> 2026-05-21</p>
+          </article>
 
-        <article
-          class="listing"
-          data-age-min="6"
-          data-age-max="12"
-          data-type="school holiday camps"
-          data-weekdays="Monday,Tuesday,Wednesday,Thursday,Friday"
-          data-setting="mixed"
-          data-cost="paid"
-          data-beginner-friendly="yes"
-        >
-          <h2>Forest Explorers Summer Camp</h2>
-          <p><strong>Category:</strong> school holiday camps</p>
-          <p><strong>Description:</strong> Week-long camp combining outdoor games, crafts, and guided nature walks.</p>
-          <p><strong>Age range:</strong> 6-12</p>
-          <p><strong>Location:</strong> Hullern Forest Base, Haltern am See</p>
-          <p><strong>Days/times:</strong> School holidays, Monday-Friday, 09:00-15:00</p>
-          <p><strong>Cost:</strong> €145 per week</p>
-          <p><strong>Trial availability:</strong> Not specified</p>
-          <p><strong>Contact:</strong> <span class="muted">Not specified</span></p>
-          <p><strong>Last verified:</strong> 2026-05-17</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+          <article class="listing" data-age-min="8" data-age-max="12" data-town="Lavesum" data-category="STEM" data-beginner-friendly="true">
+            <span class="listing-tag">Holiday</span>
+            <h2>Maker Lab Holiday Club</h2>
+            <p><strong>Category:</strong> STEM</p>
+            <p><strong>Age range:</strong> 8-12</p>
+            <p><strong>Town:</strong> Lavesum</p>
+            <p><strong>When:</strong> Summer holidays, Tuesday-Thursday, 10:00-14:00</p>
+            <p><strong>Cost:</strong> €95 for three days</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> Single-day trial possible if places remain</p>
+            <p><strong>Contact or website:</strong> <span class="muted">Not listed yet</span></p>
+            <p><strong>Last verified:</strong> 2026-05-23</p>
+          </article>
+        </div>
+      </section>
 
-        <article
-          class="listing"
-          data-age-min="2"
-          data-age-max="10"
-          data-type="weekend family activities"
-          data-weekdays="Sunday"
-          data-setting="outdoor"
-          data-cost="free"
-          data-beginner-friendly="yes"
-        >
-          <h2>Family Nature Walk at Silbersee</h2>
-          <p><strong>Category:</strong> weekend family activities</p>
-          <p><strong>Description:</strong> Guided family walk with playful stop points and picnic break.</p>
-          <p><strong>Age range:</strong> 2-10</p>
-          <p><strong>Location:</strong> Silbersee Trail Start, Haltern am See</p>
-          <p><strong>Days/times:</strong> Sunday, 10:00-12:00</p>
-          <p><strong>Cost:</strong> Free</p>
-          <p><strong>Trial availability:</strong> No registration needed</p>
-          <p><strong>Contact:</strong> <a href="https://example.org/family-walk">Organizer website</a></p>
-          <p><strong>Last verified:</strong> 2026-05-21</p>
-          <div class="listing-actions">
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Suggest%20activity">Suggest an activity</a>
-            <a class="text-link" href="mailto:hello@kinderradar.local?subject=Claim%20or%20update%20listing">Claim/update this listing</a>
-          </div>
-        </article>
+      <section class="panel" data-section aria-labelledby="beginner-friendly-trial-activities-heading">
+        <h2 id="beginner-friendly-trial-activities-heading">Beginner-friendly trial activities</h2>
+        <p class="section-intro">Options that clearly welcome first-timers and make it easy to try before committing.</p>
+        <div class="listing-grid">
+          <article class="listing" data-age-min="5" data-age-max="8" data-town="Haltern am See" data-category="Swimming" data-beginner-friendly="true">
+            <span class="listing-tag">Beginner-friendly</span>
+            <h2>Rookie Swim Start</h2>
+            <p><strong>Category:</strong> Swimming</p>
+            <p><strong>Age range:</strong> 5-8</p>
+            <p><strong>Town:</strong> Haltern am See</p>
+            <p><strong>When:</strong> Thursday, 17:15-18:00</p>
+            <p><strong>Cost:</strong> From €22/month</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> Trial lesson on request</p>
+            <p><strong>Contact or website:</strong> <a href="https://example.org/rookie-swim-start">Organizer website</a></p>
+            <p><strong>Last verified:</strong> 2026-05-27</p>
+          </article>
+
+          <article class="listing" data-age-min="2" data-age-max="5" data-town="Sythen" data-category="Music" data-beginner-friendly="true">
+            <span class="listing-tag">Beginner-friendly</span>
+            <h2>First Steps Music Circle</h2>
+            <p><strong>Category:</strong> Music</p>
+            <p><strong>Age range:</strong> 2-5</p>
+            <p><strong>Town:</strong> Sythen</p>
+            <p><strong>When:</strong> Friday, 10:00-10:45</p>
+            <p><strong>Cost:</strong> €9 per class</p>
+            <p><strong>Beginner-friendly:</strong> Yes</p>
+            <p><strong>Trial availability:</strong> One free drop-in class</p>
+            <p><strong>Contact or website:</strong> <span class="muted">Not listed yet</span></p>
+            <p><strong>Last verified:</strong> 2026-05-30</p>
+          </article>
+        </div>
       </section>
     </main>
 

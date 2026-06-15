@@ -7,6 +7,7 @@ const requiredFiles = [
   'assets/styles.css',
   'assets/filters.js',
   'assets/filtering.mjs',
+  'assets/activities-data.mjs',
 ];
 
 for (const file of requiredFiles) {
