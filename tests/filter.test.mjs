@@ -55,8 +55,8 @@ test('supports category and beginner-friendly filtering', () => {
 test('validates seed data has required fields and permits optional fields', () => {
   assert.ok(activities.length >= 8);
 
-  const missingOptionalFields = activities.filter((activity) => !activity.contactUrl || !activity.trialAvailability);
-  assert.ok(missingOptionalFields.length >= 1);
+  const activitiesWithMissingOptionalFields = activities.filter((activity) => !activity.contactUrl || !activity.trialAvailability);
+  assert.ok(activitiesWithMissingOptionalFields.length >= 1);
 
   for (const activity of activities) {
     assert.ok(activity.name);
