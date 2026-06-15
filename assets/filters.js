@@ -6,12 +6,11 @@ function readListingData(listingElement) {
 
   return {
     node: listingElement,
+    section: listingElement.closest('[data-section]'),
     ageMin: Number.isNaN(ageMin) ? 0 : ageMin,
     ageMax: Number.isNaN(ageMax) ? 99 : ageMax,
-    type: listingElement.dataset.type ?? '',
-    weekdays: (listingElement.dataset.weekdays ?? '').split(',').map((day) => day.trim()).filter(Boolean),
-    setting: listingElement.dataset.setting ?? '',
-    cost: listingElement.dataset.cost ?? '',
+    town: listingElement.dataset.town ?? '',
+    category: listingElement.dataset.category ?? '',
     beginnerFriendly: listingElement.dataset.beginnerFriendly ?? '',
   };
 }
@@ -20,10 +19,8 @@ function readSelectedFilters(form) {
   const formData = new FormData(form);
   return {
     age: String(formData.get('age') ?? ''),
-    type: String(formData.get('type') ?? ''),
-    weekday: String(formData.get('weekday') ?? ''),
-    setting: String(formData.get('setting') ?? ''),
-    cost: String(formData.get('cost') ?? ''),
+    town: String(formData.get('town') ?? ''),
+    category: String(formData.get('category') ?? ''),
     beginnerFriendly: String(formData.get('beginnerFriendly') ?? ''),
   };
 }
@@ -32,6 +29,7 @@ function initFilters() {
   const form = document.getElementById('activity-filters');
   const listings = Array.from(document.querySelectorAll('.listing')).map(readListingData);
   const emptyState = document.getElementById('empty-state');
+  const sections = Array.from(document.querySelectorAll('[data-section]'));
 
   if (!form || listings.length === 0 || !emptyState) {
     return;
@@ -47,6 +45,11 @@ function initFilters() {
       if (visible) {
         visibleCount += 1;
       }
+    });
+
+    sections.forEach((section) => {
+      const hasVisibleListing = listings.some((listing) => listing.section === section && !listing.node.hidden);
+      section.hidden = !hasVisibleListing;
     });
 
     emptyState.hidden = visibleCount > 0;

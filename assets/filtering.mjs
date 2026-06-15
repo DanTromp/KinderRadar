@@ -20,19 +20,11 @@ export function matchesFilters(listing, selected) {
     return false;
   }
 
-  if (selected.type && listing.type !== selected.type) {
+  if (selected.town && listing.town !== selected.town) {
     return false;
   }
 
-  if (selected.weekday && !listing.weekdays.includes(selected.weekday)) {
-    return false;
-  }
-
-  if (selected.setting && listing.setting !== selected.setting) {
-    return false;
-  }
-
-  if (selected.cost && listing.cost !== selected.cost) {
+  if (selected.category && listing.category !== selected.category) {
     return false;
   }
 
