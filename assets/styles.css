@@ -1,0 +1,151 @@
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #2563eb;
+  --border: #dbe3ef;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page {
+  width: min(1100px, 92vw);
+  margin: 2rem auto 3rem;
+}
+
+.hero,
+.panel,
+.listing {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+}
+
+.hero {
+  margin-top: 4rem;
+  padding: 2rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.page-header {
+  margin-bottom: 1rem;
+}
+
+.back-link,
+.text-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.back-link:hover,
+.text-link:hover {
+  text-decoration: underline;
+}
+
+.button {
+  display: inline-block;
+  margin-top: 0.9rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.filters select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem;
+  font: inherit;
+  color: var(--text);
+  background: #fff;
+}
+
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.listing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.listing h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.1rem;
+}
+
+.listing p {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.listing-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.empty-state {
+  border: 1px dashed var(--border);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 0.8rem;
+  margin-top: 1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .page {
+    width: 94vw;
+    margin-top: 1rem;
+  }
+
+  .hero {
+    margin-top: 1rem;
+    padding: 1.2rem;
+  }
+}
