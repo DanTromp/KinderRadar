@@ -1,0 +1,10 @@
+{
+  "name": "kinderradar",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-check.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
