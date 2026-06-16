@@ -3,10 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KinderRadar Haltern am See | Kids' activities kept fresh</title>
+    <title data-i18n="home.title">KinderRadar Haltern am See | Kids' activities kept fresh</title>
     <meta
       name="description"
       content="Find kids' activities in Haltern am See that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh."
+      data-i18n-attr="content:home.description"
     />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="KinderRadar Haltern am See" />
@@ -25,16 +26,21 @@
     <script>window.location.replace('/cities/haltern-am-see/');</script>
   </head>
   <body>
+    <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
+      <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
+      <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+    </nav>
     <main class="page page-home stack">
       <section class="hero">
-        <p class="eyebrow">KinderRadar Haltern am See</p>
-        <h1>Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
-        <p>
+        <p class="eyebrow" data-i18n="home.eyebrow">KinderRadar Haltern am See</p>
+        <h1 data-i18n="home.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
+        <p data-i18n="home.intro">
           Curated listings for parents around Haltern am See — including Sythen, Hullern, and Lavesum —
           that are actually kept fresh.
         </p>
-        <a class="button" href="/cities/haltern-am-see/">Browse activities</a>
+        <a class="button" href="/cities/haltern-am-see/" data-i18n="home.browse">Browse activities</a>
       </section>
     </main>
+    <script type="module" src="/assets/i18n.js"></script>
   </body>
 </html>

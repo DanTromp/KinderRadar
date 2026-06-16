@@ -39,10 +39,19 @@ test('freshnessBadge classifies by age and status', () => {
 });
 
 test('verifierLabel maps known values, returns null otherwise', () => {
-  assert.equal(verifierLabel('organizer'), 'Organizer submitted');
-  assert.equal(verifierLabel('parent'), 'Parent confirmed');
-  assert.equal(verifierLabel('editor'), 'Editor curated');
+  assert.deepEqual(verifierLabel('organizer'), { label: 'Organizer submitted', i18nKey: 'enum.verifier.organizer' });
+  assert.deepEqual(verifierLabel('parent'), { label: 'Parent confirmed', i18nKey: 'enum.verifier.parent' });
+  assert.deepEqual(verifierLabel('editor'), { label: 'Editor curated', i18nKey: 'enum.verifier.editor' });
   assert.equal(verifierLabel('alien'), null);
+});
+
+test('freshnessBadge exposes i18n key and params for translation', () => {
+  const now = new Date('2026-06-15T12:00:00Z');
+  assert.equal(freshnessBadge({ lastVerified: '2026-06-14' }, now).i18nKey, 'freshness.fresh.one');
+  assert.deepEqual(freshnessBadge({ lastVerified: '2026-06-10' }, now).i18nParams, { days: 5 });
+  assert.equal(freshnessBadge({ lastVerified: '2025-01-01' }, now).i18nKey, 'freshness.stale');
+  assert.equal(freshnessBadge({ status: 'reported-closed' }, now).i18nKey, 'freshness.closed');
+  assert.equal(freshnessBadge({}, now).i18nKey, 'freshness.unknown');
 });
 
 const sampleListing = {
@@ -109,4 +118,25 @@ test('renderListingHtml escapes user-supplied strings', () => {
   assert.ok(!html.includes('<img src=x'));
   assert.ok(!html.includes('"><script>'));
   assert.match(html, /&lt;img/);
+});
+
+test('renderListingHtml emits data-i18n attributes for translation', () => {
+  const html = renderListingHtml(sampleListing, { sections, repoSlug: 'o/r' });
+  // Field labels carry i18n keys.
+  assert.match(html, /data-i18n="field\.category"/);
+  assert.match(html, /data-i18n="field\.ageRange"/);
+  assert.match(html, /data-i18n="field\.town"/);
+  assert.match(html, /data-i18n="field\.when"/);
+  assert.match(html, /data-i18n="field\.cost"/);
+  assert.match(html, /data-i18n="field\.beginnerFriendly"/);
+  assert.match(html, /data-i18n="field\.contactOrWebsite"/);
+  // Enum values carry i18n keys.
+  assert.match(html, /data-i18n="enum\.category\.Sports"/);
+  assert.match(html, /data-i18n="enum\.setting\.outdoor"/);
+  assert.match(html, /data-i18n="enum\.bool\.yes"/);
+  // Freshness badge carries an i18n key + params.
+  assert.match(html, /data-i18n="freshness\./);
+  // Section tag and listing.suggestUpdate too.
+  assert.match(html, /data-i18n="section\.weekly-activities\.tag"/);
+  assert.match(html, /data-i18n="listing\.suggestUpdate"/);
 });

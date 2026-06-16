@@ -75,7 +75,7 @@ function applyUrlStateToControls(form, chipContainer, searchInput) {
 
 function buildChipBar(container) {
   container.innerHTML = CHIP_DEFINITIONS
-    .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" aria-pressed="false">${c.label}</button>`)
+    .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" data-i18n="${c.labelKey}" aria-pressed="false">${c.label}</button>`)
     .join('');
   container.addEventListener('click', (event) => {
     const chip = event.target.closest('.chip');
@@ -120,6 +120,11 @@ function init() {
 
   buildChipBar(chipContainer);
   applyUrlStateToControls(form, chipContainer, searchInput);
+
+  // Tell the i18n runtime to translate the freshly rebuilt chip bar and
+  // listings root, so they pick up any non-English language already in use.
+  document.dispatchEvent(new CustomEvent('kr:dom-updated', { detail: { root } }));
+  document.dispatchEvent(new CustomEvent('kr:dom-updated', { detail: { root: chipContainer } }));
 
   const allListingNodes = Array.from(root.querySelectorAll('.listing'));
   const listingsBySection = new Map();
