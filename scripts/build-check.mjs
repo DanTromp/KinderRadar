@@ -61,8 +61,16 @@ function validateActivity(a, sectionIds) {
   if (typeof a.ageMin === 'number' && typeof a.ageMax === 'number' && a.ageMin > a.ageMax) {
     errors.push(`ageMin (${a.ageMin}) > ageMax (${a.ageMax})`);
   }
-  if (a.lastVerified && !ISO_DATE.test(a.lastVerified)) {
-    errors.push(`lastVerified "${a.lastVerified}" must be YYYY-MM-DD`);
+  if (a.lastVerified) {
+    if (!ISO_DATE.test(a.lastVerified)) {
+      errors.push(`lastVerified "${a.lastVerified}" must be YYYY-MM-DD`);
+    } else {
+      const [y, mo, d] = a.lastVerified.split('-').map(Number);
+      const dt = new Date(y, mo - 1, d);
+      if (dt.getFullYear() !== y || dt.getMonth() + 1 !== mo || dt.getDate() !== d) {
+        errors.push(`lastVerified "${a.lastVerified}" is not a valid calendar date`);
+      }
+    }
   }
   if (a.contactUrl !== undefined && !validUrl(a.contactUrl)) {
     errors.push(`contactUrl "${a.contactUrl}" is not a valid http(s) URL`);

@@ -16,7 +16,7 @@ const sampleListing = {
   ageMax: 12,
   town: 'Haltern am See',
   category: 'Sports',
-  beginnerFriendly: 'true',
+  beginnerFriendly: true,
 };
 
 test('matches listing with no filters', () => {

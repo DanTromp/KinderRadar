@@ -30,7 +30,7 @@ export function matchesFilters(listing, selected) {
     return false;
   }
 
-  if (selected.beginnerFriendly && listing.beginnerFriendly !== selected.beginnerFriendly) {
+  if (selected.beginnerFriendly && listing.beginnerFriendly !== (selected.beginnerFriendly === 'true')) {
     return false;
   }
 
