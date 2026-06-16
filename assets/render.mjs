@@ -149,7 +149,11 @@ function suggestUpdateUrl(listing, repoSlug) {
 
 // Build a single listing card as an HTML string. Used both at build time
 // (static generation) and at runtime (innerHTML hydration).
-export function renderListingHtml(listing, { sections = [], repoSlug = '' } = {}) {
+export function renderListingHtml(listing, {
+  sections = [],
+  repoSlug = '',
+  activityHrefPrefix = '/activities',
+} = {}) {
   const tagInfo = tagInfoForSection(listing.section, sections);
   const badge = freshnessBadge(listing);
   const verifier = verifierLabel(listing.verifiedBy);
@@ -218,7 +222,7 @@ export function renderListingHtml(listing, { sections = [], repoSlug = '' } = {}
         <span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}"${i18nAttrs(badge.i18nKey, badge.i18nParams)}>${escapeHtml(badge.label)}</span>
       </div>
       ${closedBanner}
-      <h3><a class="text-link" href="/activities/${escapeHtml(listing.slug)}/"${nameText.attrs}>${nameText.en}</a></h3>
+      <h3><a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/"${nameText.attrs}>${nameText.en}</a></h3>
       <p><strong${i18nAttrs('field.category')}>Category:</strong> ${enumSpan('enum.category', listing.category)}</p>
       <p><strong${i18nAttrs('field.ageRange')}>Age range:</strong> ${escapeHtml(listing.ageRange)}</p>
       <p><strong${i18nAttrs('field.town')}>Town:</strong> <span${townText.attrs}>${townText.en}</span></p>
@@ -236,8 +240,16 @@ export function renderListingHtml(listing, { sections = [], repoSlug = '' } = {}
 }
 
 // Build a full section panel (heading + grid of listings) as HTML.
-export function renderSectionHtml(section, listings, { sections = [], repoSlug = '' } = {}) {
-  const cards = listings.map((l) => renderListingHtml(l, { sections, repoSlug })).join('\n');
+export function renderSectionHtml(section, listings, {
+  sections = [],
+  repoSlug = '',
+  activityHrefPrefix = '/activities',
+} = {}) {
+  const cards = listings.map((l) => renderListingHtml(l, {
+    sections,
+    repoSlug,
+    activityHrefPrefix,
+  })).join('\n');
   const labelKey = `section.${section.id}.label`;
   const introKey = `section.${section.id}.intro`;
   return `<section class="panel" data-section-id="${escapeHtml(section.id)}" aria-labelledby="${escapeHtml(section.id)}-heading">

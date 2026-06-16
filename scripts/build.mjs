@@ -27,6 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 const SITE_BASE_URL = process.env.KINDERRADAR_BASE_URL ?? 'https://dantromp.github.io/KinderRadar';
+const PLAUSIBLE_DOMAIN = process.env.KINDERRADAR_PLAUSIBLE_DOMAIN ?? '';
 
 // Known enum vocabulary used on the activity detail page. Values outside
 // these sets (e.g. compound days like "Monday-Friday") are rendered as
@@ -41,7 +42,20 @@ const KNOWN_DETAIL_ENUMS = {
   'enum.category': new Set(['Sports', 'Arts & crafts', 'Family outing', 'Nature', 'Holiday camp', 'STEM', 'Swimming', 'Music']),
 };
 
-const layoutHtml = ({ title, description, lang = 'en', body, ogTitle, ogDescription, ogUrl, titleI18nKey, titleI18nParams, descriptionI18nKey, descriptionI18nParams }) => {
+const layoutHtml = ({
+  title,
+  description,
+  lang = 'en',
+  body,
+  ogTitle,
+  ogDescription,
+  ogUrl,
+  titleI18nKey,
+  titleI18nParams,
+  descriptionI18nKey,
+  descriptionI18nParams,
+  assetPrefix = '',
+}) => {
   const oTitle = ogTitle ?? title;
   const oDesc = ogDescription ?? description;
   const absUrl = ogUrl ? `${SITE_BASE_URL}${ogUrl}` : SITE_BASE_URL;
@@ -50,6 +64,9 @@ const layoutHtml = ({ title, description, lang = 'en', body, ogTitle, ogDescript
     : '';
   const descAttrs = descriptionI18nKey
     ? ` data-i18n-attr="content:${escapeHtml(descriptionI18nKey)}"${descriptionI18nParams ? ` data-i18n-params="${escapeHtml(JSON.stringify(descriptionI18nParams))}"` : ''}`
+    : '';
+  const analyticsConfig = PLAUSIBLE_DOMAIN
+    ? `    <script>window.KINDERRADAR_PLAUSIBLE_DOMAIN=${JSON.stringify(PLAUSIBLE_DOMAIN)};</script>\n`
     : '';
   return `<!doctype html>
 <html lang="${escapeHtml(lang)}" data-repo-slug="${escapeHtml(REPO_SLUG)}">
@@ -67,12 +84,12 @@ const layoutHtml = ({ title, description, lang = 'en', body, ogTitle, ogDescript
     <meta name="twitter:title" content="${escapeHtml(oTitle)}" />
     <meta name="twitter:description" content="${escapeHtml(oDesc)}" />
     <link rel="canonical" href="${escapeHtml(absUrl)}" />
-    <link rel="stylesheet" href="/assets/styles.css" />
-  </head>
+    <link rel="stylesheet" href="${escapeHtml(assetPrefix)}assets/styles.css" />
+${analyticsConfig}  </head>
   <body>
 ${languageToggleHtml()}
 ${body}
-    <script type="module" src="/assets/i18n.js"></script>
+    <script type="module" src="${escapeHtml(assetPrefix)}assets/i18n.js"></script>
   </body>
 </html>
 `;
@@ -93,7 +110,11 @@ function cityPage(city) {
     .map((section) => {
       const inSection = sortByFreshness(cityActivities.filter((a) => a.section === section.id));
       if (inSection.length === 0) return '';
-      return renderSectionHtml(section, inSection, { sections, repoSlug: REPO_SLUG });
+      return renderSectionHtml(section, inSection, {
+        sections,
+        repoSlug: REPO_SLUG,
+        activityHrefPrefix: '../../activities',
+      });
     })
     .filter(Boolean)
     .join('\n');
@@ -200,8 +221,8 @@ ${sectionsHtml}
       </section>
     </main>
 
-    <script type="module" src="/assets/filters.js"></script>
-    <script type="module" src="/assets/analytics.js"></script>`;
+    <script type="module" src="../../assets/filters.js"></script>
+    <script type="module" src="../../assets/analytics.js"></script>`;
 
   return layoutHtml({
     title: `KinderRadar ${city.name} | Kids' activities kept fresh`,
@@ -214,6 +235,7 @@ ${sectionsHtml}
     titleI18nParams: { city: city.name },
     descriptionI18nKey: 'city.description',
     descriptionI18nParams: { city: city.name },
+    assetPrefix: '../../',
   }).replace(
     '<html ',
     `<html data-city-slug="${escapeHtml(city.slug)}" data-city-towns="${escapeHtml(city.nearbyTowns.join('|'))}" `,
@@ -397,7 +419,7 @@ function activityDetailPage(listing) {
 
   const body = `    <main class="page stack">
       <header class="page-header">
-        <a class="back-link" href="/cities/${escapeHtml(backCity.slug)}/" data-i18n="activity.back">← Back to activities</a>
+        <a class="back-link" href="../../cities/${escapeHtml(backCity.slug)}/" data-i18n="activity.back">← Back to activities</a>
         <p class="eyebrow"${townDisplay.attrs}>${townDisplay.en}</p>
         <div class="listing-header">
           <h1${nameDisplay.attrs}>${nameDisplay.en}</h1>
@@ -426,7 +448,7 @@ ${trustPanel}
       </section>
     </main>
 
-    <script type="module" src="/assets/analytics.js"></script>`;
+    <script type="module" src="../../assets/analytics.js"></script>`;
 
   return layoutHtml({
     title: `${listing.name} | KinderRadar`,
@@ -435,6 +457,7 @@ ${trustPanel}
     ogTitle,
     ogDescription: ogDesc,
     ogUrl: `/activities/${listing.slug}/`,
+    assetPrefix: '../../',
   });
 }
 

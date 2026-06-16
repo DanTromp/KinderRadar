@@ -1,16 +1,16 @@
 // Browser glue: render listings from data, wire filters, chips, search, and
 // URL state. Pure logic lives in filtering.mjs and render.mjs.
 
-import { activities, sections } from '/assets/activities-data.mjs';
+import { activities, sections } from './activities-data.mjs';
 import {
   matchesFilters,
   matchesChips,
   matchesSearch,
   sortByFreshness,
   CHIP_DEFINITIONS,
-} from '/assets/filtering.mjs';
-import { renderSectionHtml } from '/assets/render.mjs';
-import { analytics } from '/assets/analytics.js';
+} from './filtering.mjs';
+import { renderSectionHtml } from './render.mjs';
+import { analytics } from './analytics.js';
 
 function repoSlugFromDocument() {
   return document.documentElement.dataset.repoSlug ?? '';
@@ -113,7 +113,11 @@ function init() {
     .map((section) => {
       const inSection = sortByFreshness(cityActivities.filter((a) => a.section === section.id));
       if (inSection.length === 0) return '';
-      return renderSectionHtml(section, inSection, { sections, repoSlug });
+      return renderSectionHtml(section, inSection, {
+        sections,
+        repoSlug,
+        activityHrefPrefix: '../../activities',
+      });
     })
     .join('\n');
   root.innerHTML = sectionHtml;
@@ -169,7 +173,7 @@ function init() {
   // --- Analytics wiring -----------------------------------------------------
   const lastValues = { age: '', town: '', category: '', beginnerFriendly: '', sort: '' };
   let zeroFiredFor = null;
-  let lastQuery = '';
+  let lastTrackedQuery = '';
   let searchTimer = null;
 
   const updateMissingLink = (query) => {
@@ -232,25 +236,25 @@ function init() {
       zeroFiredFor = null;
     }
 
-    lastQuery = query;
+    return visibleCount;
   };
 
   form.addEventListener('change', () => render({ source: 'form' }));
   chipContainer.addEventListener('chipchange', (event) => {
-    render({ source: 'chip' });
+    const visibleCount = render({ source: 'chip' });
     const detail = event?.detail;
-    if (detail) analytics.filterChange(`chip:${detail.chipId}`, detail.active ? 'on' : 'off', 0);
+    if (detail) analytics.filterChange(`chip:${detail.chipId}`, detail.active ? 'on' : 'off', visibleCount);
   });
   if (searchInput) {
     searchInput.addEventListener('input', () => {
-      render({ source: 'search' });
+      const visibleCount = render({ source: 'search' });
       // Debounced search analytics so we don't log every keystroke.
       clearTimeout(searchTimer);
       const q = searchInput.value;
       searchTimer = setTimeout(() => {
-        if (q.trim() && q !== lastQuery) {
-          const visible = allListingNodes.filter((n) => !n.hidden).length;
-          analytics.search(q, visible);
+        if (q.trim() && q !== lastTrackedQuery) {
+          analytics.search(q, visibleCount);
+          lastTrackedQuery = q;
         }
       }, 600);
     });

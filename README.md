@@ -95,6 +95,10 @@ The site uses a cookieless analytics shim (`assets/analytics.js`) that:
   is true). Cloudflare Web Analytics page views work out of the box if
   the CF beacon `<script>` is added to `scripts/build.mjs`'s `layoutHtml`.
 
+For GitHub Pages, set the repository variable
+`KINDERRADAR_PLAUSIBLE_DOMAIN` to enable Plausible during the deploy build.
+Leave it unset for a no-op analytics build.
+
 ### Event schema (keep stable)
 
 | Event                          | Properties                                            |
@@ -127,6 +131,10 @@ The default deployment target is **GitHub Pages**, configured by
 variable `KINDERRADAR_BASE_URL` (e.g. `https://haltern.kinderradar.de`)
 once a custom domain is in place; the value is baked into Open Graph URLs
 and `sitemap.xml`.
+
+Internal links and assets are emitted as relative URLs, so the site works
+both on a GitHub Pages project URL (`/KinderRadar/`) and on a custom root
+domain.
 
 To switch to Cloudflare Pages instead, point Cloudflare at the repo and
 use:

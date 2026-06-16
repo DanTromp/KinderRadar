@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -44,7 +45,6 @@ test('placeholders ({foo}) match between en and de for shared keys', () => {
 // build emits across the generated site. Every one of those keys must exist
 // in en.json (and therefore, by the parity test above, in de.json).
 async function collectI18nKeysFromBuiltSite() {
-  const { globSync } = await import('node:fs');
   const keys = new Set();
   const dataI18nRe = /data-i18n="([^"]+)"/g;
   const dataI18nAttrRe = /data-i18n-attr="([^"]+)"/g;
@@ -52,9 +52,7 @@ async function collectI18nKeysFromBuiltSite() {
     join(ROOT, 'index.html'),
     join(ROOT, 'cities/haltern-am-see/index.html'),
   ];
-  // Sample a couple of activity pages — they all share the same template.
-  const { readdirSync } = await import('node:fs');
-  for (const slug of readdirSync(join(ROOT, 'activities')).slice(0, 5)) {
+  for (const slug of readdirSync(join(ROOT, 'activities'))) {
     files.push(join(ROOT, 'activities', slug, 'index.html'));
   }
   for (const f of files) {
@@ -84,5 +82,41 @@ test('home page canonical uses the full GitHub Pages URL', async () => {
   assert.match(
     html,
     /<link rel="canonical" href="https:\/\/dantromp\.github\.io\/KinderRadar\/cities\/haltern-am-see\/" \/>/,
+  );
+});
+
+function collectHtmlFiles(dir, out = []) {
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    const stats = statSync(path);
+    if (stats.isDirectory()) {
+      collectHtmlFiles(path, out);
+    } else if (entry.endsWith('.html')) {
+      out.push(path);
+    }
+  }
+  return out;
+}
+
+test('generated pages avoid root-relative internal assets and links', async () => {
+  const offenders = [];
+
+  for (const file of collectHtmlFiles(ROOT)) {
+    const html = await readFile(file, 'utf8');
+    for (const pattern of [
+      /\s(?:href|src)="\/(?:assets|cities|activities)\//g,
+      /url=\/(?:cities|activities)\//g,
+      /window\.location\.replace\('\/(?:cities|activities)\//g,
+    ]) {
+      for (const match of html.matchAll(pattern)) {
+        offenders.push(`${file}: ${match[0]}`);
+      }
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `root-relative internal URLs break GitHub Pages project hosting:\n${offenders.join('\n')}`,
   );
 });

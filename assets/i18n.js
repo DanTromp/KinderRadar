@@ -143,9 +143,11 @@ function wireToggle() {
 async function loadTranslations() {
   if (state.loaded) return;
   try {
+    const enUrl = new URL('./i18n/en.json', import.meta.url);
+    const deUrl = new URL('./i18n/de.json', import.meta.url);
     const [en, de] = await Promise.all([
-      fetch('/assets/i18n/en.json').then((r) => r.json()),
-      fetch('/assets/i18n/de.json').then((r) => r.json()),
+      fetch(enUrl).then((r) => r.json()),
+      fetch(deUrl).then((r) => r.json()),
     ]);
     state.translations = { en, de };
     state.loaded = true;

@@ -74,6 +74,27 @@ export function track(name, props = {}) {
   vendorSend(name, safeProps);
 }
 
+function initPlausible() {
+  if (isDoNotTrack() || typeof window === 'undefined' || typeof document === 'undefined') return;
+  const domain = String(window.KINDERRADAR_PLAUSIBLE_DOMAIN ?? '').trim();
+  if (!domain) return;
+
+  if (typeof window.plausible !== 'function') {
+    window.plausible = function plausibleQueue() {
+      window.plausible.q = window.plausible.q || [];
+      window.plausible.q.push(arguments);
+    };
+  }
+
+  if (document.querySelector('script[data-kinderradar-plausible]')) return;
+  const script = document.createElement('script');
+  script.defer = true;
+  script.dataset.kinderradarPlausible = 'true';
+  script.dataset.domain = domain;
+  script.src = 'https://plausible.io/js/script.js';
+  document.head.appendChild(script);
+}
+
 export const analytics = {
   search(q, results) {
     track('search', { q: sanitizeQuery(q), results: Number(results) || 0 });
@@ -125,4 +146,5 @@ function wireDataAnalytics() {
   );
 }
 
+initPlausible();
 wireDataAnalytics();

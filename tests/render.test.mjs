@@ -103,6 +103,14 @@ test('renderListingHtml includes a freshness badge and a detail-page link', () =
   assert.match(html, /href="\/activities\/demo\/"/);
 });
 
+test('renderListingHtml supports relative activity links for project-page hosting', () => {
+  const html = renderListingHtml(sampleListing, {
+    sections,
+    activityHrefPrefix: '../../activities',
+  });
+  assert.match(html, /href="\.\.\/\.\.\/activities\/demo\/"/);
+});
+
 test('renderListingHtml renders a closed banner when status is reported-closed', () => {
   const html = renderListingHtml({ ...sampleListing, status: 'reported-closed' }, { sections });
   assert.match(html, /reported closed/i);
