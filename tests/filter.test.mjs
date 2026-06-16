@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { matchesFilters, optionalText } from '../assets/filtering.mjs';
+import {
+  matchesFilters,
+  optionalText,
+  matchesChips,
+  matchesSearch,
+  sortByFreshness,
+  CHIP_DEFINITIONS,
+  chipById,
+} from '../assets/filtering.mjs';
 import { activities } from '../assets/activities-data.mjs';
 
 const sampleListing = {
@@ -8,7 +16,7 @@ const sampleListing = {
   ageMax: 12,
   town: 'Haltern am See',
   category: 'Sports',
-  beginnerFriendly: 'true',
+  beginnerFriendly: true,
 };
 
 test('matches listing with no filters', () => {
@@ -38,24 +46,20 @@ test('optional text falls back when empty or missing', () => {
 
 test('supports category and beginner-friendly filtering', () => {
   assert.equal(matchesFilters(sampleListing, {
-    age: '',
-    town: 'Haltern am See',
-    category: 'Sports',
-    beginnerFriendly: 'true',
+    age: '', town: 'Haltern am See', category: 'Sports', beginnerFriendly: 'true',
   }), true);
 
   assert.equal(matchesFilters(sampleListing, {
-    age: '',
-    town: 'Haltern am See',
-    category: 'Music',
-    beginnerFriendly: 'true',
+    age: '', town: 'Haltern am See', category: 'Music', beginnerFriendly: 'true',
   }), false);
 });
 
 test('validates seed data has required fields and permits optional fields', () => {
   assert.ok(activities.length >= 8);
 
-  const activitiesWithMissingOptionalFields = activities.filter((activity) => !activity.contactUrl || !activity.trialAvailability);
+  const activitiesWithMissingOptionalFields = activities.filter(
+    (activity) => !activity.contactUrl || !activity.trialAvailability,
+  );
   assert.ok(activitiesWithMissingOptionalFields.length >= 1);
 
   for (const activity of activities) {
@@ -67,5 +71,92 @@ test('validates seed data has required fields and permits optional fields', () =
     assert.ok(activity.cost);
     assert.equal(typeof activity.beginnerFriendly, 'boolean');
     assert.ok(activity.lastVerified);
+    assert.ok(activity.slug, 'every activity has a slug');
   }
+});
+
+// ---- Phase 3: chip presets ------------------------------------------------
+
+test('every chip definition has id, label, and predicate', () => {
+  for (const chip of CHIP_DEFINITIONS) {
+    assert.ok(chip.id);
+    assert.ok(chip.label);
+    assert.equal(typeof chip.predicate, 'function');
+  }
+});
+
+test('"this weekend" chip matches Saturday/Sunday only', () => {
+  const sat = { dayOfWeek: 'Saturday' };
+  const tue = { dayOfWeek: 'Tuesday' };
+  assert.equal(matchesChips(sat, ['this-weekend']), true);
+  assert.equal(matchesChips(tue, ['this-weekend']), false);
+});
+
+test('"after kindergarten" chip requires a weekday and start time >= 14:00', () => {
+  assert.equal(matchesChips({ dayOfWeek: 'Tuesday', startTime: '16:00' }, ['after-kindergarten']), true);
+  assert.equal(matchesChips({ dayOfWeek: 'Tuesday', startTime: '10:00' }, ['after-kindergarten']), false);
+  assert.equal(matchesChips({ dayOfWeek: 'Saturday', startTime: '16:00' }, ['after-kindergarten']), false);
+});
+
+test('"free" chip matches price.free === true', () => {
+  assert.equal(matchesChips({ price: { free: true } }, ['free']), true);
+  assert.equal(matchesChips({ price: { free: false } }, ['free']), false);
+  assert.equal(matchesChips({}, ['free']), false);
+});
+
+test('"no-membership" excludes membership pricing', () => {
+  assert.equal(matchesChips({ price: { unit: 'membership' } }, ['no-membership']), false);
+  assert.equal(matchesChips({ price: { unit: 'per-session' } }, ['no-membership']), true);
+  assert.equal(matchesChips({}, ['no-membership']), true);
+});
+
+test('"rainy day" matches indoor or mixed setting', () => {
+  assert.equal(matchesChips({ setting: 'indoor' }, ['rainy-day']), true);
+  assert.equal(matchesChips({ setting: 'mixed' }, ['rainy-day']), true);
+  assert.equal(matchesChips({ setting: 'outdoor' }, ['rainy-day']), false);
+});
+
+test('multiple chips compose with AND', () => {
+  const free = { price: { free: true }, dayOfWeek: 'Saturday', setting: 'outdoor' };
+  assert.equal(matchesChips(free, ['free', 'this-weekend']), true);
+  assert.equal(matchesChips(free, ['free', 'rainy-day']), false);
+});
+
+test('chipById returns the right chip or null', () => {
+  assert.equal(chipById('free').id, 'free');
+  assert.equal(chipById('does-not-exist'), null);
+});
+
+// ---- Phase 3: search ------------------------------------------------------
+
+test('search matches case-insensitively across name/category/town', () => {
+  const l = { name: 'Rookie Swim Start', category: 'Swimming', town: 'Haltern am See' };
+  assert.equal(matchesSearch(l, 'rookie'), true);
+  assert.equal(matchesSearch(l, 'SWIM'), true);
+  assert.equal(matchesSearch(l, 'haltern'), true);
+  assert.equal(matchesSearch(l, 'pottery'), false);
+  assert.equal(matchesSearch(l, ''), true);
+  assert.equal(matchesSearch(l, '   '), true);
+});
+
+// ---- Phase 4: sort --------------------------------------------------------
+
+test('sortByFreshness puts newer lastVerified first', () => {
+  const list = [
+    { name: 'A', lastVerified: '2026-01-01' },
+    { name: 'B', lastVerified: '2026-06-01' },
+    { name: 'C', lastVerified: '2026-03-01' },
+  ];
+  const sorted = sortByFreshness(list).map((x) => x.name);
+  assert.deepEqual(sorted, ['B', 'C', 'A']);
+});
+
+test('sortByFreshness sinks reported-closed entries', () => {
+  const list = [
+    { name: 'Closed', lastVerified: '2026-06-01', status: 'reported-closed' },
+    { name: 'Old', lastVerified: '2026-01-01' },
+    { name: 'New', lastVerified: '2026-06-01' },
+  ];
+  const sorted = sortByFreshness(list).map((x) => x.name);
+  assert.equal(sorted[sorted.length - 1], 'Closed');
 });

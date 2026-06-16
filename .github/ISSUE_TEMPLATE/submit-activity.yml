@@ -1,0 +1,84 @@
+name: Submit activity
+description: Suggest a new kids activity to add to KinderRadar.
+title: "[Submit] New activity"
+labels: ["data", "submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping local parents! Fill in what you know — anything
+        you're unsure of can be left blank.
+  - type: input
+    id: activity
+    attributes:
+      label: Activity name
+      placeholder: e.g. Rookie Swim Start
+    validations:
+      required: true
+  - type: input
+    id: city
+    attributes:
+      label: City or town
+      placeholder: e.g. Haltern am See
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Sports
+        - Arts & crafts
+        - Family outing
+        - Nature
+        - Holiday camp
+        - STEM
+        - Swimming
+        - Music
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: age-range
+    attributes:
+      label: Age range (min-max)
+      placeholder: e.g. 4-6
+    validations:
+      required: true
+  - type: input
+    id: when
+    attributes:
+      label: When does it happen?
+      placeholder: e.g. Tuesday, 16:00-17:00
+  - type: input
+    id: cost
+    attributes:
+      label: Cost
+      placeholder: e.g. €14 per session, Free, Membership €16/month
+  - type: dropdown
+    id: setting
+    attributes:
+      label: Indoor / outdoor
+      options:
+        - indoor
+        - outdoor
+        - mixed
+        - unsure
+  - type: dropdown
+    id: trial
+    attributes:
+      label: Trial lesson available?
+      options:
+        - "Yes"
+        - "No"
+        - Unsure
+  - type: input
+    id: url
+    attributes:
+      label: Website or contact URL
+      placeholder: https://...
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else parents should know?
+      placeholder: Beginner-friendliness, parent participation, accessibility, language, etc.
