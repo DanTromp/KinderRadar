@@ -1,0 +1,41 @@
+name: Label data issues
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+# Title-based fallback for issues opened outside the templates (e.g. via the
+# pre-filled query-string links on activity detail pages). Templates already
+# add the `type:*` labels themselves; this workflow just keeps the queue
+# sortable when the title format is followed.
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add type label from title prefix
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.issue.title || '';
+            const map = [
+              [/^\[Submit\]/i,    'type:submission'],
+              [/^\[Update\]/i,    'type:update'],
+              [/^\[Closed\??\]/i, 'type:closed'],
+              [/^\[Confirm\]/i,   'type:confirm'],
+              [/^\[Claim\]/i,     'type:claim'],
+            ];
+            const labels = new Set((context.payload.issue.labels || []).map(l => l.name));
+            const toAdd = [];
+            for (const [re, label] of map) {
+              if (re.test(title) && !labels.has(label)) toAdd.push(label);
+            }
+            if (!labels.has('data')) toAdd.push('data');
+            if (toAdd.length === 0) return;
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: toAdd,
+            });

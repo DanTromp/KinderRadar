@@ -150,7 +150,7 @@ export function renderListingHtml(listing, { sections = [], repoSlug = '' } = {}
       <p><strong>Contact or website:</strong> ${contactLineHtml(listing)}</p>
       <p><strong>Last verified:</strong> ${escapeHtml(listing.lastVerified)}</p>
       ${verifierLine}
-      <p class="listing-actions"><a class="text-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer">Suggest an update</a></p>
+      <p class="listing-actions"><a class="text-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click">Suggest an update</a></p>
     </article>`;
 }
 

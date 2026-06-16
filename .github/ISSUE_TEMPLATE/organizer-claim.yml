@@ -1,0 +1,51 @@
+name: Organizer claim
+description: I run this activity and want future confirmations to be marked as organizer-verified.
+title: "[Claim] Organizer for existing activity"
+labels: ["data", "type:claim"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome! Claiming your listing lets us mark it "Organizer submitted" so
+        parents see that updates come straight from you.
+  - type: input
+    id: slug
+    attributes:
+      label: Activity slug
+      description: Found in the URL, e.g. /activities/rookie-swim-start/.
+      placeholder: rookie-swim-start
+  - type: input
+    id: activity
+    attributes:
+      label: Activity name
+    validations:
+      required: true
+  - type: input
+    id: town
+    attributes:
+      label: Town
+  - type: input
+    id: organization
+    attributes:
+      label: Organization / Verein name
+    validations:
+      required: true
+  - type: input
+    id: role
+    attributes:
+      label: Your role
+      placeholder: e.g. Übungsleiterin, Vereinsvorstand, Geschäftsführerin
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: Verifiable contact (org email or phone)
+      description: We'll do a quick courtesy check against the organizer's public contact info before flipping the listing to organizer-verified.
+    validations:
+      required: true
+  - type: textarea
+    id: corrections
+    attributes:
+      label: Anything to correct in the current listing?
+      placeholder: Leave blank if nothing needs changing.

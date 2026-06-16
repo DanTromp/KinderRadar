@@ -1,7 +1,7 @@
 name: Suggest update
-description: Update or correct an existing activity (or report it closed).
+description: Update or correct an existing activity (price, time, age, contact, etc.).
 title: "[Update] Existing activity"
-labels: ["data", "update"]
+labels: ["data", "type:update"]
 body:
   - type: input
     id: slug
@@ -22,21 +22,28 @@ body:
   - type: dropdown
     id: change-type
     attributes:
-      label: What kind of change?
+      label: What changed?
       options:
-        - Details have changed (time, cost, age, etc.)
-        - Reported closed
-        - Still active — please re-verify
-        - Other
+        - Price / cost
+        - Time / day
+        - Age range
+        - Contact details / URL
+        - Description / other
     validations:
       required: true
   - type: textarea
-    id: details
+    id: new-value
     attributes:
-      label: What changed?
+      label: New value
       placeholder: e.g. New time is Tuesday 17:00, cost is now €18/month.
     validations:
       required: true
+  - type: input
+    id: evidence-url
+    attributes:
+      label: Evidence URL
+      description: Link to the organizer page (or screenshot/Drive link) supporting the change.
+      placeholder: https://...
   - type: dropdown
     id: verified-by
     attributes:
@@ -46,3 +53,5 @@ body:
         - I'm a parent who attended recently
         - I saw it on the organizer's website
         - Other
+    validations:
+      required: true

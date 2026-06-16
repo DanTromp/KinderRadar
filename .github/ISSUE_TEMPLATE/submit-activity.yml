@@ -1,7 +1,7 @@
 name: Submit activity
 description: Suggest a new kids activity to add to KinderRadar.
 title: "[Submit] New activity"
-labels: ["data", "submission"]
+labels: ["data", "type:submission"]
 body:
   - type: markdown
     attributes:

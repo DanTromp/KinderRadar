@@ -10,6 +10,7 @@ import {
   CHIP_DEFINITIONS,
 } from '/assets/filtering.mjs';
 import { renderSectionHtml } from '/assets/render.mjs';
+import { analytics } from '/assets/analytics.js';
 
 function repoSlugFromDocument() {
   return document.documentElement.dataset.repoSlug ?? '';
@@ -33,6 +34,7 @@ function readSelectedFilters(form) {
     town: String(formData.get('town') ?? ''),
     category: String(formData.get('category') ?? ''),
     beginnerFriendly: String(formData.get('beginnerFriendly') ?? ''),
+    sort: String(formData.get('sort') ?? 'freshness'),
   };
 }
 
@@ -45,7 +47,7 @@ function readActiveChips(container) {
 function syncUrlState({ selected, chips, query }) {
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(selected)) {
-    if (v) params.set(k, v);
+    if (v && !(k === 'sort' && v === 'freshness')) params.set(k, v);
   }
   if (chips.length) params.set('chips', chips.join(','));
   if (query) params.set('q', query);
@@ -56,7 +58,7 @@ function syncUrlState({ selected, chips, query }) {
 
 function applyUrlStateToControls(form, chipContainer, searchInput) {
   const params = new URLSearchParams(window.location.search);
-  for (const name of ['age', 'town', 'category', 'beginnerFriendly']) {
+  for (const name of ['age', 'town', 'category', 'beginnerFriendly', 'sort']) {
     const v = params.get(name);
     if (v && form.elements[name]) form.elements[name].value = v;
   }
@@ -80,7 +82,7 @@ function buildChipBar(container) {
     if (!chip) return;
     const pressed = chip.getAttribute('aria-pressed') === 'true';
     chip.setAttribute('aria-pressed', pressed ? 'false' : 'true');
-    chip.dispatchEvent(new CustomEvent('chipchange', { bubbles: true }));
+    chip.dispatchEvent(new CustomEvent('chipchange', { bubbles: true, detail: { chipId: chip.dataset.chipId, active: !pressed } }));
   });
 }
 
@@ -90,6 +92,7 @@ function init() {
   const chipContainer = document.getElementById('filter-chips');
   const searchInput = document.getElementById('activity-search');
   const emptyState = document.getElementById('empty-state');
+  const missingLink = document.getElementById('missing-listing-link');
   if (!root || !form || !chipContainer || !emptyState) return;
 
   const citySlug = citySlugFromDocument();
@@ -97,9 +100,11 @@ function init() {
   const allowedTowns = new Set(townsForCity(citySlug));
 
   // Listings scoped to this city (or all activities if no city scope set).
-  const cityActivities = allowedTowns.size === 0
+  // Closed listings are filtered out so they don't appear in any sort/filter.
+  const cityActivities = (allowedTowns.size === 0
     ? activities
-    : activities.filter((a) => allowedTowns.has(a.town));
+    : activities.filter((a) => allowedTowns.has(a.town))
+  ).filter((a) => a.status !== 'reported-closed');
 
   // Initial render: one panel per section, populated from data and pre-sorted
   // by freshness. The DOM cards include all data-* attributes the filter
@@ -132,7 +137,47 @@ function init() {
     if (listing) nodeToListing.set(node, listing);
   }
 
-  const render = () => {
+  // Re-order DOM nodes within each section when the sort changes. Pure
+  // re-ordering avoids re-rendering and preserves attached event state.
+  const sortListings = (mode) => {
+    for (const [, nodes] of listingsBySection) {
+      const sectionEl = nodes[0]?.sectionEl;
+      if (!sectionEl) continue;
+      const grid = sectionEl.querySelector('.listing-grid');
+      if (!grid) continue;
+      const sorted = [...nodes].sort(({ node: a }, { node: b }) => {
+        const la = nodeToListing.get(a);
+        const lb = nodeToListing.get(b);
+        if (mode === 'name') {
+          return String(la?.name ?? '').localeCompare(String(lb?.name ?? ''));
+        }
+        // default: freshness
+        const ta = Date.parse(la?.lastVerified ?? '') || 0;
+        const tb = Date.parse(lb?.lastVerified ?? '') || 0;
+        if (ta !== tb) return tb - ta;
+        return String(la?.name ?? '').localeCompare(String(lb?.name ?? ''));
+      });
+      for (const { node } of sorted) grid.appendChild(node);
+    }
+  };
+
+  // --- Analytics wiring -----------------------------------------------------
+  const lastValues = { age: '', town: '', category: '', beginnerFriendly: '', sort: '' };
+  let zeroFiredFor = null;
+  let lastQuery = '';
+  let searchTimer = null;
+
+  const updateMissingLink = (query) => {
+    if (!missingLink) return;
+    try {
+      const url = new URL(missingLink.href);
+      if (query) url.searchParams.set('missing-query', query);
+      else url.searchParams.delete('missing-query');
+      missingLink.href = url.toString();
+    } catch { /* malformed href, ignore */ }
+  };
+
+  const render = ({ source } = {}) => {
     const selected = readSelectedFilters(form);
     const chips = readActiveChips(chipContainer);
     const query = searchInput ? searchInput.value : '';
@@ -156,15 +201,57 @@ function init() {
     }
 
     emptyState.hidden = visibleCount > 0;
+    updateMissingLink(query);
     syncUrlState({ selected, chips, query });
+
+    // Sort whenever it changes.
+    if (selected.sort !== lastValues.sort) {
+      sortListings(selected.sort);
+    }
+
+    // Emit filter_change events for any filter whose value changed.
+    for (const key of ['age', 'town', 'category', 'beginnerFriendly', 'sort']) {
+      if (selected[key] !== lastValues[key]) {
+        if (source !== 'init') analytics.filterChange(key, selected[key], visibleCount);
+        lastValues[key] = selected[key];
+      }
+    }
+
+    // Zero-results: fire once per unique (state, query) until something
+    // about the inputs changes.
+    const stateKey = JSON.stringify({ ...selected, chips, q: query });
+    if (visibleCount === 0 && source !== 'init' && stateKey !== zeroFiredFor) {
+      analytics.zeroResults({ q: query, ...selected, chips });
+      zeroFiredFor = stateKey;
+    } else if (visibleCount > 0) {
+      zeroFiredFor = null;
+    }
+
+    lastQuery = query;
   };
 
-  form.addEventListener('change', render);
-  chipContainer.addEventListener('chipchange', render);
+  form.addEventListener('change', () => render({ source: 'form' }));
+  chipContainer.addEventListener('chipchange', (event) => {
+    render({ source: 'chip' });
+    const detail = event?.detail;
+    if (detail) analytics.filterChange(`chip:${detail.chipId}`, detail.active ? 'on' : 'off', 0);
+  });
   if (searchInput) {
-    searchInput.addEventListener('input', render);
+    searchInput.addEventListener('input', () => {
+      render({ source: 'search' });
+      // Debounced search analytics so we don't log every keystroke.
+      clearTimeout(searchTimer);
+      const q = searchInput.value;
+      searchTimer = setTimeout(() => {
+        if (q.trim() && q !== lastQuery) {
+          const visible = allListingNodes.filter((n) => !n.hidden).length;
+          analytics.search(q, visible);
+        }
+      }, 600);
+    });
   }
-  render();
+  render({ source: 'init' });
 }
 
 init();
+
