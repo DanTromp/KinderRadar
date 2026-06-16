@@ -12,6 +12,7 @@ const requiredFiles = [
   'index.html',
   'assets/styles.css',
   'assets/filters.js',
+  'assets/analytics.js',
   'assets/filtering.mjs',
   'assets/render.mjs',
   'assets/activities-data.mjs',
@@ -79,6 +80,12 @@ function validateActivity(a, sectionIds) {
   }
   if (a.sourceUrl !== undefined && !validUrl(a.sourceUrl)) {
     errors.push(`sourceUrl "${a.sourceUrl}" is not a valid http(s) URL`);
+  }
+  for (const key of ['contactUrl', 'sourceUrl']) {
+    const v = a[key];
+    if (typeof v === 'string' && /example\.(org|com|net)/i.test(v)) {
+      errors.push(`${key} "${v}" still points at example.org — replace with a real organizer URL`);
+    }
   }
   if (a.recurring !== undefined && !RECURRING_VALUES.has(a.recurring)) {
     errors.push(`recurring "${a.recurring}" must be one of ${[...RECURRING_VALUES].join(', ')}`);
@@ -153,6 +160,47 @@ export function validateData() {
   return errors;
 }
 
+const STALE_DAYS = 90;
+
+export function collectWarnings(now = new Date()) {
+  const warnings = [];
+
+  // Warn on entries that haven't been verified in over STALE_DAYS days.
+  for (const a of activities) {
+    if (!a.lastVerified || !ISO_DATE.test(a.lastVerified)) continue;
+    const t = Date.parse(a.lastVerified);
+    if (Number.isNaN(t)) continue;
+    const days = Math.floor((now.getTime() - t) / 86_400_000);
+    if (days > STALE_DAYS) {
+      warnings.push(`activity "${a.slug}": lastVerified is ${days} days old (>${STALE_DAYS}); needs re-check`);
+    }
+  }
+
+  // Warn if any filter facet returns 0 active listings — these are dead-ends
+  // for users that we should either fill or hide.
+  const active = activities.filter((a) => a.status !== 'reported-closed');
+  for (const section of sections) {
+    if (!active.some((a) => a.section === section.id)) {
+      warnings.push(`section "${section.id}" has 0 active listings`);
+    }
+  }
+  for (const city of cities) {
+    for (const town of city.nearbyTowns) {
+      if (!active.some((a) => a.town === town)) {
+        warnings.push(`town "${town}" (${city.slug}) has 0 active listings`);
+      }
+    }
+  }
+  const usedCategories = new Set(active.map((a) => a.category));
+  for (const cat of categories) {
+    if (!usedCategories.has(cat)) {
+      warnings.push(`category "${cat}" has 0 active listings`);
+    }
+  }
+
+  return warnings;
+}
+
 async function main() {
   for (const file of requiredFiles) {
     await access(new URL(`../${file}`, import.meta.url), constants.R_OK);
@@ -163,6 +211,12 @@ async function main() {
     console.error(`Build check failed with ${errors.length} error(s):`);
     for (const e of errors) console.error(`  - ${e}`);
     process.exit(1);
+  }
+
+  const warnings = collectWarnings();
+  if (warnings.length > 0) {
+    console.warn(`Build check warnings (${warnings.length}):`);
+    for (const w of warnings) console.warn(`  • ${w}`);
   }
 
   console.log(`Build check passed: ${activities.length} activities, ${cities.length} city/cities.`);

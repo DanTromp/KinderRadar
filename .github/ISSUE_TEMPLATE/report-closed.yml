@@ -1,0 +1,38 @@
+name: Report activity as closed
+description: Let us know that an activity has stopped running so we can remove it.
+title: "[Closed?] Existing activity"
+labels: ["data", "type:closed"]
+body:
+  - type: input
+    id: slug
+    attributes:
+      label: Activity slug
+      description: Found in the URL, e.g. /activities/rookie-swim-start/.
+      placeholder: rookie-swim-start
+  - type: input
+    id: activity
+    attributes:
+      label: Activity name
+    validations:
+      required: true
+  - type: input
+    id: town
+    attributes:
+      label: Town
+  - type: input
+    id: observed-date
+    attributes:
+      label: When did you notice it had closed? (YYYY-MM-DD)
+      placeholder: 2026-06-15
+  - type: textarea
+    id: evidence
+    attributes:
+      label: How do you know?
+      placeholder: e.g. The organizer's website now lists the course as discontinued. The trainer told me. We turned up and it was cancelled.
+    validations:
+      required: true
+  - type: input
+    id: evidence-url
+    attributes:
+      label: Evidence URL (optional)
+      placeholder: https://...

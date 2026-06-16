@@ -2,6 +2,12 @@
 // Produces both HTML strings (used by the static generator) and DOM nodes
 // (used by the in-browser script). Browser-only code paths are guarded so
 // this module can be imported under Node for tests and build-time use.
+//
+// Translation strategy: every user-visible string is emitted with the
+// English text inline AND a `data-i18n` attribute (or `data-i18n-attr` for
+// attribute translations). The runtime in /assets/i18n.js swaps the text
+// when the user toggles the language. This keeps SSR output usable without
+// JS while letting us add German translations entirely via JSON files.
 
 import { optionalText } from './filtering.mjs';
 
@@ -24,25 +30,33 @@ export function daysSince(isoDate, now = new Date()) {
 }
 
 // Trust/freshness classification driven by lastVerified + status.
-// Returns { label, tone } where tone ∈ {fresh, neutral, stale, closed}.
+// Returns { tone, label, i18nKey, i18nParams } so consumers can emit a
+// `data-i18n` attribute alongside the English label.
 export function freshnessBadge(listing, now = new Date()) {
   if (listing?.status === 'reported-closed') {
-    return { label: 'Reported closed', tone: 'closed' };
+    return { tone: 'closed', label: 'Reported closed', i18nKey: 'freshness.closed', i18nParams: null };
   }
   const days = daysSince(listing?.lastVerified, now);
   if (days === null) {
-    return { label: 'Verification unknown', tone: 'stale' };
+    return { tone: 'stale', label: 'Verification unknown', i18nKey: 'freshness.unknown', i18nParams: null };
   }
-  if (days < 30) return { label: `Verified ${days} day${days === 1 ? '' : 's'} ago`, tone: 'fresh' };
-  if (days <= 90) return { label: `Verified ${days} days ago`, tone: 'neutral' };
-  return { label: 'Needs update', tone: 'stale' };
+  if (days < 30) {
+    const i18nKey = days === 1 ? 'freshness.fresh.one' : 'freshness.fresh.other';
+    const label = `Verified ${days} day${days === 1 ? '' : 's'} ago`;
+    return { tone: 'fresh', label, i18nKey, i18nParams: { days } };
+  }
+  if (days <= 90) {
+    return { tone: 'neutral', label: `Verified ${days} days ago`, i18nKey: 'freshness.neutral', i18nParams: { days } };
+  }
+  return { tone: 'stale', label: 'Needs update', i18nKey: 'freshness.stale', i18nParams: null };
 }
 
+// verifierLabel returns { label, i18nKey } for known values, null otherwise.
 export function verifierLabel(verifiedBy) {
   switch (verifiedBy) {
-    case 'organizer': return 'Organizer submitted';
-    case 'parent': return 'Parent confirmed';
-    case 'editor': return 'Editor curated';
+    case 'organizer': return { label: 'Organizer submitted', i18nKey: 'enum.verifier.organizer' };
+    case 'parent': return { label: 'Parent confirmed', i18nKey: 'enum.verifier.parent' };
+    case 'editor': return { label: 'Editor curated', i18nKey: 'enum.verifier.editor' };
     default: return null;
   }
 }
@@ -57,16 +71,65 @@ export function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function tagLabelForSection(section, sections) {
+function tagInfoForSection(section, sections) {
   const found = sections.find((s) => s.id === section);
-  return found ? found.tag : 'Activity';
+  if (!found) return { label: 'Activity', i18nKey: null };
+  return { label: found.tag, i18nKey: `section.${found.id}.tag` };
+}
+
+// Helpers for emitting the data-i18n + data-i18n-params attribute pair.
+function i18nAttrs(key, params) {
+  if (!key) return '';
+  let out = ` data-i18n="${escapeHtml(key)}"`;
+  if (params) out += ` data-i18n-params="${escapeHtml(JSON.stringify(params))}"`;
+  return out;
+}
+
+// Render a free-text value that may be either a plain string or
+// { en, de }. Returns the English HTML-escaped text and the data-i18n-text-*
+// attributes needed to translate it at runtime.
+function freeText(value) {
+  if (value == null) return { en: '', attrs: '' };
+  if (typeof value === 'object' && (value.en !== undefined || value.de !== undefined)) {
+    const en = value.en ?? value.de ?? '';
+    let attrs = ` data-i18n-text-en="${escapeHtml(en)}"`;
+    if (value.de) attrs += ` data-i18n-text-de="${escapeHtml(value.de)}"`;
+    return { en: escapeHtml(en), attrs };
+  }
+  return { en: escapeHtml(value), attrs: '' };
+}
+
+// Render an enum-coded value as a <span> carrying both the English text and
+// the i18n key. `prefix` is the JSON key prefix (e.g. "enum.recurring").
+// When the value isn't a known enum member (e.g. compound days like
+// "Monday-Friday"), we emit plain escaped text so we don't reference a
+// missing translation key.
+const KNOWN_ENUMS = {
+  'enum.recurring': new Set(['weekly', 'monthly', 'one-off']),
+  'enum.setting': new Set(['indoor', 'outdoor', 'mixed']),
+  'enum.parentParticipation': new Set(['required', 'optional', 'none']),
+  'enum.contactMethod': new Set(['email', 'phone', 'form', 'whatsapp']),
+  'enum.language': new Set(['de', 'en']),
+  'enum.dayOfWeek': new Set(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']),
+  'enum.category': new Set(['Sports', 'Arts & crafts', 'Family outing', 'Nature', 'Holiday camp', 'STEM', 'Swimming', 'Music']),
+  'enum.status': new Set(['active', 'needs-update', 'reported-closed']),
+};
+
+function enumSpan(prefix, rawValue) {
+  if (rawValue === undefined || rawValue === null || rawValue === '') return '';
+  const known = KNOWN_ENUMS[prefix];
+  if (known && !known.has(rawValue)) {
+    return escapeHtml(rawValue);
+  }
+  const key = `${prefix}.${rawValue}`;
+  return `<span${i18nAttrs(key)}>${escapeHtml(rawValue)}</span>`;
 }
 
 function contactLineHtml(listing) {
   if (listing.contactUrl) {
-    return `<a class="text-link" href="${escapeHtml(listing.contactUrl)}" rel="noopener noreferrer">Organizer website</a>`;
+    return `<a class="text-link" href="${escapeHtml(listing.contactUrl)}" rel="noopener noreferrer"${i18nAttrs('listing.contact.organizer')}>Organizer website</a>`;
   }
-  return '<span class="muted">Not listed yet</span>';
+  return `<span class="muted"${i18nAttrs('listing.contact.notListed')}>Not listed yet</span>`;
 }
 
 function suggestUpdateUrl(listing, repoSlug) {
@@ -87,7 +150,7 @@ function suggestUpdateUrl(listing, repoSlug) {
 // Build a single listing card as an HTML string. Used both at build time
 // (static generation) and at runtime (innerHTML hydration).
 export function renderListingHtml(listing, { sections = [], repoSlug = '' } = {}) {
-  const tag = tagLabelForSection(listing.section, sections);
+  const tagInfo = tagInfoForSection(listing.section, sections);
   const badge = freshnessBadge(listing);
   const verifier = verifierLabel(listing.verifiedBy);
   const closed = badge.tone === 'closed';
@@ -116,50 +179,70 @@ export function renderListingHtml(listing, { sections = [], repoSlug = '' } = {}
   ].map(([k, v]) => `${k}="${escapeHtml(v)}"`).join(' ');
 
   const closedBanner = closed
-    ? '<p class="status-banner" role="status">This activity was reported closed. Please verify before going.</p>'
+    ? `<p class="status-banner" role="status"${i18nAttrs('activity.closedBanner')}>This activity was reported closed. Please verify before going.</p>`
     : '';
 
   const verifierLine = verifier
-    ? `<p class="verifier muted">${escapeHtml(verifier)}</p>`
+    ? `<p class="verifier muted"${i18nAttrs(verifier.i18nKey)}>${escapeHtml(verifier.label)}</p>`
     : '';
 
   const settingLine = listing.setting
-    ? `<p><strong>Setting:</strong> ${escapeHtml(listing.setting)}</p>`
+    ? `<p><strong${i18nAttrs('field.setting')}>Setting:</strong> ${enumSpan('enum.setting', listing.setting)}</p>`
     : '';
 
   const languageLine = listing.language
-    ? `<p><strong>Language:</strong> ${escapeHtml(listing.language)}</p>`
+    ? `<p><strong${i18nAttrs('field.language')}>Language:</strong> ${enumSpan('enum.language', listing.language)}</p>`
     : '';
+
+  const nameText = freeText(listing.name);
+  const timingText = freeText(listing.timing);
+  const costText = freeText(listing.cost);
+  const townText = freeText(listing.town);
+  const trialRaw = listing.trial?.notes ?? listing.trialAvailability;
+  const hasTrialText = typeof trialRaw === 'object'
+    || (typeof trialRaw === 'string' && trialRaw.trim() !== '');
+  const trialEn = optionalText(typeof trialRaw === 'string' ? trialRaw : (trialRaw?.en ?? ''));
+  const trialAttrs = (typeof trialRaw === 'object' && trialRaw && (trialRaw.en || trialRaw.de))
+    ? freeText(trialRaw).attrs
+    : (hasTrialText ? '' : i18nAttrs('enum.notSpecified'));
+  const trialDisplay = hasTrialText && typeof trialRaw === 'object'
+    ? freeText(trialRaw).en
+    : escapeHtml(trialEn);
+
+  const beginnerKey = listing.beginnerFriendly ? 'enum.bool.yes' : 'enum.bool.no';
+  const beginnerLabel = listing.beginnerFriendly ? 'Yes' : 'No';
 
   return `<article class="listing" ${dataAttrs}>
       <div class="listing-header">
-        <span class="listing-tag">${escapeHtml(tag)}</span>
-        <span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}">${escapeHtml(badge.label)}</span>
+        <span class="listing-tag"${i18nAttrs(tagInfo.i18nKey)}>${escapeHtml(tagInfo.label)}</span>
+        <span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}"${i18nAttrs(badge.i18nKey, badge.i18nParams)}>${escapeHtml(badge.label)}</span>
       </div>
       ${closedBanner}
-      <h3><a class="text-link" href="/activities/${escapeHtml(listing.slug)}/">${escapeHtml(listing.name)}</a></h3>
-      <p><strong>Category:</strong> ${escapeHtml(listing.category)}</p>
-      <p><strong>Age range:</strong> ${escapeHtml(listing.ageRange)}</p>
-      <p><strong>Town:</strong> ${escapeHtml(listing.town)}</p>
-      <p><strong>When:</strong> ${escapeHtml(listing.timing)}</p>
-      <p><strong>Cost:</strong> ${escapeHtml(listing.cost)}</p>
-      <p><strong>Beginner-friendly:</strong> ${listing.beginnerFriendly ? 'Yes' : 'No'}</p>
-      <p><strong>Trial availability:</strong> ${escapeHtml(optionalText(listing.trial?.notes ?? listing.trialAvailability))}</p>
+      <h3><a class="text-link" href="/activities/${escapeHtml(listing.slug)}/"${nameText.attrs}>${nameText.en}</a></h3>
+      <p><strong${i18nAttrs('field.category')}>Category:</strong> ${enumSpan('enum.category', listing.category)}</p>
+      <p><strong${i18nAttrs('field.ageRange')}>Age range:</strong> ${escapeHtml(listing.ageRange)}</p>
+      <p><strong${i18nAttrs('field.town')}>Town:</strong> <span${townText.attrs}>${townText.en}</span></p>
+      <p><strong${i18nAttrs('field.when')}>When:</strong> <span${timingText.attrs}>${timingText.en}</span></p>
+      <p><strong${i18nAttrs('field.cost')}>Cost:</strong> <span${costText.attrs}>${costText.en}</span></p>
+      <p><strong${i18nAttrs('field.beginnerFriendly')}>Beginner-friendly:</strong> <span${i18nAttrs(beginnerKey)}>${beginnerLabel}</span></p>
+      <p><strong${i18nAttrs('field.trialAvailability')}>Trial availability:</strong> <span${trialAttrs}>${trialDisplay}</span></p>
       ${settingLine}
       ${languageLine}
-      <p><strong>Contact or website:</strong> ${contactLineHtml(listing)}</p>
-      <p><strong>Last verified:</strong> ${escapeHtml(listing.lastVerified)}</p>
+      <p><strong${i18nAttrs('field.contactOrWebsite')}>Contact or website:</strong> ${contactLineHtml(listing)}</p>
+      <p><strong${i18nAttrs('field.lastVerified')}>Last verified:</strong> ${escapeHtml(listing.lastVerified)}</p>
       ${verifierLine}
-      <p class="listing-actions"><a class="text-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer">Suggest an update</a></p>
+      <p class="listing-actions"><a class="text-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a></p>
     </article>`;
 }
 
 // Build a full section panel (heading + grid of listings) as HTML.
 export function renderSectionHtml(section, listings, { sections = [], repoSlug = '' } = {}) {
   const cards = listings.map((l) => renderListingHtml(l, { sections, repoSlug })).join('\n');
+  const labelKey = `section.${section.id}.label`;
+  const introKey = `section.${section.id}.intro`;
   return `<section class="panel" data-section-id="${escapeHtml(section.id)}" aria-labelledby="${escapeHtml(section.id)}-heading">
-      <h2 id="${escapeHtml(section.id)}-heading">${escapeHtml(section.label)}</h2>
-      <p class="section-intro">${escapeHtml(section.intro)}</p>
+      <h2 id="${escapeHtml(section.id)}-heading"${i18nAttrs(labelKey)}>${escapeHtml(section.label)}</h2>
+      <p class="section-intro"${i18nAttrs(introKey)}>${escapeHtml(section.intro)}</p>
       <div class="listing-grid">
 ${cards}
       </div>

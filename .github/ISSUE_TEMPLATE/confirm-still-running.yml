@@ -1,0 +1,40 @@
+name: Confirm still running
+description: Confirm a listing is unchanged so the editor can bump its "last verified" date.
+title: "[Confirm] Existing activity still running"
+labels: ["data", "type:confirm"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for keeping local listings trustworthy. This takes 30 seconds.
+  - type: input
+    id: slug
+    attributes:
+      label: Activity slug
+      description: Found in the URL, e.g. /activities/rookie-swim-start/.
+      placeholder: rookie-swim-start
+  - type: input
+    id: activity
+    attributes:
+      label: Activity name
+    validations:
+      required: true
+  - type: input
+    id: town
+    attributes:
+      label: Town
+  - type: dropdown
+    id: relationship
+    attributes:
+      label: How do you know?
+      options:
+        - I'm the organizer
+        - I attended in the last 4 weeks
+        - I checked the organizer's website today
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything still up to date worth noting?
+      placeholder: e.g. Time and price unchanged for autumn term.

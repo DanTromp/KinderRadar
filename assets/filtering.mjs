@@ -76,11 +76,13 @@ export const CHIP_DEFINITIONS = [
   {
     id: 'this-weekend',
     label: 'This weekend',
+    labelKey: 'chip.this-weekend',
     predicate: (l) => parseDayList(l.dayOfWeek).some((d) => WEEKEND_DAYS.has(d)),
   },
   {
     id: 'after-kindergarten',
     label: 'After kindergarten',
+    labelKey: 'chip.after-kindergarten',
     predicate: (l) => {
       const days = parseDayList(l.dayOfWeek);
       if (!days.length || !days.some((d) => WEEKDAYS.has(d))) return false;
@@ -91,26 +93,31 @@ export const CHIP_DEFINITIONS = [
   {
     id: 'free',
     label: 'Free',
+    labelKey: 'chip.free',
     predicate: (l) => l.price?.free === true,
   },
   {
     id: 'beginner-friendly',
     label: 'Beginner-friendly',
+    labelKey: 'chip.beginner-friendly',
     predicate: (l) => l.beginnerFriendly === true,
   },
   {
     id: 'rainy-day',
     label: 'For rainy days',
+    labelKey: 'chip.rainy-day',
     predicate: (l) => l.setting === 'indoor' || l.setting === 'mixed',
   },
   {
     id: 'no-membership',
     label: 'No membership required',
+    labelKey: 'chip.no-membership',
     predicate: (l) => (l.price?.unit ?? '') !== 'membership',
   },
   {
     id: 'trial-available',
     label: 'Trial available',
+    labelKey: 'chip.trial-available',
     predicate: (l) => Boolean(l.trial?.available ?? l.trialAvailability),
   },
 ];
