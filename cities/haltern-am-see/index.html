@@ -1,25 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html data-city-slug="haltern-am-see" data-city-towns="Haltern am See|Sythen|Hullern|Lavesum" lang="en" data-repo-slug="DanTromp/KinderRadar">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KinderAktiv Haltern | Local kids activities near Haltern am See</title>
-    <meta
-      name="description"
-      content="Discover weekly activities, weekend family ideas, holiday activities, and beginner-friendly trials near Haltern am See."
-    />
+    <title>KinderAktiv Haltern am See | Local kids activities near Haltern am See</title>
+    <meta name="description" content="Discover weekly activities, weekend family ideas, holiday activities, and beginner-friendly trials near Haltern am See." />
     <link rel="stylesheet" href="/assets/styles.css" />
   </head>
   <body>
     <main class="page stack">
       <header class="page-header">
         <a class="back-link" href="/">← Back to homepage</a>
-        <p class="eyebrow">KinderAktiv Haltern</p>
+        <p class="eyebrow">KinderAktiv Haltern am See</p>
         <h1>Find local activities your child can join, try, or do nearby.</h1>
         <p>Manually curated options for parents comparing weekly, weekend, holiday, and beginner-friendly activities near Haltern am See.</p>
         <div class="button-row">
-          <a class="button" href="mailto:hello@kinderradar.local?subject=Get%20updates%20when%20new%20activities%20are%20added">Get updates when new activities are added</a>
-          <a class="button secondary" href="mailto:hello@kinderradar.local?subject=Submit%20or%20update%20an%20activity">Submit or update an activity</a>
+          <a class="button secondary" href="https://github.com/DanTromp/KinderRadar/issues/new?template=submit-activity.yml&amp;title=%5BSubmit%5D+New+activity+in+Haltern+am+See&amp;city=Haltern+am+See" rel="noopener noreferrer">Submit or update an activity</a>
         </div>
       </header>
 
@@ -27,16 +23,16 @@
         <h2 id="filter-heading">Filter activities</h2>
         <form id="activity-filters" class="filters" novalidate>
           <label>
+            Search
+            <input id="activity-search" name="q" type="search" placeholder="Search activities, towns, categories…" autocomplete="off" />
+          </label>
+          <label>
             Town
             <select name="town">
               <option value="">All nearby towns</option>
-              <option value="Haltern am See">Haltern am See</option>
-              <option value="Sythen">Sythen</option>
-              <option value="Hullern">Hullern</option>
-              <option value="Lavesum">Lavesum</option>
+              <option value="Haltern am See">Haltern am See</option><option value="Sythen">Sythen</option><option value="Hullern">Hullern</option><option value="Lavesum">Lavesum</option>
             </select>
           </label>
-
           <label>
             Child age
             <select name="age">
@@ -47,22 +43,13 @@
               <option value="10-14">10-14</option>
             </select>
           </label>
-
           <label>
             Category
             <select name="category">
               <option value="">All categories</option>
-              <option value="Sports">Sports</option>
-              <option value="Arts & crafts">Arts & crafts</option>
-              <option value="Family outing">Family outing</option>
-              <option value="Nature">Nature</option>
-              <option value="Holiday camp">Holiday camp</option>
-              <option value="STEM">STEM</option>
-              <option value="Swimming">Swimming</option>
-              <option value="Music">Music</option>
+              <option value="Arts &amp; crafts">Arts &amp; crafts</option><option value="Family outing">Family outing</option><option value="Holiday camp">Holiday camp</option><option value="Music">Music</option><option value="Nature">Nature</option><option value="STEM">STEM</option><option value="Sports">Sports</option><option value="Swimming">Swimming</option>
             </select>
           </label>
-
           <label>
             Beginner-friendly
             <select name="beginnerFriendly">
@@ -72,147 +59,207 @@
             </select>
           </label>
         </form>
+        <div id="filter-chips" class="chip-bar" aria-label="Quick filters"><button type="button" class="chip" data-chip-id="this-weekend" aria-pressed="false">This weekend</button><button type="button" class="chip" data-chip-id="after-kindergarten" aria-pressed="false">After kindergarten</button><button type="button" class="chip" data-chip-id="free" aria-pressed="false">Free</button><button type="button" class="chip" data-chip-id="beginner-friendly" aria-pressed="false">Beginner-friendly</button><button type="button" class="chip" data-chip-id="rainy-day" aria-pressed="false">For rainy days</button><button type="button" class="chip" data-chip-id="no-membership" aria-pressed="false">No membership required</button><button type="button" class="chip" data-chip-id="trial-available" aria-pressed="false">Trial available</button></div>
       </section>
 
       <p id="empty-state" class="empty-state" hidden>
         No activities match the selected filters yet. Try widening your criteria.
       </p>
 
-      <section class="panel" data-section aria-labelledby="weekly-activities-heading">
-        <h2 id="weekly-activities-heading">Weekly activities</h2>
-        <p class="section-intro">Recurring local options for families who want a regular activity during the week.</p>
-        <div class="listing-grid">
-          <article class="listing" data-age-min="4" data-age-max="6" data-town="Haltern am See" data-category="Sports" data-beginner-friendly="true">
-            <span class="listing-tag">Weekly</span>
-            <h2>Lakeside Little Kickers</h2>
-            <p><strong>Category:</strong> Sports</p>
-            <p><strong>Age range:</strong> 4-6</p>
-            <p><strong>Town:</strong> Haltern am See</p>
-            <p><strong>When:</strong> Tuesday, 16:00-17:00</p>
-            <p><strong>Cost:</strong> Club membership from €16/month</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> Two trial sessions available</p>
-            <p><strong>Contact or website:</strong> <a href="https://example.org/lakeside-little-kickers">Organizer website</a></p>
-            <p><strong>Last verified:</strong> 2026-05-28</p>
-          </article>
-
-          <article class="listing" data-age-min="6" data-age-max="10" data-town="Sythen" data-category="Arts & crafts" data-beginner-friendly="true">
-            <span class="listing-tag">Weekly</span>
-            <h2>Creative Kids Atelier</h2>
-            <p><strong>Category:</strong> Arts & crafts</p>
-            <p><strong>Age range:</strong> 6-10</p>
-            <p><strong>Town:</strong> Sythen</p>
-            <p><strong>When:</strong> Wednesday, 15:30-17:00</p>
-            <p><strong>Cost:</strong> €14 per session</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> First workshop discounted</p>
-            <p><strong>Contact or website:</strong> <a href="https://example.org/creative-kids-atelier">Organizer website</a></p>
-            <p><strong>Last verified:</strong> 2026-05-26</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel" data-section aria-labelledby="weekend-family-ideas-heading">
-        <h2 id="weekend-family-ideas-heading">Weekend family ideas</h2>
-        <p class="section-intro">Easy weekend options for families looking for a one-off outing nearby.</p>
-        <div class="listing-grid">
-          <article class="listing" data-age-min="3" data-age-max="10" data-town="Hullern" data-category="Family outing" data-beginner-friendly="true">
-            <span class="listing-tag">Weekend</span>
-            <h2>Family Farm Morning</h2>
-            <p><strong>Category:</strong> Family outing</p>
-            <p><strong>Age range:</strong> 3-10</p>
-            <p><strong>Town:</strong> Hullern</p>
-            <p><strong>When:</strong> Saturday, 09:30-12:00</p>
-            <p><strong>Cost:</strong> Free with optional snack donation</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> Drop in when spots are open</p>
-            <p><strong>Contact or website:</strong> <a href="https://example.org/family-farm-morning">Organizer website</a></p>
-            <p><strong>Last verified:</strong> 2026-05-29</p>
-          </article>
-
-          <article class="listing" data-age-min="4" data-age-max="9" data-town="Haltern am See" data-category="Nature" data-beginner-friendly="true">
-            <span class="listing-tag">Weekend</span>
-            <h2>Silbersee Story Walk</h2>
-            <p><strong>Category:</strong> Nature</p>
-            <p><strong>Age range:</strong> 4-9</p>
-            <p><strong>Town:</strong> Haltern am See</p>
-            <p><strong>When:</strong> Sunday, 10:00-11:30</p>
-            <p><strong>Cost:</strong> Free</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> No booking required</p>
-            <p><strong>Contact or website:</strong> <a href="https://example.org/silbersee-story-walk">Organizer website</a></p>
-            <p><strong>Last verified:</strong> 2026-05-24</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel" data-section aria-labelledby="school-holiday-activities-heading">
-        <h2 id="school-holiday-activities-heading">School holiday activities</h2>
-        <p class="section-intro">Shortlist camps and holiday clubs for school break planning.</p>
-        <div class="listing-grid">
-          <article class="listing" data-age-min="7" data-age-max="12" data-town="Haltern am See" data-category="Holiday camp" data-beginner-friendly="false">
-            <span class="listing-tag">Holiday</span>
-            <h2>Holiday Circus Camp</h2>
-            <p><strong>Category:</strong> Holiday camp</p>
-            <p><strong>Age range:</strong> 7-12</p>
-            <p><strong>Town:</strong> Haltern am See</p>
-            <p><strong>When:</strong> Autumn break, Monday-Friday, 09:00-15:00</p>
-            <p><strong>Cost:</strong> €149 per week</p>
-            <p><strong>Beginner-friendly:</strong> No</p>
-            <p><strong>Trial availability:</strong> <span class="muted">Not specified</span></p>
-            <p><strong>Contact or website:</strong> <a href="https://example.org/holiday-circus-camp">Organizer website</a></p>
-            <p><strong>Last verified:</strong> 2026-05-21</p>
-          </article>
-
-          <article class="listing" data-age-min="8" data-age-max="12" data-town="Lavesum" data-category="STEM" data-beginner-friendly="true">
-            <span class="listing-tag">Holiday</span>
-            <h2>Maker Lab Holiday Club</h2>
-            <p><strong>Category:</strong> STEM</p>
-            <p><strong>Age range:</strong> 8-12</p>
-            <p><strong>Town:</strong> Lavesum</p>
-            <p><strong>When:</strong> Summer holidays, Tuesday-Thursday, 10:00-14:00</p>
-            <p><strong>Cost:</strong> €95 for three days</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> Single-day trial possible if places remain</p>
-            <p><strong>Contact or website:</strong> <span class="muted">Not listed yet</span></p>
-            <p><strong>Last verified:</strong> 2026-05-23</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="panel" data-section aria-labelledby="beginner-friendly-trial-activities-heading">
-        <h2 id="beginner-friendly-trial-activities-heading">Beginner-friendly trial activities</h2>
-        <p class="section-intro">Options that clearly welcome first-timers and make it easy to try before committing.</p>
-        <div class="listing-grid">
-          <article class="listing" data-age-min="5" data-age-max="8" data-town="Haltern am See" data-category="Swimming" data-beginner-friendly="true">
-            <span class="listing-tag">Beginner-friendly</span>
-            <h2>Rookie Swim Start</h2>
-            <p><strong>Category:</strong> Swimming</p>
-            <p><strong>Age range:</strong> 5-8</p>
-            <p><strong>Town:</strong> Haltern am See</p>
-            <p><strong>When:</strong> Thursday, 17:15-18:00</p>
-            <p><strong>Cost:</strong> From €22/month</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> Trial lesson on request</p>
-            <p><strong>Contact or website:</strong> <a href="https://example.org/rookie-swim-start">Organizer website</a></p>
-            <p><strong>Last verified:</strong> 2026-05-27</p>
-          </article>
-
-          <article class="listing" data-age-min="2" data-age-max="5" data-town="Sythen" data-category="Music" data-beginner-friendly="true">
-            <span class="listing-tag">Beginner-friendly</span>
-            <h2>First Steps Music Circle</h2>
-            <p><strong>Category:</strong> Music</p>
-            <p><strong>Age range:</strong> 2-5</p>
-            <p><strong>Town:</strong> Sythen</p>
-            <p><strong>When:</strong> Friday, 10:00-10:45</p>
-            <p><strong>Cost:</strong> €9 per class</p>
-            <p><strong>Beginner-friendly:</strong> Yes</p>
-            <p><strong>Trial availability:</strong> One free drop-in class</p>
-            <p><strong>Contact or website:</strong> <span class="muted">Not listed yet</span></p>
-            <p><strong>Last verified:</strong> 2026-05-30</p>
-          </article>
-        </div>
-      </section>
+      <div id="listings-root">
+<section class="panel" data-section-id="weekly-activities" aria-labelledby="weekly-activities-heading">
+      <h2 id="weekly-activities-heading">Weekly activities</h2>
+      <p class="section-intro">Recurring local options for families who want a regular activity during the week.</p>
+      <div class="listing-grid">
+<article class="listing" data-slug="lakeside-little-kickers" data-section="weekly-activities" data-age-min="4" data-age-max="6" data-town="Haltern am See" data-category="Sports" data-beginner-friendly="true" data-day-of-week="Tuesday" data-start-time="16:00" data-end-time="17:00" data-recurring="weekly" data-price-free="false" data-price-unit="membership" data-trial-available="true" data-booking-required="true" data-setting="outdoor" data-parent-participation="none" data-language="de" data-status="active" data-last-verified="2026-05-28">
+      <div class="listing-header">
+        <span class="listing-tag">Weekly</span>
+        <span class="freshness freshness-fresh" title="2026-05-28">Verified 19 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/lakeside-little-kickers/">Lakeside Little Kickers</a></h3>
+      <p><strong>Category:</strong> Sports</p>
+      <p><strong>Age range:</strong> 4-6</p>
+      <p><strong>Town:</strong> Haltern am See</p>
+      <p><strong>When:</strong> Tuesday, 16:00-17:00</p>
+      <p><strong>Cost:</strong> Club membership from €16/month</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> Two trial sessions available</p>
+      <p><strong>Setting:</strong> outdoor</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <a class="text-link" href="https://example.org/lakeside-little-kickers" rel="noopener noreferrer">Organizer website</a></p>
+      <p><strong>Last verified:</strong> 2026-05-28</p>
+      <p class="verifier muted">Organizer submitted</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Lakeside+Little+Kickers&amp;slug=lakeside-little-kickers&amp;activity=Lakeside+Little+Kickers&amp;town=Haltern+am+See" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+<article class="listing" data-slug="creative-kids-atelier" data-section="weekly-activities" data-age-min="6" data-age-max="10" data-town="Sythen" data-category="Arts &amp; crafts" data-beginner-friendly="true" data-day-of-week="Wednesday" data-start-time="15:30" data-end-time="17:00" data-recurring="weekly" data-price-free="false" data-price-unit="per-session" data-trial-available="true" data-booking-required="true" data-setting="indoor" data-parent-participation="optional" data-language="de" data-status="active" data-last-verified="2026-05-26">
+      <div class="listing-header">
+        <span class="listing-tag">Weekly</span>
+        <span class="freshness freshness-fresh" title="2026-05-26">Verified 21 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/creative-kids-atelier/">Creative Kids Atelier</a></h3>
+      <p><strong>Category:</strong> Arts &amp; crafts</p>
+      <p><strong>Age range:</strong> 6-10</p>
+      <p><strong>Town:</strong> Sythen</p>
+      <p><strong>When:</strong> Wednesday, 15:30-17:00</p>
+      <p><strong>Cost:</strong> €14 per session</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> First workshop discounted</p>
+      <p><strong>Setting:</strong> indoor</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <a class="text-link" href="https://example.org/creative-kids-atelier" rel="noopener noreferrer">Organizer website</a></p>
+      <p><strong>Last verified:</strong> 2026-05-26</p>
+      <p class="verifier muted">Organizer submitted</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Creative+Kids+Atelier&amp;slug=creative-kids-atelier&amp;activity=Creative+Kids+Atelier&amp;town=Sythen" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+      </div>
+    </section>
+<section class="panel" data-section-id="weekend-family-ideas" aria-labelledby="weekend-family-ideas-heading">
+      <h2 id="weekend-family-ideas-heading">Weekend family ideas</h2>
+      <p class="section-intro">Easy weekend options for families looking for a one-off outing nearby.</p>
+      <div class="listing-grid">
+<article class="listing" data-slug="family-farm-morning" data-section="weekend-family-ideas" data-age-min="3" data-age-max="10" data-town="Hullern" data-category="Family outing" data-beginner-friendly="true" data-day-of-week="Saturday" data-start-time="09:30" data-end-time="12:00" data-recurring="weekly" data-price-free="true" data-price-unit="free" data-trial-available="true" data-booking-required="false" data-setting="outdoor" data-parent-participation="required" data-language="de" data-status="active" data-last-verified="2026-05-29">
+      <div class="listing-header">
+        <span class="listing-tag">Weekend</span>
+        <span class="freshness freshness-fresh" title="2026-05-29">Verified 18 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/family-farm-morning/">Family Farm Morning</a></h3>
+      <p><strong>Category:</strong> Family outing</p>
+      <p><strong>Age range:</strong> 3-10</p>
+      <p><strong>Town:</strong> Hullern</p>
+      <p><strong>When:</strong> Saturday, 09:30-12:00</p>
+      <p><strong>Cost:</strong> Free with optional snack donation</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> Drop in when spots are open</p>
+      <p><strong>Setting:</strong> outdoor</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <a class="text-link" href="https://example.org/family-farm-morning" rel="noopener noreferrer">Organizer website</a></p>
+      <p><strong>Last verified:</strong> 2026-05-29</p>
+      <p class="verifier muted">Parent confirmed</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Family+Farm+Morning&amp;slug=family-farm-morning&amp;activity=Family+Farm+Morning&amp;town=Hullern" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+<article class="listing" data-slug="silbersee-story-walk" data-section="weekend-family-ideas" data-age-min="4" data-age-max="9" data-town="Haltern am See" data-category="Nature" data-beginner-friendly="true" data-day-of-week="Sunday" data-start-time="10:00" data-end-time="11:30" data-recurring="monthly" data-price-free="true" data-price-unit="free" data-trial-available="true" data-booking-required="false" data-setting="outdoor" data-parent-participation="required" data-language="de" data-status="active" data-last-verified="2026-05-24">
+      <div class="listing-header">
+        <span class="listing-tag">Weekend</span>
+        <span class="freshness freshness-fresh" title="2026-05-24">Verified 23 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/silbersee-story-walk/">Silbersee Story Walk</a></h3>
+      <p><strong>Category:</strong> Nature</p>
+      <p><strong>Age range:</strong> 4-9</p>
+      <p><strong>Town:</strong> Haltern am See</p>
+      <p><strong>When:</strong> Sunday, 10:00-11:30</p>
+      <p><strong>Cost:</strong> Free</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> No booking required</p>
+      <p><strong>Setting:</strong> outdoor</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <a class="text-link" href="https://example.org/silbersee-story-walk" rel="noopener noreferrer">Organizer website</a></p>
+      <p><strong>Last verified:</strong> 2026-05-24</p>
+      <p class="verifier muted">Editor curated</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Silbersee+Story+Walk&amp;slug=silbersee-story-walk&amp;activity=Silbersee+Story+Walk&amp;town=Haltern+am+See" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+      </div>
+    </section>
+<section class="panel" data-section-id="school-holiday-activities" aria-labelledby="school-holiday-activities-heading">
+      <h2 id="school-holiday-activities-heading">School holiday activities</h2>
+      <p class="section-intro">Shortlist camps and holiday clubs for school break planning.</p>
+      <div class="listing-grid">
+<article class="listing" data-slug="maker-lab-holiday-club" data-section="school-holiday-activities" data-age-min="8" data-age-max="12" data-town="Lavesum" data-category="STEM" data-beginner-friendly="true" data-day-of-week="Tuesday-Thursday" data-start-time="10:00" data-end-time="14:00" data-recurring="one-off" data-price-free="false" data-price-unit="per-block" data-trial-available="true" data-booking-required="true" data-setting="indoor" data-parent-participation="none" data-language="de+en" data-status="active" data-last-verified="2026-05-23">
+      <div class="listing-header">
+        <span class="listing-tag">Holiday</span>
+        <span class="freshness freshness-fresh" title="2026-05-23">Verified 24 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/maker-lab-holiday-club/">Maker Lab Holiday Club</a></h3>
+      <p><strong>Category:</strong> STEM</p>
+      <p><strong>Age range:</strong> 8-12</p>
+      <p><strong>Town:</strong> Lavesum</p>
+      <p><strong>When:</strong> Summer holidays, Tuesday-Thursday, 10:00-14:00</p>
+      <p><strong>Cost:</strong> €95 for three days</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> Single-day trial possible if places remain</p>
+      <p><strong>Setting:</strong> indoor</p>
+      <p><strong>Language:</strong> de+en</p>
+      <p><strong>Contact or website:</strong> <span class="muted">Not listed yet</span></p>
+      <p><strong>Last verified:</strong> 2026-05-23</p>
+      <p class="verifier muted">Editor curated</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Maker+Lab+Holiday+Club&amp;slug=maker-lab-holiday-club&amp;activity=Maker+Lab+Holiday+Club&amp;town=Lavesum" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+<article class="listing" data-slug="holiday-circus-camp" data-section="school-holiday-activities" data-age-min="7" data-age-max="12" data-town="Haltern am See" data-category="Holiday camp" data-beginner-friendly="false" data-day-of-week="Monday-Friday" data-start-time="09:00" data-end-time="15:00" data-recurring="one-off" data-price-free="false" data-price-unit="per-week" data-trial-available="false" data-booking-required="true" data-setting="mixed" data-parent-participation="none" data-language="de" data-status="active" data-last-verified="2026-05-21">
+      <div class="listing-header">
+        <span class="listing-tag">Holiday</span>
+        <span class="freshness freshness-fresh" title="2026-05-21">Verified 26 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/holiday-circus-camp/">Holiday Circus Camp</a></h3>
+      <p><strong>Category:</strong> Holiday camp</p>
+      <p><strong>Age range:</strong> 7-12</p>
+      <p><strong>Town:</strong> Haltern am See</p>
+      <p><strong>When:</strong> Autumn break, Monday-Friday, 09:00-15:00</p>
+      <p><strong>Cost:</strong> €149 per week</p>
+      <p><strong>Beginner-friendly:</strong> No</p>
+      <p><strong>Trial availability:</strong> Not specified</p>
+      <p><strong>Setting:</strong> mixed</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <a class="text-link" href="https://example.org/holiday-circus-camp" rel="noopener noreferrer">Organizer website</a></p>
+      <p><strong>Last verified:</strong> 2026-05-21</p>
+      <p class="verifier muted">Organizer submitted</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Holiday+Circus+Camp&amp;slug=holiday-circus-camp&amp;activity=Holiday+Circus+Camp&amp;town=Haltern+am+See" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+      </div>
+    </section>
+<section class="panel" data-section-id="beginner-friendly-trial-activities" aria-labelledby="beginner-friendly-trial-activities-heading">
+      <h2 id="beginner-friendly-trial-activities-heading">Beginner-friendly trial activities</h2>
+      <p class="section-intro">Options that clearly welcome first-timers and make it easy to try before committing.</p>
+      <div class="listing-grid">
+<article class="listing" data-slug="first-steps-music-circle" data-section="beginner-friendly-trial-activities" data-age-min="2" data-age-max="5" data-town="Sythen" data-category="Music" data-beginner-friendly="true" data-day-of-week="Friday" data-start-time="10:00" data-end-time="10:45" data-recurring="weekly" data-price-free="false" data-price-unit="per-session" data-trial-available="true" data-booking-required="false" data-setting="indoor" data-parent-participation="required" data-language="de" data-status="active" data-last-verified="2026-05-30">
+      <div class="listing-header">
+        <span class="listing-tag">Beginner-friendly</span>
+        <span class="freshness freshness-fresh" title="2026-05-30">Verified 17 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/first-steps-music-circle/">First Steps Music Circle</a></h3>
+      <p><strong>Category:</strong> Music</p>
+      <p><strong>Age range:</strong> 2-5</p>
+      <p><strong>Town:</strong> Sythen</p>
+      <p><strong>When:</strong> Friday, 10:00-10:45</p>
+      <p><strong>Cost:</strong> €9 per class</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> One free drop-in class</p>
+      <p><strong>Setting:</strong> indoor</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <span class="muted">Not listed yet</span></p>
+      <p><strong>Last verified:</strong> 2026-05-30</p>
+      <p class="verifier muted">Parent confirmed</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+First+Steps+Music+Circle&amp;slug=first-steps-music-circle&amp;activity=First+Steps+Music+Circle&amp;town=Sythen" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+<article class="listing" data-slug="rookie-swim-start" data-section="beginner-friendly-trial-activities" data-age-min="5" data-age-max="8" data-town="Haltern am See" data-category="Swimming" data-beginner-friendly="true" data-day-of-week="Thursday" data-start-time="17:15" data-end-time="18:00" data-recurring="weekly" data-price-free="false" data-price-unit="membership" data-trial-available="true" data-booking-required="true" data-setting="indoor" data-parent-participation="optional" data-language="de" data-status="active" data-last-verified="2026-05-27">
+      <div class="listing-header">
+        <span class="listing-tag">Beginner-friendly</span>
+        <span class="freshness freshness-fresh" title="2026-05-27">Verified 20 days ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="/activities/rookie-swim-start/">Rookie Swim Start</a></h3>
+      <p><strong>Category:</strong> Swimming</p>
+      <p><strong>Age range:</strong> 5-8</p>
+      <p><strong>Town:</strong> Haltern am See</p>
+      <p><strong>When:</strong> Thursday, 17:15-18:00</p>
+      <p><strong>Cost:</strong> From €22/month</p>
+      <p><strong>Beginner-friendly:</strong> Yes</p>
+      <p><strong>Trial availability:</strong> Trial lesson on request</p>
+      <p><strong>Setting:</strong> indoor</p>
+      <p><strong>Language:</strong> de</p>
+      <p><strong>Contact or website:</strong> <a class="text-link" href="https://example.org/rookie-swim-start" rel="noopener noreferrer">Organizer website</a></p>
+      <p><strong>Last verified:</strong> 2026-05-27</p>
+      <p class="verifier muted">Organizer submitted</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Rookie+Swim+Start&amp;slug=rookie-swim-start&amp;activity=Rookie+Swim+Start&amp;town=Haltern+am+See" rel="noopener noreferrer">Suggest an update</a></p>
+    </article>
+      </div>
+    </section>
+      </div>
     </main>
 
     <script type="module" src="/assets/filters.js"></script>

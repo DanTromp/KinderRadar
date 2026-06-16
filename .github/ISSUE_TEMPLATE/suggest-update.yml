@@ -1,0 +1,48 @@
+name: Suggest update
+description: Update or correct an existing activity (or report it closed).
+title: "[Update] Existing activity"
+labels: ["data", "update"]
+body:
+  - type: input
+    id: slug
+    attributes:
+      label: Activity slug
+      description: Found in the URL, e.g. /activities/rookie-swim-start/.
+      placeholder: rookie-swim-start
+  - type: input
+    id: activity
+    attributes:
+      label: Activity name
+    validations:
+      required: true
+  - type: input
+    id: town
+    attributes:
+      label: Town
+  - type: dropdown
+    id: change-type
+    attributes:
+      label: What kind of change?
+      options:
+        - Details have changed (time, cost, age, etc.)
+        - Reported closed
+        - Still active — please re-verify
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What changed?
+      placeholder: e.g. New time is Tuesday 17:00, cost is now €18/month.
+    validations:
+      required: true
+  - type: dropdown
+    id: verified-by
+    attributes:
+      label: How do you know?
+      options:
+        - I'm the organizer
+        - I'm a parent who attended recently
+        - I saw it on the organizer's website
+        - Other
