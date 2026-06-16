@@ -78,3 +78,11 @@ test('every data-i18n key in generated pages exists in en.json', async () => {
   const missing = [...usedKeys].filter((k) => !Object.prototype.hasOwnProperty.call(en, k));
   assert.deepEqual(missing, [], `i18n keys used in HTML but missing from en.json:\n${missing.join('\n')}`);
 });
+
+test('home page canonical uses the full GitHub Pages URL', async () => {
+  const html = await readFile(join(ROOT, 'index.html'), 'utf8');
+  assert.match(
+    html,
+    /<link rel="canonical" href="https:\/\/dantromp\.github\.io\/KinderRadar\/cities\/haltern-am-see\/" \/>/,
+  );
+});

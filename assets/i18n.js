@@ -61,29 +61,31 @@ export function translate(key, params) {
 export function apply(root) {
   const scope = root ?? document;
 
-  // Text content translation.
-  const textEls = scope.querySelectorAll('[data-i18n]');
-  textEls.forEach((el) => {
-    const key = el.getAttribute('data-i18n');
-    if (!key) return;
-    el.textContent = format(lookup(state.current, key), readParams(el));
-  });
+  if (state.loaded) {
+    // Text content translation.
+    const textEls = scope.querySelectorAll('[data-i18n]');
+    textEls.forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (!key) return;
+      el.textContent = format(lookup(state.current, key), readParams(el));
+    });
 
-  // Attribute translation. Format: "attr1:key1,attr2:key2".
-  const attrEls = scope.querySelectorAll('[data-i18n-attr]');
-  attrEls.forEach((el) => {
-    const spec = el.getAttribute('data-i18n-attr');
-    if (!spec) return;
-    const params = readParams(el);
-    for (const pair of spec.split(',')) {
-      const idx = pair.indexOf(':');
-      if (idx <= 0) continue;
-      const attr = pair.slice(0, idx).trim();
-      const key = pair.slice(idx + 1).trim();
-      if (!attr || !key) continue;
-      el.setAttribute(attr, format(lookup(state.current, key), params));
-    }
-  });
+    // Attribute translation. Format: "attr1:key1,attr2:key2".
+    const attrEls = scope.querySelectorAll('[data-i18n-attr]');
+    attrEls.forEach((el) => {
+      const spec = el.getAttribute('data-i18n-attr');
+      if (!spec) return;
+      const params = readParams(el);
+      for (const pair of spec.split(',')) {
+        const idx = pair.indexOf(':');
+        if (idx <= 0) continue;
+        const attr = pair.slice(0, idx).trim();
+        const key = pair.slice(idx + 1).trim();
+        if (!attr || !key) continue;
+        el.setAttribute(attr, format(lookup(state.current, key), params));
+      }
+    });
+  }
 
   // Free-text per-listing fields: data-i18n-text-de overrides the English
   // textContent when German is active. Initial text is the English version.
