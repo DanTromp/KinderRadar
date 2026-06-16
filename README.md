@@ -34,6 +34,7 @@ tests/
 ## Commands
 
 ```bash
+npm start       # serve the static app locally at http://localhost:4173/
 npm run build   # validate data, then regenerate cities/ and activities/
 npm test        # run unit tests
 ```

@@ -7,7 +7,7 @@
 
 import { mkdir, writeFile, rm } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 import { activities, sections, cities } from '../assets/activities-data.mjs';
 import {
@@ -270,7 +270,7 @@ export async function generate() {
   return written;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
   const count = await generate();
   console.log(`Generated ${count} page(s).`);
 }

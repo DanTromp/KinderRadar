@@ -3,6 +3,8 @@
 
 import { access } from 'node:fs/promises';
 import { constants } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { activities, sections, categories, cities } from '../assets/activities-data.mjs';
 
@@ -166,6 +168,6 @@ async function main() {
   console.log(`Build check passed: ${activities.length} activities, ${cities.length} city/cities.`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
   await main();
 }
