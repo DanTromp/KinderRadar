@@ -111,9 +111,11 @@ function cityRowsToData(cityRows, townRows) {
       ...towns.filter((town) => !existingOrder.includes(town)).sort(),
     ];
 
+    const existing = existingBySlug.get(city.slug);
     return {
       slug: city.slug,
       name: city.name,
+      ...(existing?.heroImage ? { heroImage: existing.heroImage } : {}),
       nearbyTowns: ordered,
     };
   });

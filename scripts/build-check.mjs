@@ -19,6 +19,9 @@ const requiredFiles = [
   'assets/render.mjs',
   'assets/activities-data.mjs',
   'assets/kinderradar-hero.png',
+  'assets/kinderradar-hero-sythen.png',
+  'assets/kinderradar-hero-hullern.png',
+  'assets/kinderradar-hero-lavesum.png',
 ];
 
 const RECURRING_VALUES = new Set(['weekly', 'monthly', 'one-off']);

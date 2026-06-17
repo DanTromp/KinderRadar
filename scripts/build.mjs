@@ -20,7 +20,10 @@ import {
 import { sortByFreshness, CHIP_DEFINITIONS } from '../assets/filtering.mjs';
 
 function cityForTown(town) {
-  return cities.find((c) => c.nearbyTowns.includes(town)) ?? cities[0];
+  return cities.find((c) => c.name === town && c.nearbyTowns.length === 1)
+    ?? cities.find((c) => c.name === town)
+    ?? cities.find((c) => c.nearbyTowns.includes(town))
+    ?? cities[0];
 }
 
 function parseLocalEnv() {
@@ -238,13 +241,19 @@ function cityPage(city) {
   const chipsHtml = CHIP_DEFINITIONS
     .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" data-i18n="${escapeHtml(c.labelKey)}" aria-pressed="false">${escapeHtml(c.label)}</button>`)
     .join('');
+  const placeLinks = cities
+    .map((c) => {
+      const active = c.slug === city.slug ? ' aria-current="page"' : '';
+      return `<a href="../../cities/${escapeHtml(c.slug)}/"${active}>${escapeHtml(c.name)}</a>`;
+    })
+    .join('');
 
   const description = `Find kids' activities in ${city.name} that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh.`;
 
   const cityParams = { city: city.name, towns: city.nearbyTowns.join(', ') };
 
   const body = `    <main class="page stack">
-      <header class="page-header hero-shell">
+      <header class="page-header hero-shell" style="--hero-image: url('../../assets/${escapeHtml(city.heroImage ?? 'kinderradar-hero.png')}')">
         <div class="hero-copy">
           <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="${escapeHtml(JSON.stringify({ city: city.name }))}">KinderRadar ${escapeHtml(city.name)}</p>
           <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
@@ -262,6 +271,10 @@ function cityPage(city) {
           <span></span>
         </div>
       </header>
+
+      <nav class="place-tabs" aria-label="Nearby places" data-i18n-attr="aria-label:city.places.label">
+        ${placeLinks}
+      </nav>
 
       <section class="filter-panel" aria-labelledby="filter-heading">
         <div class="filter-panel-heading">

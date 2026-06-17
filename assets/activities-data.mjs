@@ -43,10 +43,35 @@ export const cities = [
   {
     "slug": "haltern-am-see",
     "name": "Haltern am See",
+    "heroImage": "kinderradar-hero.png",
     "nearbyTowns": [
       "Haltern am See",
       "Sythen",
       "Hullern",
+      "Lavesum"
+    ]
+  },
+  {
+    "slug": "sythen",
+    "name": "Sythen",
+    "heroImage": "kinderradar-hero-sythen.png",
+    "nearbyTowns": [
+      "Sythen"
+    ]
+  },
+  {
+    "slug": "hullern",
+    "name": "Hullern",
+    "heroImage": "kinderradar-hero-hullern.png",
+    "nearbyTowns": [
+      "Hullern"
+    ]
+  },
+  {
+    "slug": "lavesum",
+    "name": "Lavesum",
+    "heroImage": "kinderradar-hero-lavesum.png",
+    "nearbyTowns": [
       "Lavesum"
     ]
   }

@@ -151,7 +151,7 @@ a {
   cursor: pointer;
   font: inherit;
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
@@ -216,7 +216,7 @@ a {
   letter-spacing: 0;
   font-size: 0.78rem;
   color: color-mix(in srgb, #fff 76%, var(--sun));
-  font-weight: 900;
+  font-weight: 760;
 }
 
 .page-header h1,
@@ -264,7 +264,7 @@ a {
 .hero-stats dt {
   margin: 0;
   font-size: 1.65rem;
-  font-weight: 900;
+  font-weight: 760;
 }
 
 .hero-stats dd {
@@ -313,7 +313,7 @@ a {
   background: var(--accent);
   color: var(--accent-ink);
   text-decoration: none;
-  font-weight: 850;
+  font-weight: 720;
   box-shadow: 0 12px 24px color-mix(in srgb, var(--accent) 25%, transparent);
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -342,11 +342,51 @@ a {
   margin-top: 0;
 }
 
+.place-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  padding: 0.55rem;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(14px);
+}
+
+.place-tabs a {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 620;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.place-tabs a:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+  background: var(--surface-strong);
+}
+
+.place-tabs a[aria-current='page'] {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 74%, var(--border));
+}
+
 .back-link,
 .text-link {
   color: var(--accent-strong);
   text-decoration: none;
-  font-weight: 750;
+  font-weight: 680;
 }
 
 .back-link:hover,
@@ -357,9 +397,7 @@ a {
 }
 
 .filter-panel {
-  position: sticky;
-  top: 4.2rem;
-  z-index: 8;
+  position: relative;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -392,7 +430,7 @@ a {
   min-height: 2rem;
   color: var(--muted);
   font-size: 0.84rem;
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .filter-loader .radar-loader {
@@ -418,7 +456,7 @@ a {
   gap: 0.32rem;
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .filters select,
@@ -464,7 +502,7 @@ a {
   padding: 0.36rem 0.8rem;
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 800;
+  font-weight: 680;
   cursor: pointer;
   transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
@@ -575,7 +613,7 @@ a {
   background: color-mix(in srgb, var(--sky) 14%, var(--surface-strong));
   color: color-mix(in srgb, var(--sky) 64%, var(--text));
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .freshness {
@@ -585,7 +623,7 @@ a {
   padding: 0.23rem 0.55rem;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 900;
+  font-weight: 700;
   border: 1px solid var(--border);
   background: var(--surface-strong);
   color: var(--muted);
@@ -623,7 +661,7 @@ a {
 
 .listing strong {
   color: var(--text);
-  font-weight: 850;
+  font-weight: 680;
 }
 
 .listing-actions {
@@ -643,7 +681,7 @@ a {
   border: 1px solid color-mix(in srgb, var(--sun) 34%, var(--border));
   border-radius: var(--radius);
   font-size: 0.9rem;
-  font-weight: 720;
+  font-weight: 620;
 }
 
 .empty-state {
@@ -751,7 +789,7 @@ a {
 }
 
 .trust-panel .trust-grid dt {
-  font-weight: 850;
+  font-weight: 680;
   color: var(--muted);
 }
 

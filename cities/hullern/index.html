@@ -1,0 +1,245 @@
+<!doctype html>
+<html data-city-slug="hullern" data-city-towns="Hullern" lang="en" data-repo-slug="DanTromp/KinderRadar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="city.title" data-i18n-params="{&quot;city&quot;:&quot;Hullern&quot;}">KinderRadar Hullern | Kids&#39; activities kept fresh</title>
+    <meta name="description" content="Find kids&#39; activities in Hullern that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh." data-i18n-attr="content:city.description" data-i18n-params="{&quot;city&quot;:&quot;Hullern&quot;}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="KinderRadar Hullern" />
+    <meta property="og:description" content="Find kids&#39; activities in Hullern that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh." />
+    <meta property="og:url" content="https://dantromp.github.io/KinderRadar/cities/hullern/" />
+    <meta property="og:site_name" content="KinderRadar Haltern am See" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="KinderRadar Hullern" />
+    <meta name="twitter:description" content="Find kids&#39; activities in Hullern that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh." />
+    <link rel="canonical" href="https://dantromp.github.io/KinderRadar/cities/hullern/" />
+    <link rel="stylesheet" href="../../assets/styles.css" />
+    <script>window.KINDERRADAR_SUPABASE={"url":"https://jxcekrfgwvpnmratafxr.supabase.co","publishableKey":"sb_publishable_wPNgjEZ-ot67AtFh-sWiyw_X6o5Enqh"};</script>
+  </head>
+  <body>
+    <nav class="app-controls" aria-label="Display controls">
+      <div class="theme-toggle" data-theme-toggle aria-label="Theme" data-i18n-attr="aria-label:theme.toggle.label">
+        <button type="button" data-theme-value="light" aria-pressed="true" data-i18n="theme.light">Light</button>
+        <button type="button" data-theme-value="night" aria-pressed="false" data-i18n="theme.night">Night</button>
+        <button type="button" data-theme-value="forest" aria-pressed="false" data-i18n="theme.forest">Forest</button>
+      </div>
+      <div class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
+        <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+      </div>
+    </nav>
+    <main class="page stack">
+      <header class="page-header hero-shell" style="--hero-image: url('../../assets/kinderradar-hero-hullern.png')">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="{&quot;city&quot;:&quot;Hullern&quot;}">KinderRadar Hullern</p>
+          <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
+          <p data-i18n="city.intro" data-i18n-params="{&quot;city&quot;:&quot;Hullern&quot;,&quot;towns&quot;:&quot;Hullern&quot;}">Find kids&#39; activities in Hullern that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh. Curated for parents around Hullern (Hullern).</p>
+          <div class="button-row">
+            <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+          </div>
+        </div>
+        <dl class="hero-stats" aria-label="Activity overview">
+          <div><dt>2</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>2</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>1</dt><dd data-i18n="city.stats.weekend">weekend ideas</dd></div>
+        </dl>
+        <div class="radar-loader hero-loader" aria-hidden="true">
+          <span></span>
+        </div>
+      </header>
+
+      <nav class="place-tabs" aria-label="Nearby places" data-i18n-attr="aria-label:city.places.label">
+        <a href="../../cities/haltern-am-see/">Haltern am See</a><a href="../../cities/sythen/">Sythen</a><a href="../../cities/hullern/" aria-current="page">Hullern</a><a href="../../cities/lavesum/">Lavesum</a>
+      </nav>
+
+      <section class="filter-panel" aria-labelledby="filter-heading">
+        <div class="filter-panel-heading">
+          <h2 id="filter-heading" data-i18n="city.filters.heading">Filter activities</h2>
+          <div id="filter-loader" class="filter-loader" hidden aria-live="polite">
+            <span class="radar-loader" aria-hidden="true"><span></span></span>
+            <span data-i18n="city.filters.loading">Tuning radar...</span>
+          </div>
+        </div>
+        <form id="activity-filters" class="filters" novalidate>
+          <label>
+            <span data-i18n="city.filters.search.label">Search</span>
+            <input id="activity-search" name="q" type="search" placeholder="Search activities, towns, categories…" autocomplete="off" data-i18n-attr="placeholder:city.filters.search.placeholder" />
+          </label>
+          <label>
+            <span data-i18n="city.filters.town.label">Town</span>
+            <select name="town">
+              <option value="" data-i18n="city.filters.town.all">All nearby towns</option>
+              <option value="Hullern">Hullern</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="city.filters.age.label">Child age</span>
+            <select name="age">
+              <option value="" data-i18n="city.filters.age.all">All ages</option>
+              <option value="0-3">0-3</option>
+              <option value="3-6">3-6</option>
+              <option value="6-10">6-10</option>
+              <option value="10-14">10-14</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="city.filters.category.label">Category</span>
+            <select name="category">
+              <option value="" data-i18n="city.filters.category.all">All categories</option>
+              <option value="Family outing" data-i18n="enum.category.Family outing">Family outing</option><option value="Sports" data-i18n="enum.category.Sports">Sports</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="city.filters.day.label">Day</span>
+            <select name="day">
+              <option value="" data-i18n="city.filters.day.any">Any day</option>
+              <option value="weekend" data-i18n="city.filters.day.weekend">Weekend</option>
+              <option value="weekday" data-i18n="city.filters.day.weekday">Weekdays</option>
+              <option value="monday" data-i18n="enum.dayOfWeek.Monday">Monday</option>
+              <option value="tuesday" data-i18n="enum.dayOfWeek.Tuesday">Tuesday</option>
+              <option value="wednesday" data-i18n="enum.dayOfWeek.Wednesday">Wednesday</option>
+              <option value="thursday" data-i18n="enum.dayOfWeek.Thursday">Thursday</option>
+              <option value="friday" data-i18n="enum.dayOfWeek.Friday">Friday</option>
+              <option value="saturday" data-i18n="enum.dayOfWeek.Saturday">Saturday</option>
+              <option value="sunday" data-i18n="enum.dayOfWeek.Sunday">Sunday</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="city.filters.beginner.label">Beginner-friendly</span>
+            <select name="beginnerFriendly">
+              <option value="" data-i18n="city.filters.beginner.any">Any</option>
+              <option value="true" data-i18n="city.filters.beginner.yes">Yes</option>
+              <option value="false" data-i18n="city.filters.beginner.no">No</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="city.filters.sort.label">Sort by</span>
+            <select name="sort" id="activity-sort">
+              <option value="freshness" data-i18n="city.filters.sort.freshness">Last checked (freshest first)</option>
+              <option value="name" data-i18n="city.filters.sort.name">Name (A–Z)</option>
+            </select>
+          </label>
+        </form>
+        <div id="filter-chips" class="chip-bar" aria-label="Quick filters" data-i18n-attr="aria-label:city.chips.aria"><button type="button" class="chip" data-chip-id="this-weekend" data-i18n="chip.this-weekend" aria-pressed="false">This weekend</button><button type="button" class="chip" data-chip-id="after-kindergarten" data-i18n="chip.after-kindergarten" aria-pressed="false">After kindergarten</button><button type="button" class="chip" data-chip-id="free" data-i18n="chip.free" aria-pressed="false">Free</button><button type="button" class="chip" data-chip-id="beginner-friendly" data-i18n="chip.beginner-friendly" aria-pressed="false">Beginner-friendly</button><button type="button" class="chip" data-chip-id="rainy-day" data-i18n="chip.rainy-day" aria-pressed="false">For rainy days</button><button type="button" class="chip" data-chip-id="no-membership" data-i18n="chip.no-membership" aria-pressed="false">No membership required</button><button type="button" class="chip" data-chip-id="trial-available" data-i18n="chip.trial-available" aria-pressed="false">Trial available</button></div>
+      </section>
+
+      <p id="empty-state" class="empty-state" hidden>
+        <span data-i18n="city.empty.text">No activities match the selected filters yet. Try widening your criteria —</span>
+        <span data-i18n="city.empty.or">or</span> <a id="missing-listing-link" class="text-link" href="#submit-activity" data-analytics="missing_listing_click" data-i18n="city.empty.link">tell us what's missing</a>.
+      </p>
+
+      <div id="listings-root">
+<section class="activity-section" data-section-id="weekly-activities" aria-labelledby="weekly-activities-heading">
+      <div class="section-heading">
+        <h2 id="weekly-activities-heading" data-i18n="section.weekly-activities.label">Weekly activities</h2>
+        <p class="section-intro" data-i18n="section.weekly-activities.intro">Recurring local options for families who want a regular activity during the week.</p>
+      </div>
+      <div class="listing-grid">
+<article class="listing" data-slug="tus-hullern-kinderturnen" data-section="weekly-activities" data-age-min="4" data-age-max="8" data-town="Hullern" data-category="Sports" data-beginner-friendly="true" data-day-of-week="Thursday" data-start-time="16:30" data-end-time="17:30" data-recurring="weekly" data-price-free="false" data-price-unit="membership" data-trial-available="true" data-booking-required="false" data-setting="indoor" data-parent-participation="none" data-language="de" data-status="active" data-last-verified="2026-06-16">
+      <div class="listing-header">
+        <span class="listing-tag" data-i18n="section.weekly-activities.tag">Weekly</span>
+        <span class="freshness freshness-fresh" title="2026-06-16" data-i18n="freshness.fresh.one" data-i18n-params="{&quot;days&quot;:1}">Verified 1 day ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="../../activities/tus-hullern-kinderturnen/">TuS Hullern Kinderturnen</a></h3>
+      <p><strong data-i18n="field.category">Category:</strong> <span data-i18n="enum.category.Sports">Sports</span></p>
+      <p><strong data-i18n="field.ageRange">Age range:</strong> 4-8</p>
+      <p><strong data-i18n="field.town">Town:</strong> <span>Hullern</span></p>
+      <p><strong data-i18n="field.when">When:</strong> <span>Thursday, 16:30-17:30 (term time)</span></p>
+      <p><strong data-i18n="field.cost">Cost:</strong> <span>Vereinsbeitrag from ~€7/month</span></p>
+      <p><strong data-i18n="field.beginnerFriendly">Beginner-friendly:</strong> <span data-i18n="enum.bool.yes">Yes</span></p>
+      <p><strong data-i18n="field.trialAvailability">Trial availability:</strong> <span>Schnupperstunde free</span></p>
+      <p><strong data-i18n="field.setting">Setting:</strong> <span data-i18n="enum.setting.indoor">indoor</span></p>
+      <p><strong data-i18n="field.language">Language:</strong> <span data-i18n="enum.language.de">de</span></p>
+      <p><strong data-i18n="field.contactOrWebsite">Contact or website:</strong> <a class="text-link" href="https://www.tus-hullern.de/" rel="noopener noreferrer" data-i18n="listing.contact.organizer">Organizer website</a></p>
+      <p><strong data-i18n="field.lastVerified">Last verified:</strong> 2026-06-16</p>
+      <p class="verifier muted" data-i18n="enum.verifier.editor">Editor curated</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+TuS+Hullern+Kinderturnen&amp;slug=tus-hullern-kinderturnen&amp;activity=TuS+Hullern+Kinderturnen&amp;town=Hullern" rel="noopener noreferrer" data-analytics="suggest_update_click" data-i18n="listing.suggestUpdate">Suggest an update</a></p>
+    </article>
+      </div>
+    </section>
+<section class="activity-section" data-section-id="weekend-family-ideas" aria-labelledby="weekend-family-ideas-heading">
+      <div class="section-heading">
+        <h2 id="weekend-family-ideas-heading" data-i18n="section.weekend-family-ideas.label">Weekend family ideas</h2>
+        <p class="section-intro" data-i18n="section.weekend-family-ideas.intro">Easy weekend options for families looking for a one-off outing nearby.</p>
+      </div>
+      <div class="listing-grid">
+<article class="listing" data-slug="hullerner-see-picknick" data-section="weekend-family-ideas" data-age-min="0" data-age-max="12" data-town="Hullern" data-category="Family outing" data-beginner-friendly="true" data-day-of-week="Saturday-Sunday" data-start-time="" data-end-time="" data-recurring="weekly" data-price-free="true" data-price-unit="free" data-trial-available="false" data-booking-required="false" data-setting="outdoor" data-parent-participation="required" data-language="de" data-status="active" data-last-verified="2026-06-16">
+      <div class="listing-header">
+        <span class="listing-tag" data-i18n="section.weekend-family-ideas.tag">Weekend</span>
+        <span class="freshness freshness-fresh" title="2026-06-16" data-i18n="freshness.fresh.one" data-i18n-params="{&quot;days&quot;:1}">Verified 1 day ago</span>
+      </div>
+      
+      <h3><a class="text-link" href="../../activities/hullerner-see-picknick/">Hullerner See Familienpicknick</a></h3>
+      <p><strong data-i18n="field.category">Category:</strong> <span data-i18n="enum.category.Family outing">Family outing</span></p>
+      <p><strong data-i18n="field.ageRange">Age range:</strong> 0-12</p>
+      <p><strong data-i18n="field.town">Town:</strong> <span>Hullern</span></p>
+      <p><strong data-i18n="field.when">When:</strong> <span>Open daily</span></p>
+      <p><strong data-i18n="field.cost">Cost:</strong> <span>Free</span></p>
+      <p><strong data-i18n="field.beginnerFriendly">Beginner-friendly:</strong> <span data-i18n="enum.bool.yes">Yes</span></p>
+      <p><strong data-i18n="field.trialAvailability">Trial availability:</strong> <span data-i18n="enum.notSpecified">Not specified</span></p>
+      <p><strong data-i18n="field.setting">Setting:</strong> <span data-i18n="enum.setting.outdoor">outdoor</span></p>
+      <p><strong data-i18n="field.language">Language:</strong> <span data-i18n="enum.language.de">de</span></p>
+      <p><strong data-i18n="field.contactOrWebsite">Contact or website:</strong> <a class="text-link" href="https://www.haltern-am-see.de/Tourismus/Sehensw%C3%BCrdigkeiten/Hullerner-See/" rel="noopener noreferrer" data-i18n="listing.contact.organizer">Organizer website</a></p>
+      <p><strong data-i18n="field.lastVerified">Last verified:</strong> 2026-06-16</p>
+      <p class="verifier muted" data-i18n="enum.verifier.editor">Editor curated</p>
+      <p class="listing-actions"><a class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Hullerner+See+Familienpicknick&amp;slug=hullerner-see-picknick&amp;activity=Hullerner+See+Familienpicknick&amp;town=Hullern" rel="noopener noreferrer" data-analytics="suggest_update_click" data-i18n="listing.suggestUpdate">Suggest an update</a></p>
+    </article>
+      </div>
+    </section>
+      </div>
+
+      <section class="trust-explainer" aria-labelledby="trust-explainer-heading">
+        <h2 id="trust-explainer-heading" data-i18n="city.trust.heading">How we keep this fresh</h2>
+        <ul>
+          <li><strong data-i18n="city.trust.curated.title">Editor curated.</strong> <span data-i18n="city.trust.curated.text">Every listing starts from a public organizer page; the source link is on each detail page.</span></li>
+          <li><strong data-i18n="city.trust.freshness.title">Freshness chip.</strong> <span data-i18n="city.trust.freshness.text">Green ≤30 days, neutral ≤90 days, amber over 90 days ("Needs update").</span></li>
+          <li><strong data-i18n="city.trust.reports.title">Parent reports &amp; organizer claims.</strong> <span data-i18n="city.trust.reports.text">Anyone can suggest an update, confirm a listing is still running, or report it closed — straight from the detail page.</span></li>
+          <li><strong data-i18n="city.trust.closed.title">Closed listings disappear.</strong> <span data-i18n="city.trust.closed.text">Once a closure is confirmed, the listing is removed from this page on the next data update.</span></li>
+        </ul>
+      </section>
+
+      <section id="submit-activity" class="panel contribution-panel" aria-labelledby="submit-activity-heading">
+        <h2 id="submit-activity-heading">Submit a missing activity</h2>
+        <form class="contribution-form" data-kinderradar-update data-update-type="submission" data-city="Hullern" novalidate>
+          <label>
+            Activity name
+            <input name="activityName" autocomplete="off" required />
+          </label>
+          <label>
+            Town
+            <select name="town" required>
+              <option value="">Choose a town</option>
+              <option value="Hullern">Hullern</option>
+            </select>
+          </label>
+          <label>
+            Source or organizer URL
+            <input name="sourceUrl" type="url" inputmode="url" placeholder="https://..." required />
+          </label>
+          <label>
+            Notes
+            <textarea name="notes" rows="4" placeholder="Age range, timing, price, organizer details"></textarea>
+          </label>
+          <label>
+            Email (optional)
+            <input name="reporterEmail" type="email" autocomplete="email" />
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit">Send for review</button>
+          <p class="form-status" data-form-status aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="../../assets/filters.js"></script>
+    <script type="module" src="../../assets/analytics.js"></script>
+    <script type="module" src="../../assets/update-form.js"></script>
+    <script type="module" src="../../assets/i18n.js"></script>
+    <script type="module" src="../../assets/theme.js"></script>
+  </body>
+</html>
