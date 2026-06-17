@@ -11,7 +11,7 @@
 // Event schema (also documented in README.md — keep in sync):
 //   search              { q: string, results: number }
 //   filter_change       { name: string, value: string, results: number }
-//   zero_results        { q: string, town, age, category, beginnerFriendly,
+//   zero_results        { q: string, town, age, category, day, beginnerFriendly,
 //                         chips: string }
 //   listing_click       { slug: string }
 //   suggest_update_click, report_closed_click, confirm_still_running_click,
@@ -108,6 +108,7 @@ export const analytics = {
       town: state?.town ?? '',
       age: state?.age ?? '',
       category: state?.category ?? '',
+      day: state?.day ?? '',
       beginnerFriendly: state?.beginnerFriendly ?? '',
       chips: Array.isArray(state?.chips) ? state.chips.join('|') : '',
     });

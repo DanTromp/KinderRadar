@@ -223,7 +223,7 @@ function cityPage(city) {
 
   const categories = Array.from(new Set(cityActivities.map((a) => a.category))).sort();
   const categoryOptions = categories
-    .map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    .map((c) => `<option value="${escapeHtml(c)}" data-i18n="enum.category.${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 
   const chipsHtml = CHIP_DEFINITIONS
     .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" data-i18n="${escapeHtml(c.labelKey)}" aria-pressed="false">${escapeHtml(c.label)}</button>`)
@@ -272,6 +272,21 @@ function cityPage(city) {
             <select name="category">
               <option value="" data-i18n="city.filters.category.all">All categories</option>
               ${categoryOptions}
+            </select>
+          </label>
+          <label>
+            <span data-i18n="city.filters.day.label">Day</span>
+            <select name="day">
+              <option value="" data-i18n="city.filters.day.any">Any day</option>
+              <option value="weekend" data-i18n="city.filters.day.weekend">Weekend</option>
+              <option value="weekday" data-i18n="city.filters.day.weekday">Weekdays</option>
+              <option value="monday" data-i18n="enum.dayOfWeek.Monday">Monday</option>
+              <option value="tuesday" data-i18n="enum.dayOfWeek.Tuesday">Tuesday</option>
+              <option value="wednesday" data-i18n="enum.dayOfWeek.Wednesday">Wednesday</option>
+              <option value="thursday" data-i18n="enum.dayOfWeek.Thursday">Thursday</option>
+              <option value="friday" data-i18n="enum.dayOfWeek.Friday">Friday</option>
+              <option value="saturday" data-i18n="enum.dayOfWeek.Saturday">Saturday</option>
+              <option value="sunday" data-i18n="enum.dayOfWeek.Sunday">Sunday</option>
             </select>
           </label>
           <label>

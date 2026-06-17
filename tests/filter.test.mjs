@@ -8,6 +8,8 @@ import {
   sortByFreshness,
   CHIP_DEFINITIONS,
   chipById,
+  parseDayList,
+  matchesDayFilter,
 } from '../assets/filtering.mjs';
 import { activities } from '../assets/activities-data.mjs';
 
@@ -54,6 +56,20 @@ test('supports category and beginner-friendly filtering', () => {
   }), false);
 });
 
+test('supports day and category filtering together', () => {
+  assert.equal(matchesFilters({ ...sampleListing, dayOfWeek: 'Saturday' }, {
+    age: '', town: '', category: 'Sports', day: 'weekend', beginnerFriendly: '',
+  }), true);
+
+  assert.equal(matchesFilters({ ...sampleListing, dayOfWeek: 'Saturday' }, {
+    age: '', town: '', category: 'Music', day: 'weekend', beginnerFriendly: '',
+  }), false);
+
+  assert.equal(matchesFilters({ ...sampleListing, dayOfWeek: 'Tuesday' }, {
+    age: '', town: '', category: 'Sports', day: 'weekend', beginnerFriendly: '',
+  }), false);
+});
+
 test('validates seed data has required fields and permits optional fields', () => {
   assert.ok(activities.length >= 8);
 
@@ -88,8 +104,26 @@ test('every chip definition has id, label, and predicate', () => {
 test('"this weekend" chip matches Saturday/Sunday only', () => {
   const sat = { dayOfWeek: 'Saturday' };
   const tue = { dayOfWeek: 'Tuesday' };
+  const weekdayRange = { dayOfWeek: 'Monday-Friday' };
+  const weekendRange = { dayOfWeek: 'Saturday-Sunday' };
   assert.equal(matchesChips(sat, ['this-weekend']), true);
   assert.equal(matchesChips(tue, ['this-weekend']), false);
+  assert.equal(matchesChips(weekdayRange, ['this-weekend']), false);
+  assert.equal(matchesChips(weekendRange, ['this-weekend']), true);
+});
+
+test('day parser expands day ranges in data-friendly formats', () => {
+  assert.deepEqual(parseDayList('Monday-Friday'), ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
+  assert.deepEqual(parseDayList('Monday-Wednesday'), ['monday', 'tuesday', 'wednesday']);
+  assert.deepEqual(parseDayList('Saturday & Sunday, season'), ['saturday', 'sunday']);
+});
+
+test('day filter supports weekday, weekend, and individual days', () => {
+  assert.equal(matchesDayFilter({ dayOfWeek: 'Monday-Friday' }, 'weekday'), true);
+  assert.equal(matchesDayFilter({ dayOfWeek: 'Monday-Friday' }, 'weekend'), false);
+  assert.equal(matchesDayFilter({ dayOfWeek: 'Saturday-Sunday' }, 'weekend'), true);
+  assert.equal(matchesDayFilter({ dayOfWeek: 'Monday-Wednesday' }, 'wednesday'), true);
+  assert.equal(matchesDayFilter({ dayOfWeek: 'Monday-Wednesday' }, 'thursday'), false);
 });
 
 test('"after kindergarten" chip requires a weekday and start time >= 14:00', () => {

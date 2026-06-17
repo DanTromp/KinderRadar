@@ -108,7 +108,7 @@ Leave it unset for a no-op analytics build.
 | ------------------------------ | ----------------------------------------------------- |
 | `search`                       | `q`, `results`                                        |
 | `filter_change`                | `name`, `value`, `results` (also fires for chip toggles as `name: "chip:<id>"`) |
-| `zero_results`                 | `q`, `town`, `age`, `category`, `beginnerFriendly`, `chips` |
+| `zero_results`                 | `q`, `town`, `age`, `category`, `day`, `beginnerFriendly`, `chips` |
 | `listing_click`                | `slug`                                                |
 | `suggest_update_click`         | —                                                     |
 | `report_closed_click`          | —                                                     |
@@ -144,3 +144,27 @@ use:
 - Build command: `npm run build`
 - Output directory: `.` (the generator writes pages in place)
 - Environment variable: `KINDERRADAR_BASE_URL`
+
+This project does not require Wrangler for normal Cloudflare Pages Git
+deployment: it is a static site with no `wrangler.toml` and the build writes
+the deployable pages into the repository root. Native Cloudflare Pages Git
+deployment is therefore enough when Cloudflare builds from the connected repo.
+
+Use Wrangler only for Direct Upload or external CI deployment. In that case,
+the deploy step must authenticate to Cloudflare and upload a prepared static
+asset directory:
+
+```bash
+wrangler pages deploy dist --project-name kinderradar
+```
+
+Set these deployment secrets/environment variables in the CI or Cloudflare
+dashboard, not in the repo:
+- `CLOUDFLARE_ACCOUNT_ID`: the target Cloudflare account ID
+- `CLOUDFLARE_API_TOKEN`: an API token scoped to the target account with
+  `Account -> Cloudflare Pages -> Edit`
+
+The command above expects `dist` to exist before it runs. The default
+`npm run build` command writes pages in place, so a Wrangler Direct Upload
+workflow that keeps `dist` must stage the static site files there before
+deploying.

@@ -30,6 +30,10 @@ export function matchesFilters(listing, selected) {
     return false;
   }
 
+  if (selected.day && !matchesDayFilter(listing, selected.day)) {
+    return false;
+  }
+
   if (selected.beginnerFriendly && listing.beginnerFriendly !== (selected.beginnerFriendly === 'true')) {
     return false;
   }
@@ -52,16 +56,77 @@ export function optionalText(value) {
 // composed with AND so multiple chips narrow results.
 // ---------------------------------------------------------------------------
 
-const WEEKEND_DAYS = new Set(['saturday', 'sunday', 'sat', 'sun']);
+const DAY_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const DAY_ALIASES = new Map([
+  ['monday', 'monday'],
+  ['mon', 'monday'],
+  ['tuesday', 'tuesday'],
+  ['tue', 'tuesday'],
+  ['tues', 'tuesday'],
+  ['wednesday', 'wednesday'],
+  ['wed', 'wednesday'],
+  ['thursday', 'thursday'],
+  ['thu', 'thursday'],
+  ['thur', 'thursday'],
+  ['thurs', 'thursday'],
+  ['friday', 'friday'],
+  ['fri', 'friday'],
+  ['saturday', 'saturday'],
+  ['sat', 'saturday'],
+  ['sunday', 'sunday'],
+  ['sun', 'sunday'],
+]);
+const WEEKEND_DAYS = new Set(['saturday', 'sunday']);
 const WEEKDAYS = new Set(['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
 
-function parseDayList(dayOfWeek) {
+function expandDayRange(start, end) {
+  const startIndex = DAY_ORDER.indexOf(start);
+  const endIndex = DAY_ORDER.indexOf(end);
+  if (startIndex === -1 || endIndex === -1) return [start, end];
+
+  if (startIndex <= endIndex) {
+    return DAY_ORDER.slice(startIndex, endIndex + 1);
+  }
+
+  return [...DAY_ORDER.slice(startIndex), ...DAY_ORDER.slice(0, endIndex + 1)];
+}
+
+export function parseDayList(dayOfWeek) {
   if (!dayOfWeek) return [];
-  return String(dayOfWeek)
-    .toLowerCase()
-    .split(/[\s,/&-]+/)
-    .map((d) => d.trim())
-    .filter(Boolean);
+  const text = String(dayOfWeek).toLowerCase();
+  const days = new Set();
+  const rangePattern = /\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b\s*(?:-|to|through|until)\s*\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/g;
+  let rangeMatch;
+
+  while ((rangeMatch = rangePattern.exec(text)) !== null) {
+    const start = DAY_ALIASES.get(rangeMatch[1]);
+    const end = DAY_ALIASES.get(rangeMatch[2]);
+    for (const day of expandDayRange(start, end)) {
+      days.add(day);
+    }
+  }
+
+  for (const match of text.matchAll(/\b(mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?)\b/g)) {
+    days.add(DAY_ALIASES.get(match[1]));
+  }
+
+  return DAY_ORDER.filter((day) => days.has(day));
+}
+
+export function matchesDayFilter(listing, selectedDay) {
+  if (!selectedDay) return true;
+  const days = parseDayList(listing.dayOfWeek);
+  if (!days.length) return false;
+
+  if (selectedDay === 'weekend') {
+    return days.some((day) => WEEKEND_DAYS.has(day));
+  }
+
+  if (selectedDay === 'weekday') {
+    return days.some((day) => WEEKDAYS.has(day));
+  }
+
+  return days.includes(selectedDay);
 }
 
 function startMinutes(listing) {
@@ -77,7 +142,7 @@ export const CHIP_DEFINITIONS = [
     id: 'this-weekend',
     label: 'This weekend',
     labelKey: 'chip.this-weekend',
-    predicate: (l) => parseDayList(l.dayOfWeek).some((d) => WEEKEND_DAYS.has(d)),
+    predicate: (l) => matchesDayFilter(l, 'weekend'),
   },
   {
     id: 'after-kindergarten',

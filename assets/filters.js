@@ -33,6 +33,7 @@ function readSelectedFilters(form) {
     age: String(formData.get('age') ?? ''),
     town: String(formData.get('town') ?? ''),
     category: String(formData.get('category') ?? ''),
+    day: String(formData.get('day') ?? ''),
     beginnerFriendly: String(formData.get('beginnerFriendly') ?? ''),
     sort: String(formData.get('sort') ?? 'freshness'),
   };
@@ -58,7 +59,7 @@ function syncUrlState({ selected, chips, query }) {
 
 function applyUrlStateToControls(form, chipContainer, searchInput) {
   const params = new URLSearchParams(window.location.search);
-  for (const name of ['age', 'town', 'category', 'beginnerFriendly', 'sort']) {
+  for (const name of ['age', 'town', 'category', 'day', 'beginnerFriendly', 'sort']) {
     const v = params.get(name);
     if (v && form.elements[name]) form.elements[name].value = v;
   }
@@ -171,7 +172,7 @@ function init() {
   };
 
   // --- Analytics wiring -----------------------------------------------------
-  const lastValues = { age: '', town: '', category: '', beginnerFriendly: '', sort: '' };
+  const lastValues = { age: '', town: '', category: '', day: '', beginnerFriendly: '', sort: '' };
   let zeroFiredFor = null;
   let lastTrackedQuery = '';
   let searchTimer = null;
@@ -219,7 +220,7 @@ function init() {
     }
 
     // Emit filter_change events for any filter whose value changed.
-    for (const key of ['age', 'town', 'category', 'beginnerFriendly', 'sort']) {
+    for (const key of ['age', 'town', 'category', 'day', 'beginnerFriendly', 'sort']) {
       if (selected[key] !== lastValues[key]) {
         if (source !== 'init') analytics.filterChange(key, selected[key], visibleCount);
         lastValues[key] = selected[key];
