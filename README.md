@@ -41,7 +41,10 @@ tests/
 ```bash
 npm start       # serve the static app locally at http://localhost:4173/
 npm run build   # validate data, then regenerate cities/ activities/ sitemap/ robots
+npm run build:supabase # export Supabase data, then run the static build
 npm test        # run unit tests
+npm run supabase:status # show table counts from Supabase
+npm run supabase:updates # list new parent/organizer reports
 ```
 
 `npm run build` exits non-zero if any activity is missing required fields,
@@ -119,10 +122,10 @@ Renaming an event = breaking history. Add a new event instead.
 
 ## Public contributions
 
-Each listing detail page and the city page link to the GitHub Issue
-templates above. Parents (or organizers themselves) can submit, update,
-confirm, or report closures with one click — every report goes to a public
-issue tracker so the trust loop is visible.
+Each listing detail page and the city page include Supabase-backed forms.
+Parents and organizers can submit, update, confirm, claim, or report closures
+without an account. Every report lands in `activity_updates` with
+`status: "new"` for review.
 
 ## Deploy
 

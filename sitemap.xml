@@ -2,44 +2,44 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://dantromp.github.io/KinderRadar/</loc><changefreq>weekly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/cities/haltern-am-see/</loc><changefreq>weekly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-kinderturnen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-leichtathletik-kids/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/sv-lippramsdorf-fussball-bambini/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tc-sythen-tennis-kids/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/dlrg-haltern-anfaengerschwimmen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/dlrg-haltern-seepferdchen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/musikschule-haltern-musikgarten/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/musikschule-haltern-blockfloete/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/rv-haltern-reiten-kids/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/pfadfinder-haltern-woelflinge/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/kinderchor-st-sixtus/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/stadtbuecherei-bilderbuchkino/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/vhs-kreatives-malen-kinder/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-sythen-eltern-kind-turnen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-hullern-kinderturnen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/jugendzentrum-mosaik-offener-treff/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/kinderchor-st-sixtus/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/musikschule-haltern-blockfloete/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/musikschule-haltern-musikgarten/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/rc-haltern-bambini-rad/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/rv-haltern-reiten-kids/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/stadtbuecherei-bilderbuchkino/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/sv-lippramsdorf-fussball-bambini/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tc-sythen-tennis-kids/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-kinderturnen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-leichtathletik-kids/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-hullern-kinderturnen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-sythen-eltern-kind-turnen/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/vhs-kreatives-malen-kinder/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/biologische-station-kreis-re-naturtag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/halterner-stausee-strandbad/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/westruper-heide-familienspaziergang/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/naturparkhaus-haard-familientag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/hullerner-see-picknick/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/lwl-roemermuseum-familiensonntag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/minigolf-seehof-haltern/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/naturparkhaus-haard-familientag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/seepark-haltern-spielplatz/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/sythener-see-rundweg/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/hullerner-see-picknick/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/minigolf-seehof-haltern/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/biologische-station-kreis-re-naturtag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/stadt-haltern-ferienprogramm/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/vhs-ferienkurs-experimente/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/kolping-sommerferien-camp/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/westruper-heide-familienspaziergang/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/dlrg-ferien-schwimmkurs/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-ferien-sportcamp/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/stadt-haltern-ferienprogramm/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/kolping-sommerferien-camp/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/lwl-roemermuseum-ferien-workshop/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-ferien-sportcamp/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/vhs-ferienkurs-experimente/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/sythen-zeltlager-pfarrei/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/musikschule-haltern-instrumentenkarussell/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-judo-schnupperstunde/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/tc-sythen-tennis-schnuppertag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/rv-haltern-pony-schnuppern/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
-  <url><loc>https://dantromp.github.io/KinderRadar/activities/sv-lippramsdorf-fussball-schnuppertraining/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/pfadfinder-haltern-schnuppergruppenstunde/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/musikschule-haltern-instrumentenkarussell/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/rv-haltern-pony-schnuppern/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
   <url><loc>https://dantromp.github.io/KinderRadar/activities/stadtbuecherei-vorlesestunde-international/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/sv-lippramsdorf-fussball-schnuppertraining/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tc-sythen-tennis-schnuppertag/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
+  <url><loc>https://dantromp.github.io/KinderRadar/activities/tus-haltern-judo-schnupperstunde/</loc><lastmod>2026-06-16</lastmod><changefreq>monthly</changefreq></url>
 </urlset>

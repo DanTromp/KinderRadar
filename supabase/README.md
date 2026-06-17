@@ -38,6 +38,49 @@ initial verification event for every activity:
 npm run supabase:import -- --with-verification-events
 ```
 
+## Build From Supabase
+
+Once Supabase is the editing surface, export the published data back into the
+static generator:
+
+```sh
+npm run supabase:export
+npm run build
+```
+
+Or do both in one command:
+
+```sh
+npm run build:supabase
+```
+
+This rewrites `assets/activities-data.mjs` from Supabase rows, then regenerates
+the public static pages. The exported file is intentionally still committed so
+the site can be built, tested, and reviewed without requiring database access.
+
+## Review Incoming Reports
+
+Public forms insert into `activity_updates` with `status: "new"`.
+
+If your schema was created before the public forms were added, run
+`supabase/patch-activity-updates-public-insert.sql` once in Supabase SQL Editor.
+
+```sh
+npm run supabase:updates
+```
+
+To inspect another status:
+
+```sh
+npm run supabase:updates -- --status=needs_review
+```
+
+For now, review and apply updates in Supabase Studio, then run:
+
+```sh
+npm run build:supabase
+```
+
 ## Product Shape
 
 Supabase should become the back office source of truth. The public static site

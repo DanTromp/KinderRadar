@@ -15,6 +15,7 @@
     <meta name="twitter:description" content="Find kids&#39; activities in Haltern am See that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh." />
     <link rel="canonical" href="https://dantromp.github.io/KinderRadar/cities/haltern-am-see/" />
     <link rel="stylesheet" href="../../assets/styles.css" />
+    <script>window.KINDERRADAR_SUPABASE={"url":"https://jxcekrfgwvpnmratafxr.supabase.co","publishableKey":"sb_publishable_wPNgjEZ-ot67AtFh-sWiyw_X6o5Enqh"};</script>
   </head>
   <body>
     <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
@@ -27,7 +28,7 @@
         <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
         <p data-i18n="city.intro" data-i18n-params="{&quot;city&quot;:&quot;Haltern am See&quot;,&quot;towns&quot;:&quot;Haltern am See, Sythen, Hullern, Lavesum&quot;}">Find kids&#39; activities in Haltern am See that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh. Curated for parents around Haltern am See (Haltern am See, Sythen, Hullern, Lavesum).</p>
         <div class="button-row">
-          <a class="button secondary" href="https://github.com/DanTromp/KinderRadar/issues/new?template=submit-activity.yml&amp;title=%5BSubmit%5D+New+activity+in+Haltern+am+See&amp;city=Haltern+am+See" rel="noopener noreferrer" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+          <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
         </div>
       </header>
 
@@ -83,7 +84,7 @@
 
       <p id="empty-state" class="empty-state" hidden>
         <span data-i18n="city.empty.text">No activities match the selected filters yet. Try widening your criteria —</span>
-        <span data-i18n="city.empty.or">or</span> <a id="missing-listing-link" class="text-link" href="https://github.com/DanTromp/KinderRadar/issues/new?template=submit-activity.yml&amp;title=%5BSubmit%5D+New+activity+in+Haltern+am+See&amp;city=Haltern+am+See" rel="noopener noreferrer" data-analytics="missing_listing_click" data-i18n="city.empty.link">tell us what's missing</a>.
+        <span data-i18n="city.empty.or">or</span> <a id="missing-listing-link" class="text-link" href="#submit-activity" data-analytics="missing_listing_click" data-i18n="city.empty.link">tell us what's missing</a>.
       </p>
 
       <div id="listings-root">
@@ -962,10 +963,46 @@
           <li><strong data-i18n="city.trust.closed.title">Closed listings disappear.</strong> <span data-i18n="city.trust.closed.text">Once a closure is confirmed, the listing is removed from this page on the next data update.</span></li>
         </ul>
       </section>
+
+      <section id="submit-activity" class="panel contribution-panel" aria-labelledby="submit-activity-heading">
+        <h2 id="submit-activity-heading">Submit a missing activity</h2>
+        <form class="contribution-form" data-kinderradar-update data-update-type="submission" data-city="Haltern am See" novalidate>
+          <label>
+            Activity name
+            <input name="activityName" autocomplete="off" required />
+          </label>
+          <label>
+            Town
+            <select name="town" required>
+              <option value="">Choose a town</option>
+              <option value="Haltern am See">Haltern am See</option><option value="Sythen">Sythen</option><option value="Hullern">Hullern</option><option value="Lavesum">Lavesum</option>
+            </select>
+          </label>
+          <label>
+            Source or organizer URL
+            <input name="sourceUrl" type="url" inputmode="url" placeholder="https://..." required />
+          </label>
+          <label>
+            Notes
+            <textarea name="notes" rows="4" placeholder="Age range, timing, price, organizer details"></textarea>
+          </label>
+          <label>
+            Email (optional)
+            <input name="reporterEmail" type="email" autocomplete="email" />
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit">Send for review</button>
+          <p class="form-status" data-form-status aria-live="polite"></p>
+        </form>
+      </section>
     </main>
 
     <script type="module" src="../../assets/filters.js"></script>
     <script type="module" src="../../assets/analytics.js"></script>
+    <script type="module" src="../../assets/update-form.js"></script>
     <script type="module" src="../../assets/i18n.js"></script>
   </body>
 </html>

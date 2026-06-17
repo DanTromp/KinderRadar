@@ -87,7 +87,7 @@
   "activity.trust.verifiedBy": "Verifiziert von",
   "activity.trust.lastChecked": "Zuletzt geprüft",
   "activity.trust.status": "Status",
-  "activity.trust.note": "Eine Änderung bemerkt? Nutze die Buttons unten — jede Meldung geht in einen öffentlichen Issue-Tracker, sodass andere Eltern die Aktualisierung sehen.",
+  "activity.trust.note": "Eine Änderung bemerkt? Schick sie zur Prüfung, damit der Eintrag kontrolliert und aktualisiert werden kann.",
   "activity.unverified": "Nicht verifiziert",
 
   "field.category": "Kategorie:",

@@ -193,6 +193,14 @@ alter table public.verification_events enable row level security;
 alter table public.activity_updates enable row level security;
 alter table public.feed_items enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant select on public.cities to anon, authenticated;
+grant select on public.towns to anon, authenticated;
+grant select on public.activities to anon, authenticated;
+grant select on public.activity_sources to anon, authenticated;
+grant select on public.feed_items to anon, authenticated;
+grant insert on public.activity_updates to anon, authenticated;
+
 drop policy if exists "public read cities" on public.cities;
 create policy "public read cities" on public.cities
 for select using (true);
@@ -222,4 +230,6 @@ for select using (status = 'published');
 
 drop policy if exists "public submit updates" on public.activity_updates;
 create policy "public submit updates" on public.activity_updates
-for insert with check (status = 'new');
+for insert
+to anon, authenticated
+with check (status = 'new');

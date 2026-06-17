@@ -12,6 +12,7 @@ const requiredFiles = [
   'index.html',
   'assets/styles.css',
   'assets/filters.js',
+  'assets/update-form.js',
   'assets/analytics.js',
   'assets/filtering.mjs',
   'assets/render.mjs',

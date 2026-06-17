@@ -27,6 +27,8 @@ jobs:
         env:
           KINDERRADAR_BASE_URL: ${{ vars.KINDERRADAR_BASE_URL || 'https://dantromp.github.io/KinderRadar' }}
           KINDERRADAR_PLAUSIBLE_DOMAIN: ${{ vars.KINDERRADAR_PLAUSIBLE_DOMAIN }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
         run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

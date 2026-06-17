@@ -6,6 +6,7 @@
 // without JS, and the client-side filter script then takes over.
 
 import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -22,12 +23,31 @@ function cityForTown(town) {
   return cities.find((c) => c.nearbyTowns.includes(town)) ?? cities[0];
 }
 
-const REPO_SLUG = process.env.KINDERRADAR_REPO ?? 'DanTromp/KinderRadar';
+function parseLocalEnv() {
+  const envPath = new URL('../.env', import.meta.url);
+  if (!existsSync(envPath)) return {};
+  const env = {};
+  for (const rawLine of readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const index = line.indexOf('=');
+    if (index === -1) continue;
+    env[line.slice(0, index).trim()] = line.slice(index + 1).trim().replace(/^['"]|['"]$/g, '');
+  }
+  return env;
+}
+
+const localEnv = parseLocalEnv();
+const envValue = (name, fallback = '') => process.env[name] ?? localEnv[name] ?? fallback;
+
+const REPO_SLUG = envValue('KINDERRADAR_REPO', 'DanTromp/KinderRadar');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-const SITE_BASE_URL = process.env.KINDERRADAR_BASE_URL ?? 'https://dantromp.github.io/KinderRadar';
-const PLAUSIBLE_DOMAIN = process.env.KINDERRADAR_PLAUSIBLE_DOMAIN ?? '';
+const SITE_BASE_URL = envValue('KINDERRADAR_BASE_URL', 'https://dantromp.github.io/KinderRadar');
+const PLAUSIBLE_DOMAIN = envValue('KINDERRADAR_PLAUSIBLE_DOMAIN');
+const PUBLIC_SUPABASE_URL = envValue('SUPABASE_URL');
+const PUBLIC_SUPABASE_KEY = envValue('SUPABASE_PUBLISHABLE_KEY');
 
 // Known enum vocabulary used on the activity detail page. Values outside
 // these sets (e.g. compound days like "Monday-Friday") are rendered as
@@ -68,6 +88,9 @@ const layoutHtml = ({
   const analyticsConfig = PLAUSIBLE_DOMAIN
     ? `    <script>window.KINDERRADAR_PLAUSIBLE_DOMAIN=${JSON.stringify(PLAUSIBLE_DOMAIN)};</script>\n`
     : '';
+  const supabaseConfig = PUBLIC_SUPABASE_URL && PUBLIC_SUPABASE_KEY
+    ? `    <script>window.KINDERRADAR_SUPABASE=${JSON.stringify({ url: PUBLIC_SUPABASE_URL, publishableKey: PUBLIC_SUPABASE_KEY })};</script>\n`
+    : '';
   return `<!doctype html>
 <html lang="${escapeHtml(lang)}" data-repo-slug="${escapeHtml(REPO_SLUG)}">
   <head>
@@ -85,7 +108,7 @@ const layoutHtml = ({
     <meta name="twitter:description" content="${escapeHtml(oDesc)}" />
     <link rel="canonical" href="${escapeHtml(absUrl)}" />
     <link rel="stylesheet" href="${escapeHtml(assetPrefix)}assets/styles.css" />
-${analyticsConfig}  </head>
+${analyticsConfig}${supabaseConfig}  </head>
   <body>
 ${languageToggleHtml()}
 ${body}
@@ -100,6 +123,82 @@ function languageToggleHtml() {
       <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
       <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
     </nav>`;
+}
+
+function contributionStatusHtml() {
+  return '<p class="form-status" data-form-status aria-live="polite"></p>';
+}
+
+function citySubmissionForm(city, townOptions) {
+  return `      <section id="submit-activity" class="panel contribution-panel" aria-labelledby="submit-activity-heading">
+        <h2 id="submit-activity-heading">Submit a missing activity</h2>
+        <form class="contribution-form" data-kinderradar-update data-update-type="submission" data-city="${escapeHtml(city.name)}" novalidate>
+          <label>
+            Activity name
+            <input name="activityName" autocomplete="off" required />
+          </label>
+          <label>
+            Town
+            <select name="town" required>
+              <option value="">Choose a town</option>
+              ${townOptions}
+            </select>
+          </label>
+          <label>
+            Source or organizer URL
+            <input name="sourceUrl" type="url" inputmode="url" placeholder="https://..." required />
+          </label>
+          <label>
+            Notes
+            <textarea name="notes" rows="4" placeholder="Age range, timing, price, organizer details"></textarea>
+          </label>
+          <label>
+            Email (optional)
+            <input name="reporterEmail" type="email" autocomplete="email" />
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit">Send for review</button>
+          ${contributionStatusHtml()}
+        </form>
+      </section>`;
+}
+
+function activityUpdateForm(listing) {
+  return `      <section class="panel contribution-panel" aria-labelledby="activity-update-heading">
+        <h2 id="activity-update-heading">Help keep this accurate</h2>
+        <form class="contribution-form" data-kinderradar-update data-activity-slug="${escapeHtml(listing.slug)}" data-activity-name="${escapeHtml(listing.name)}" data-town="${escapeHtml(listing.town)}" novalidate>
+          <label>
+            What are you reporting?
+            <select name="updateType" required>
+              <option value="update">Suggest an update</option>
+              <option value="confirm">Confirm still running</option>
+              <option value="closed">Report as closed</option>
+              <option value="claim">I'm the organizer</option>
+            </select>
+          </label>
+          <label>
+            Evidence or source URL
+            <input name="evidenceUrl" type="url" inputmode="url" placeholder="https://..." />
+          </label>
+          <label>
+            Notes
+            <textarea name="notes" rows="4" placeholder="What changed, what did you confirm, or how can we verify it?"></textarea>
+          </label>
+          <label>
+            Email (optional)
+            <input name="reporterEmail" type="email" autocomplete="email" />
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit">Send for review</button>
+          ${contributionStatusHtml()}
+        </form>
+      </section>`;
 }
 
 function cityPage(city) {
@@ -130,13 +229,6 @@ function cityPage(city) {
     .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" data-i18n="${escapeHtml(c.labelKey)}" aria-pressed="false">${escapeHtml(c.label)}</button>`)
     .join('');
 
-  const submitParams = new URLSearchParams({
-    template: 'submit-activity.yml',
-    title: `[Submit] New activity in ${city.name}`,
-    city: city.name,
-  });
-  const submitUrl = `https://github.com/${REPO_SLUG}/issues/new?${submitParams.toString()}`;
-
   const description = `Find kids' activities in ${city.name} that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh.`;
 
   const cityParams = { city: city.name, towns: city.nearbyTowns.join(', ') };
@@ -147,7 +239,7 @@ function cityPage(city) {
         <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
         <p data-i18n="city.intro" data-i18n-params="${escapeHtml(JSON.stringify(cityParams))}">${escapeHtml(description)} Curated for parents around ${escapeHtml(city.name)} (${escapeHtml(city.nearbyTowns.join(', '))}).</p>
         <div class="button-row">
-          <a class="button secondary" href="${escapeHtml(submitUrl)}" rel="noopener noreferrer" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+          <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
         </div>
       </header>
 
@@ -203,7 +295,7 @@ function cityPage(city) {
 
       <p id="empty-state" class="empty-state" hidden>
         <span data-i18n="city.empty.text">No activities match the selected filters yet. Try widening your criteria —</span>
-        <span data-i18n="city.empty.or">or</span> <a id="missing-listing-link" class="text-link" href="${escapeHtml(submitUrl)}" rel="noopener noreferrer" data-analytics="missing_listing_click" data-i18n="city.empty.link">tell us what's missing</a>.
+        <span data-i18n="city.empty.or">or</span> <a id="missing-listing-link" class="text-link" href="#submit-activity" data-analytics="missing_listing_click" data-i18n="city.empty.link">tell us what's missing</a>.
       </p>
 
       <div id="listings-root">
@@ -219,10 +311,13 @@ ${sectionsHtml}
           <li><strong data-i18n="city.trust.closed.title">Closed listings disappear.</strong> <span data-i18n="city.trust.closed.text">Once a closure is confirmed, the listing is removed from this page on the next data update.</span></li>
         </ul>
       </section>
+
+${citySubmissionForm(city, townOptions)}
     </main>
 
     <script type="module" src="../../assets/filters.js"></script>
-    <script type="module" src="../../assets/analytics.js"></script>`;
+    <script type="module" src="../../assets/analytics.js"></script>
+    <script type="module" src="../../assets/update-form.js"></script>`;
 
   return layoutHtml({
     title: `KinderRadar ${city.name} | Kids' activities kept fresh`,
@@ -334,42 +429,6 @@ function activityDetailPage(listing) {
 
   const backCity = cityForTown(listing.town);
 
-  const updateParams = new URLSearchParams({
-    template: 'suggest-update.yml',
-    title: `[Update] ${listing.name}`,
-    slug: listing.slug,
-    activity: listing.name,
-    town: listing.town,
-  });
-  const updateUrl = `https://github.com/${REPO_SLUG}/issues/new?${updateParams.toString()}`;
-
-  const closedParams = new URLSearchParams({
-    template: 'report-closed.yml',
-    title: `[Closed?] ${listing.name}`,
-    slug: listing.slug,
-    activity: listing.name,
-    town: listing.town,
-  });
-  const closedUrl = `https://github.com/${REPO_SLUG}/issues/new?${closedParams.toString()}`;
-
-  const confirmParams = new URLSearchParams({
-    template: 'confirm-still-running.yml',
-    title: `[Confirm] ${listing.name} still running`,
-    slug: listing.slug,
-    activity: listing.name,
-    town: listing.town,
-  });
-  const confirmUrl = `https://github.com/${REPO_SLUG}/issues/new?${confirmParams.toString()}`;
-
-  const claimParams = new URLSearchParams({
-    template: 'organizer-claim.yml',
-    title: `[Claim] Organizer for ${listing.name}`,
-    slug: listing.slug,
-    activity: listing.name,
-    town: listing.town,
-  });
-  const claimUrl = `https://github.com/${REPO_SLUG}/issues/new?${claimParams.toString()}`;
-
   // Trust panel: source, verifier, last checked, status — all surfaced so a
   // parent (or an organizer) can decide whether to trust the listing.
   const verifierTrust = verifier
@@ -390,7 +449,7 @@ function activityDetailPage(listing) {
           <dt data-i18n="activity.trust.lastChecked">Last checked</dt><dd><span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}"${i18nAttr(badge.i18nKey, badge.i18nParams)}>${escapeHtml(badge.label)}</span> <span class="muted">(${escapeHtml(listing.lastVerified ?? 'unknown')})</span></dd>
           <dt data-i18n="activity.trust.status">Status</dt><dd data-i18n="${escapeHtml(statusKey)}">${escapeHtml(statusText)}</dd>
         </dl>
-        <p class="muted small" data-i18n="activity.trust.note">Spotted a change? Use the buttons below — every report goes to a public issue tracker so other parents see the update too.</p>
+        <p class="muted small" data-i18n="activity.trust.note">Spotted a change? Send it for review so the listing can be checked and refreshed.</p>
       </section>`;
 
   const ogTitle = `${listing.name} | KinderRadar Haltern am See`;
@@ -436,19 +495,11 @@ ${contactLink}
 
 ${trustPanel}
 
-      <section class="panel cta-panel">
-        <h2 data-i18n="activity.cta.heading">Help keep this accurate</h2>
-        <p data-i18n="activity.cta.text">Found a change? Confirmed details? Let parents in your area benefit.</p>
-        <div class="button-row">
-          <a class="button" href="${escapeHtml(updateUrl)}" rel="noopener noreferrer" data-analytics="suggest_update_click" data-i18n="activity.cta.suggestUpdate">Suggest an update</a>
-          <a class="button secondary" href="${escapeHtml(confirmUrl)}" rel="noopener noreferrer" data-analytics="confirm_still_running_click" data-i18n="activity.cta.confirmRunning">Confirm still running</a>
-          <a class="button secondary" href="${escapeHtml(closedUrl)}" rel="noopener noreferrer" data-analytics="report_closed_click" data-i18n="activity.cta.reportClosed">Report as closed</a>
-          <a class="button secondary" href="${escapeHtml(claimUrl)}" rel="noopener noreferrer" data-analytics="organizer_claim_click" data-i18n="activity.cta.organizerClaim">I'm the organizer</a>
-        </div>
-      </section>
+${activityUpdateForm(listing)}
     </main>
 
-    <script type="module" src="../../assets/analytics.js"></script>`;
+    <script type="module" src="../../assets/analytics.js"></script>
+    <script type="module" src="../../assets/update-form.js"></script>`;
 
   return layoutHtml({
     title: `${listing.name} | KinderRadar`,

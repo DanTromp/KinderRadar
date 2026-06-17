@@ -15,6 +15,7 @@
     <meta name="twitter:description" content="Reit- und Fahrverein Haltern Kinderreiten — Sports for ages 6-12 in Haltern am See. Saturday, 10:00-11:00." />
     <link rel="canonical" href="https://dantromp.github.io/KinderRadar/activities/rv-haltern-reiten-kids/" />
     <link rel="stylesheet" href="../../assets/styles.css" />
+    <script>window.KINDERRADAR_SUPABASE={"url":"https://jxcekrfgwvpnmratafxr.supabase.co","publishableKey":"sb_publishable_wPNgjEZ-ot67AtFh-sWiyw_X6o5Enqh"};</script>
   </head>
   <body>
     <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
@@ -61,22 +62,45 @@
           <dt data-i18n="activity.trust.lastChecked">Last checked</dt><dd><span class="freshness freshness-fresh" title="2026-06-16" data-i18n="freshness.fresh.one" data-i18n-params="{&quot;days&quot;:1}">Verified 1 day ago</span> <span class="muted">(2026-06-16)</span></dd>
           <dt data-i18n="activity.trust.status">Status</dt><dd data-i18n="enum.status.active">Active</dd>
         </dl>
-        <p class="muted small" data-i18n="activity.trust.note">Spotted a change? Use the buttons below — every report goes to a public issue tracker so other parents see the update too.</p>
+        <p class="muted small" data-i18n="activity.trust.note">Spotted a change? Send it for review so the listing can be checked and refreshed.</p>
       </section>
 
-      <section class="panel cta-panel">
-        <h2 data-i18n="activity.cta.heading">Help keep this accurate</h2>
-        <p data-i18n="activity.cta.text">Found a change? Confirmed details? Let parents in your area benefit.</p>
-        <div class="button-row">
-          <a class="button" href="https://github.com/DanTromp/KinderRadar/issues/new?template=suggest-update.yml&amp;title=%5BUpdate%5D+Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;slug=rv-haltern-reiten-kids&amp;activity=Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;town=Haltern+am+See" rel="noopener noreferrer" data-analytics="suggest_update_click" data-i18n="activity.cta.suggestUpdate">Suggest an update</a>
-          <a class="button secondary" href="https://github.com/DanTromp/KinderRadar/issues/new?template=confirm-still-running.yml&amp;title=%5BConfirm%5D+Reit-+und+Fahrverein+Haltern+Kinderreiten+still+running&amp;slug=rv-haltern-reiten-kids&amp;activity=Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;town=Haltern+am+See" rel="noopener noreferrer" data-analytics="confirm_still_running_click" data-i18n="activity.cta.confirmRunning">Confirm still running</a>
-          <a class="button secondary" href="https://github.com/DanTromp/KinderRadar/issues/new?template=report-closed.yml&amp;title=%5BClosed%3F%5D+Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;slug=rv-haltern-reiten-kids&amp;activity=Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;town=Haltern+am+See" rel="noopener noreferrer" data-analytics="report_closed_click" data-i18n="activity.cta.reportClosed">Report as closed</a>
-          <a class="button secondary" href="https://github.com/DanTromp/KinderRadar/issues/new?template=organizer-claim.yml&amp;title=%5BClaim%5D+Organizer+for+Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;slug=rv-haltern-reiten-kids&amp;activity=Reit-+und+Fahrverein+Haltern+Kinderreiten&amp;town=Haltern+am+See" rel="noopener noreferrer" data-analytics="organizer_claim_click" data-i18n="activity.cta.organizerClaim">I'm the organizer</a>
-        </div>
+      <section class="panel contribution-panel" aria-labelledby="activity-update-heading">
+        <h2 id="activity-update-heading">Help keep this accurate</h2>
+        <form class="contribution-form" data-kinderradar-update data-activity-slug="rv-haltern-reiten-kids" data-activity-name="Reit- und Fahrverein Haltern Kinderreiten" data-town="Haltern am See" novalidate>
+          <label>
+            What are you reporting?
+            <select name="updateType" required>
+              <option value="update">Suggest an update</option>
+              <option value="confirm">Confirm still running</option>
+              <option value="closed">Report as closed</option>
+              <option value="claim">I'm the organizer</option>
+            </select>
+          </label>
+          <label>
+            Evidence or source URL
+            <input name="evidenceUrl" type="url" inputmode="url" placeholder="https://..." />
+          </label>
+          <label>
+            Notes
+            <textarea name="notes" rows="4" placeholder="What changed, what did you confirm, or how can we verify it?"></textarea>
+          </label>
+          <label>
+            Email (optional)
+            <input name="reporterEmail" type="email" autocomplete="email" />
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit">Send for review</button>
+          <p class="form-status" data-form-status aria-live="polite"></p>
+        </form>
       </section>
     </main>
 
     <script type="module" src="../../assets/analytics.js"></script>
+    <script type="module" src="../../assets/update-form.js"></script>
     <script type="module" src="../../assets/i18n.js"></script>
   </body>
 </html>

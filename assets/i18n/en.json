@@ -87,7 +87,7 @@
   "activity.trust.verifiedBy": "Verified by",
   "activity.trust.lastChecked": "Last checked",
   "activity.trust.status": "Status",
-  "activity.trust.note": "Spotted a change? Use the buttons below — every report goes to a public issue tracker so other parents see the update too.",
+  "activity.trust.note": "Spotted a change? Send it for review so the listing can be checked and refreshed.",
   "activity.unverified": "Unverified",
 
   "field.category": "Category:",
