@@ -9,8 +9,6 @@
 // when the user toggles the language. This keeps SSR output usable without
 // JS while letting us add German translations entirely via JSON files.
 
-import { optionalText } from './filtering.mjs';
-
 const MS_PER_DAY = 86_400_000;
 
 export function slugify(text) {
@@ -125,13 +123,6 @@ function enumSpan(prefix, rawValue) {
   return `<span${i18nAttrs(key)}>${escapeHtml(rawValue)}</span>`;
 }
 
-function contactLineHtml(listing) {
-  if (listing.contactUrl) {
-    return `<a class="text-link" href="${escapeHtml(listing.contactUrl)}" rel="noopener noreferrer"${i18nAttrs('listing.contact.organizer')}>Organizer website</a>`;
-  }
-  return `<span class="muted"${i18nAttrs('listing.contact.notListed')}>Not listed yet</span>`;
-}
-
 function suggestUpdateUrl(listing, repoSlug) {
   // GitHub Issue template prefill. repoSlug like "owner/name".
   const base = repoSlug
@@ -190,31 +181,10 @@ export function renderListingHtml(listing, {
     ? `<p class="verifier muted"${i18nAttrs(verifier.i18nKey)}>${escapeHtml(verifier.label)}</p>`
     : '';
 
-  const settingLine = listing.setting
-    ? `<p><strong${i18nAttrs('field.setting')}>Setting:</strong> ${enumSpan('enum.setting', listing.setting)}</p>`
-    : '';
-
-  const languageLine = listing.language
-    ? `<p><strong${i18nAttrs('field.language')}>Language:</strong> ${enumSpan('enum.language', listing.language)}</p>`
-    : '';
-
   const nameText = freeText(listing.name);
   const timingText = freeText(listing.timing);
   const costText = freeText(listing.cost);
   const townText = freeText(listing.town);
-  const trialRaw = listing.trial?.notes ?? listing.trialAvailability;
-  const hasTrialText = typeof trialRaw === 'object'
-    || (typeof trialRaw === 'string' && trialRaw.trim() !== '');
-  const trialEn = optionalText(typeof trialRaw === 'string' ? trialRaw : (trialRaw?.en ?? ''));
-  const trialAttrs = (typeof trialRaw === 'object' && trialRaw && (trialRaw.en || trialRaw.de))
-    ? freeText(trialRaw).attrs
-    : (hasTrialText ? '' : i18nAttrs('enum.notSpecified'));
-  const trialDisplay = hasTrialText && typeof trialRaw === 'object'
-    ? freeText(trialRaw).en
-    : escapeHtml(trialEn);
-
-  const beginnerKey = listing.beginnerFriendly ? 'enum.bool.yes' : 'enum.bool.no';
-  const beginnerLabel = listing.beginnerFriendly ? 'Yes' : 'No';
 
   return `<article class="listing" ${dataAttrs}>
       <div class="listing-header">
@@ -223,19 +193,18 @@ export function renderListingHtml(listing, {
       </div>
       ${closedBanner}
       <h3><a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/"${nameText.attrs}>${nameText.en}</a></h3>
-      <p><strong${i18nAttrs('field.category')}>Category:</strong> ${enumSpan('enum.category', listing.category)}</p>
-      <p><strong${i18nAttrs('field.ageRange')}>Age range:</strong> ${escapeHtml(listing.ageRange)}</p>
-      <p><strong${i18nAttrs('field.town')}>Town:</strong> <span${townText.attrs}>${townText.en}</span></p>
+      <div class="listing-facts">
+        <span>${enumSpan('enum.category', listing.category)}</span>
+        <span>${escapeHtml(listing.ageRange)}</span>
+        <span${townText.attrs}>${townText.en}</span>
+      </div>
       <p><strong${i18nAttrs('field.when')}>When:</strong> <span${timingText.attrs}>${timingText.en}</span></p>
       <p><strong${i18nAttrs('field.cost')}>Cost:</strong> <span${costText.attrs}>${costText.en}</span></p>
-      <p><strong${i18nAttrs('field.beginnerFriendly')}>Beginner-friendly:</strong> <span${i18nAttrs(beginnerKey)}>${beginnerLabel}</span></p>
-      <p><strong${i18nAttrs('field.trialAvailability')}>Trial availability:</strong> <span${trialAttrs}>${trialDisplay}</span></p>
-      ${settingLine}
-      ${languageLine}
-      <p><strong${i18nAttrs('field.contactOrWebsite')}>Contact or website:</strong> ${contactLineHtml(listing)}</p>
-      <p><strong${i18nAttrs('field.lastVerified')}>Last verified:</strong> ${escapeHtml(listing.lastVerified)}</p>
       ${verifierLine}
-      <p class="listing-actions"><a class="text-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a></p>
+      <p class="listing-actions">
+        <a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/" data-i18n="listing.viewDetails">View details</a>
+        <a class="text-link muted-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a>
+      </p>
     </article>`;
 }
 

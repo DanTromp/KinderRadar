@@ -13,10 +13,11 @@ change, not an HTML change.
 
 ```
 /
-  index.html                          single-city landing → redirects to Haltern
-  cities/<slug>/index.html            generated city pages
-  activities/<slug>/index.html        generated activity detail pages
-  robots.txt, sitemap.xml             generated at build time
+  dist/                               generated static site (ignored by git)
+  dist/index.html                     generated multi-place landing page
+  dist/cities/<slug>/index.html       generated city pages
+  dist/activities/<slug>/index.html   generated activity detail pages
+  dist/robots.txt, dist/sitemap.xml   generated at build time
 assets/
   activities-data.mjs                 ← source of truth (edit me)
   filtering.mjs                       pure filter / chip / search / sort logic
@@ -26,21 +27,21 @@ assets/
   styles.css
 scripts/
   build-check.mjs                     schema validator (fails build on bad data)
-  build.mjs                           static page generator + sitemap/robots
+  build.mjs                           static page generator + sitemap/robots into dist/
 tests/
   filter.test.mjs                     filter, chip, search, sort tests
   render.test.mjs                     renderer + freshness tests
   data.test.mjs                       seed-data schema tests
 .github/
   ISSUE_TEMPLATE/                     submit / update / closed / confirm / claim
-  workflows/                          CI, deploy to GitHub Pages, issue labeller
+  workflows/                          CI and issue labeller
 ```
 
 ## Commands
 
 ```bash
-npm start       # serve the static app locally at http://localhost:4173/
-npm run build   # validate data, then regenerate cities/ activities/ sitemap/ robots
+npm start       # build, then serve dist/ locally at http://localhost:4173/
+npm run build   # validate data, then regenerate dist/
 npm run build:supabase # export Supabase data, then run the static build
 npm test        # run unit tests
 npm run supabase:status # show table counts from Supabase
@@ -66,7 +67,7 @@ facet (section / town / category) has zero active listings.
    - `> 90 days` → "Needs update" (amber)
    - `status: 'reported-closed'` → hidden from city grid + red banner on
      the detail page
-4. Run `npm run build && npm test`.
+4. Run `npm test` (it builds `dist/` first).
 5. Open a PR. CI runs the same validator and tests.
 
 Towns must be listed in `cities[].nearbyTowns` for at least one city — this
@@ -98,7 +99,7 @@ The site uses a cookieless analytics shim (`assets/analytics.js`) that:
   is true). Cloudflare Web Analytics page views work out of the box if
   the CF beacon `<script>` is added to `scripts/build.mjs`'s `layoutHtml`.
 
-For GitHub Pages, set the repository variable
+For Cloudflare Pages, set the environment variable
 `KINDERRADAR_PLAUSIBLE_DOMAIN` to enable Plausible during the deploy build.
 Leave it unset for a no-op analytics build.
 
@@ -129,26 +130,25 @@ without an account. Every report lands in `activity_updates` with
 
 ## Deploy
 
-The default deployment target is **GitHub Pages**, configured by
-`.github/workflows/deploy.yml` on push to `main`. Set the repository
-variable `KINDERRADAR_BASE_URL` (e.g. `https://haltern.kinderradar.de`)
-once a custom domain is in place; the value is baked into Open Graph URLs
-and `sitemap.xml`.
+The default deployment target is **Cloudflare Pages** using its native Git
+integration. Do not add a GitHub Pages deploy workflow; Cloudflare should own
+the production deploy. Set the Cloudflare environment variable
+`KINDERRADAR_BASE_URL` (e.g. `https://haltern.kinderradar.de`) once a custom
+domain is in place; the value is baked into Open Graph URLs and `sitemap.xml`.
 
 Internal links and assets are emitted as relative URLs, so the site works
 both on a GitHub Pages project URL (`/KinderRadar/`) and on a custom root
 domain.
 
-To switch to Cloudflare Pages instead, point Cloudflare at the repo and
-use:
+Point Cloudflare Pages at the repo and use:
 - Build command: `npm run build`
-- Output directory: `.` (the generator writes pages in place)
+- Output directory: `dist`
 - Environment variable: `KINDERRADAR_BASE_URL`
 
 This project does not require Wrangler for normal Cloudflare Pages Git
 deployment: it is a static site with no `wrangler.toml` and the build writes
-the deployable pages into the repository root. Native Cloudflare Pages Git
-deployment is therefore enough when Cloudflare builds from the connected repo.
+the deployable pages into `dist/`. Native Cloudflare Pages Git deployment is
+therefore enough when Cloudflare builds from the connected repo.
 
 Use Wrangler only for Direct Upload or external CI deployment. In that case,
 the deploy step must authenticate to Cloudflare and upload a prepared static
@@ -164,7 +164,5 @@ dashboard, not in the repo:
 - `CLOUDFLARE_API_TOKEN`: an API token scoped to the target account with
   `Account -> Cloudflare Pages -> Edit`
 
-The command above expects `dist` to exist before it runs. The default
-`npm run build` command writes pages in place, so a Wrangler Direct Upload
-workflow that keeps `dist` must stage the static site files there before
-deploying.
+The command above expects `dist` to exist before it runs. `npm run build`
+creates that directory.

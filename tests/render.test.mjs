@@ -131,20 +131,14 @@ test('renderListingHtml escapes user-supplied strings', () => {
 test('renderListingHtml emits data-i18n attributes for translation', () => {
   const html = renderListingHtml(sampleListing, { sections, repoSlug: 'o/r' });
   // Field labels carry i18n keys.
-  assert.match(html, /data-i18n="field\.category"/);
-  assert.match(html, /data-i18n="field\.ageRange"/);
-  assert.match(html, /data-i18n="field\.town"/);
   assert.match(html, /data-i18n="field\.when"/);
   assert.match(html, /data-i18n="field\.cost"/);
-  assert.match(html, /data-i18n="field\.beginnerFriendly"/);
-  assert.match(html, /data-i18n="field\.contactOrWebsite"/);
   // Enum values carry i18n keys.
   assert.match(html, /data-i18n="enum\.category\.Sports"/);
-  assert.match(html, /data-i18n="enum\.setting\.outdoor"/);
-  assert.match(html, /data-i18n="enum\.bool\.yes"/);
   // Freshness badge carries an i18n key + params.
   assert.match(html, /data-i18n="freshness\./);
   // Section tag and listing.suggestUpdate too.
   assert.match(html, /data-i18n="section\.weekly-activities\.tag"/);
+  assert.match(html, /data-i18n="listing\.viewDetails"/);
   assert.match(html, /data-i18n="listing\.suggestUpdate"/);
 });

@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
+const DIST = join(ROOT, 'dist');
 
 async function loadJson(path) {
   return JSON.parse(await readFile(path, 'utf8'));
@@ -49,11 +50,11 @@ async function collectI18nKeysFromBuiltSite() {
   const dataI18nRe = /data-i18n="([^"]+)"/g;
   const dataI18nAttrRe = /data-i18n-attr="([^"]+)"/g;
   const files = [
-    join(ROOT, 'index.html'),
-    join(ROOT, 'cities/haltern-am-see/index.html'),
+    join(DIST, 'index.html'),
+    join(DIST, 'cities/haltern-am-see/index.html'),
   ];
-  for (const slug of readdirSync(join(ROOT, 'activities'))) {
-    files.push(join(ROOT, 'activities', slug, 'index.html'));
+  for (const slug of readdirSync(join(DIST, 'activities'))) {
+    files.push(join(DIST, 'activities', slug, 'index.html'));
   }
   for (const f of files) {
     const html = await readFile(f, 'utf8');
@@ -78,10 +79,10 @@ test('every data-i18n key in generated pages exists in en.json', async () => {
 });
 
 test('home page canonical uses the full GitHub Pages URL', async () => {
-  const html = await readFile(join(ROOT, 'index.html'), 'utf8');
+  const html = await readFile(join(DIST, 'index.html'), 'utf8');
   assert.match(
     html,
-    /<link rel="canonical" href="https:\/\/dantromp\.github\.io\/KinderRadar\/cities\/haltern-am-see\/" \/>/,
+    /<link rel="canonical" href="https:\/\/dantromp\.github\.io\/KinderRadar\/" \/>/,
   );
 });
 
@@ -101,7 +102,7 @@ function collectHtmlFiles(dir, out = []) {
 test('generated pages avoid root-relative internal assets and links', async () => {
   const offenders = [];
 
-  for (const file of collectHtmlFiles(ROOT)) {
+  for (const file of collectHtmlFiles(DIST)) {
     const html = await readFile(file, 'utf8');
     for (const pattern of [
       /\s(?:href|src)="\/(?:assets|cities|activities)\//g,

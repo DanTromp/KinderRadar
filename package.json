@@ -7,10 +7,10 @@
     "node": ">=20 <25"
   },
   "scripts": {
-    "start": "node scripts/dev-server.mjs",
+    "start": "npm run build && node scripts/dev-server.mjs",
     "build": "node scripts/build-check.mjs && node scripts/build.mjs",
     "build:supabase": "node scripts/supabase-export.mjs && npm run build",
-    "test": "node --test tests/*.test.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "supabase:export": "node scripts/supabase-export.mjs",
     "supabase:import": "node scripts/supabase-import.mjs",
     "supabase:status": "node scripts/supabase-status.mjs",

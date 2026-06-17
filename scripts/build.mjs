@@ -1,11 +1,12 @@
 // Static site generator.
-// Reads activities-data.mjs and writes:
-//   cities/<slug>/index.html
-//   activities/<slug>/index.html
+// Reads activities-data.mjs and writes a deployable static site into dist/:
+//   dist/index.html
+//   dist/cities/<slug>/index.html
+//   dist/activities/<slug>/index.html
 // Pages are progressively enhanced: the rendered HTML is fully usable
 // without JS, and the client-side filter script then takes over.
 
-import { mkdir, writeFile, rm } from 'node:fs/promises';
+import { cp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
@@ -46,6 +47,7 @@ const envValue = (name, fallback = '') => process.env[name] ?? localEnv[name] ??
 const REPO_SLUG = envValue('KINDERRADAR_REPO', 'DanTromp/KinderRadar');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
+const DIST = join(ROOT, 'dist');
 
 const SITE_BASE_URL = envValue('KINDERRADAR_BASE_URL', 'https://dantromp.github.io/KinderRadar');
 const PLAUSIBLE_DOMAIN = envValue('KINDERRADAR_PLAUSIBLE_DOMAIN');
@@ -212,12 +214,99 @@ function activityUpdateForm(listing) {
       </section>`;
 }
 
-function cityPage(city) {
-  const cityActivities = activities
+function activeActivitiesForCity(city) {
+  return activities
     .filter((a) => city.nearbyTowns.includes(a.town))
     .filter((a) => a.status !== 'reported-closed');
-  const activeCategories = new Set(cityActivities.map((a) => a.category).filter(Boolean));
-  const weekendCount = cityActivities.filter((a) => /sat|sun/i.test(a.dayOfWeek ?? '')).length;
+}
+
+function statsForActivities(items) {
+  return {
+    active: items.length,
+    categories: new Set(items.map((a) => a.category).filter(Boolean)).size,
+    weekend: items.filter((a) => /sat|sun/i.test(a.dayOfWeek ?? '')).length,
+  };
+}
+
+function homePage() {
+  const active = activities.filter((a) => a.status !== 'reported-closed');
+  const stats = statsForActivities(active);
+  const primaryCity = cities[0];
+  const shortcutCity = primaryCity?.slug ?? 'haltern-am-see';
+  const placeCards = cities.map((city) => {
+    const cityActivities = activeActivitiesForCity(city);
+    const cityStats = statsForActivities(cityActivities);
+    return `        <a class="place-card" href="cities/${escapeHtml(city.slug)}/" style="--hero-image: url('${escapeHtml(city.heroImage ?? 'kinderradar-hero.png')}')">
+          <span class="place-card-image" aria-hidden="true"></span>
+          <span class="place-card-body">
+            <strong>${escapeHtml(city.name)}</strong>
+            <span>${cityStats.active} activities · ${cityStats.categories} categories</span>
+          </span>
+        </a>`;
+  }).join('\n');
+
+  const shortcuts = [
+    { href: `cities/${shortcutCity}/?chips=this-weekend`, label: 'Weekend ideas', key: 'home.shortcut.weekend' },
+    { href: `cities/${shortcutCity}/?chips=free`, label: 'Free activities', key: 'home.shortcut.free' },
+    { href: `cities/${shortcutCity}/?chips=rainy-day`, label: 'Rainy-day picks', key: 'home.shortcut.rainy' },
+    { href: `cities/${shortcutCity}/?chips=trial-available`, label: 'Trial available', key: 'home.shortcut.trial' },
+  ].map((shortcut) => `        <a class="shortcut-card" href="${escapeHtml(shortcut.href)}" data-i18n="${escapeHtml(shortcut.key)}">${escapeHtml(shortcut.label)}</a>`).join('\n');
+
+  const body = `    <main class="page page-home stack">
+      <section class="hero hero-shell" style="--hero-image: url('${escapeHtml(primaryCity?.heroImage ?? 'kinderradar-hero.png')}')">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="home.eyebrow">KinderRadar</p>
+          <h1 data-i18n="home.heading">Find kids' activities around Haltern am See.</h1>
+          <p data-i18n="home.intro">Choose a nearby place, or jump straight into parent-friendly shortcuts for weekends, rainy days, free options, and trial sessions.</p>
+          <a class="button secondary" href="cities/${escapeHtml(shortcutCity)}/" data-i18n="home.browse">Browse all activities</a>
+        </div>
+        <dl class="hero-stats" aria-label="Activity overview">
+          <div><dt>${stats.active}</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>${stats.categories}</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>${stats.weekend}</dt><dd data-i18n="city.stats.weekend">weekend ideas</dd></div>
+        </dl>
+        <div class="radar-loader hero-loader" aria-hidden="true">
+          <span></span>
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="home-places-heading">
+        <div class="section-heading">
+          <h2 id="home-places-heading" data-i18n="home.places.heading">Choose your area</h2>
+          <p class="section-intro" data-i18n="home.places.intro">Start broad with Haltern am See, or browse a smaller nearby town page.</p>
+        </div>
+        <div class="place-grid">
+${placeCards}
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="home-shortcuts-heading">
+        <div class="section-heading">
+          <h2 id="home-shortcuts-heading" data-i18n="home.shortcuts.heading">Quick starts</h2>
+          <p class="section-intro" data-i18n="home.shortcuts.intro">Useful filters parents tend to reach for first.</p>
+        </div>
+        <div class="shortcut-grid">
+${shortcuts}
+        </div>
+      </section>
+    </main>`;
+
+  return layoutHtml({
+    title: 'KinderRadar | Kids activities around Haltern am See',
+    description: 'Find kids activities around Haltern am See, Sythen, Hullern, and Lavesum with listings that are kept fresh.',
+    body,
+    ogTitle: 'KinderRadar',
+    ogDescription: 'Find kids activities around Haltern am See, Sythen, Hullern, and Lavesum.',
+    ogUrl: '/',
+    titleI18nKey: 'home.title',
+    descriptionI18nKey: 'home.description',
+    assetPrefix: '',
+  });
+}
+
+function cityPage(city) {
+  const cityActivities = activeActivitiesForCity(city);
+  const cityStats = statsForActivities(cityActivities);
   const sectionsHtml = sections
     .map((section) => {
       const inSection = sortByFreshness(cityActivities.filter((a) => a.section === section.id));
@@ -263,9 +352,9 @@ function cityPage(city) {
           </div>
         </div>
         <dl class="hero-stats" aria-label="Activity overview">
-          <div><dt>${cityActivities.length}</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
-          <div><dt>${activeCategories.size}</dt><dd data-i18n="city.stats.categories">categories</dd></div>
-          <div><dt>${weekendCount}</dt><dd data-i18n="city.stats.weekend">weekend ideas</dd></div>
+          <div><dt>${cityStats.active}</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>${cityStats.categories}</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>${cityStats.weekend}</dt><dd data-i18n="city.stats.weekend">weekend ideas</dd></div>
         </dl>
         <div class="radar-loader hero-loader" aria-hidden="true">
           <span></span>
@@ -574,16 +663,22 @@ async function writeFileEnsuringDir(path, content) {
 export async function generate() {
   let written = 0;
 
+  await rm(DIST, { recursive: true, force: true });
+  await mkdir(DIST, { recursive: true });
+  await cp(join(ROOT, 'assets'), join(DIST, 'assets'), { recursive: true });
+
+  await writeFile(join(DIST, 'index.html'), homePage(), 'utf8');
+  written += 1;
+
   for (const city of cities) {
-    const out = join(ROOT, 'cities', city.slug, 'index.html');
+    const out = join(DIST, 'cities', city.slug, 'index.html');
     await writeFileEnsuringDir(out, cityPage(city));
     written += 1;
   }
 
   // Wipe and regenerate the activities/ tree so deleted entries don't linger.
-  await rm(join(ROOT, 'activities'), { recursive: true, force: true });
   for (const listing of activities) {
-    const out = join(ROOT, 'activities', listing.slug, 'index.html');
+    const out = join(DIST, 'activities', listing.slug, 'index.html');
     await writeFileEnsuringDir(out, activityDetailPage(listing));
     written += 1;
   }
@@ -601,9 +696,9 @@ export async function generate() {
 ${urls.map((u) => `  <url><loc>${SITE_BASE_URL}${u.loc}</loc>${u.lastmod ? `<lastmod>${u.lastmod}</lastmod>` : ''}<changefreq>${u.changefreq}</changefreq></url>`).join('\n')}
 </urlset>
 `;
-  await writeFile(join(ROOT, 'sitemap.xml'), sitemap, 'utf8');
+  await writeFile(join(DIST, 'sitemap.xml'), sitemap, 'utf8');
   await writeFile(
-    join(ROOT, 'robots.txt'),
+    join(DIST, 'robots.txt'),
     `User-agent: *\nAllow: /\nSitemap: ${SITE_BASE_URL}/sitemap.xml\n`,
     'utf8',
   );

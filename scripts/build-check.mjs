@@ -9,7 +9,6 @@ import { fileURLToPath } from 'node:url';
 import { activities, sections, categories, cities } from '../assets/activities-data.mjs';
 
 const requiredFiles = [
-  'index.html',
   'assets/styles.css',
   'assets/filters.js',
   'assets/update-form.js',

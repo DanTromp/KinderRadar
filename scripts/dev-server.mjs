@@ -4,7 +4,8 @@ import { stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const projectRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const root = resolve(process.env.KINDERRADAR_STATIC_ROOT ?? join(projectRoot, 'dist'));
 const preferredPort = Number.parseInt(process.env.PORT ?? '4173', 10);
 
 const contentTypes = new Map([
