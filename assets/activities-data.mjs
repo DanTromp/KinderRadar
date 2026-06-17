@@ -43,7 +43,29 @@ export const cities = [
   {
     "slug": "haltern-am-see",
     "name": "Haltern am See",
+    "kind": "region",
+    "regionSlug": "haltern-am-see",
+    "state": "North Rhine-Westphalia",
+    "country": "DE",
     "heroImage": "kinderradar-hero.png",
+    "mapPosition": {
+      "x": 47,
+      "y": 48
+    },
+    "coverageLabel": "Haltern am See, Sythen, Hullern, Lavesum",
+    "shortIntro": "The broad family hub for the lakeside town and its nearby villages.",
+    "guide": "Best when you want the widest choice first: swimming, sports clubs, library sessions, nature outings, holiday camps, and trial-friendly options across the Haltern area.",
+    "bestFor": [
+      "largest activity mix",
+      "weekend outings",
+      "swimming and sports"
+    ],
+    "featuredShortcuts": [
+      "weekend",
+      "free",
+      "rainy-day",
+      "trial"
+    ],
     "nearbyTowns": [
       "Haltern am See",
       "Sythen",
@@ -54,7 +76,29 @@ export const cities = [
   {
     "slug": "sythen",
     "name": "Sythen",
+    "kind": "town",
+    "regionSlug": "haltern-am-see",
+    "state": "North Rhine-Westphalia",
+    "country": "DE",
     "heroImage": "kinderradar-hero-sythen.png",
+    "mapPosition": {
+      "x": 31,
+      "y": 34
+    },
+    "coverageLabel": "Sythen",
+    "shortIntro": "A smaller local view for families who want options close to Sythen.",
+    "guide": "Useful for quick local checks before widening the search to all of Haltern am See. Sythen currently leans toward sports, tennis, nature, and seasonal group activities.",
+    "bestFor": [
+      "nearby sports",
+      "outdoor time",
+      "smaller-town browsing"
+    ],
+    "featuredShortcuts": [
+      "weekend",
+      "primary",
+      "trial",
+      "rainy-day"
+    ],
     "nearbyTowns": [
       "Sythen"
     ]
@@ -62,7 +106,29 @@ export const cities = [
   {
     "slug": "hullern",
     "name": "Hullern",
+    "kind": "town",
+    "regionSlug": "haltern-am-see",
+    "state": "North Rhine-Westphalia",
+    "country": "DE",
     "heroImage": "kinderradar-hero-hullern.png",
+    "mapPosition": {
+      "x": 58,
+      "y": 65
+    },
+    "coverageLabel": "Hullern",
+    "shortIntro": "A village-focused page for Hullern activities and nearby family ideas.",
+    "guide": "Good for families who want a compact list first, especially outdoor ideas around Hullern and simple local sports options before checking the wider Haltern area.",
+    "bestFor": [
+      "quiet local options",
+      "nature time",
+      "younger children"
+    ],
+    "featuredShortcuts": [
+      "weekend",
+      "preschool",
+      "free",
+      "rainy-day"
+    ],
     "nearbyTowns": [
       "Hullern"
     ]
@@ -70,7 +136,29 @@ export const cities = [
   {
     "slug": "lavesum",
     "name": "Lavesum",
+    "kind": "town",
+    "regionSlug": "haltern-am-see",
+    "state": "North Rhine-Westphalia",
+    "country": "DE",
     "heroImage": "kinderradar-hero-lavesum.png",
+    "mapPosition": {
+      "x": 76,
+      "y": 30
+    },
+    "coverageLabel": "Lavesum",
+    "shortIntro": "A focused local page for Lavesum and nearby family-friendly activities.",
+    "guide": "Useful when you want to stay close to Lavesum first, with quick routes into beginner-friendly sport, holiday ideas, and nearby outdoor activities.",
+    "bestFor": [
+      "close-to-home checks",
+      "beginner-friendly sport",
+      "holiday ideas"
+    ],
+    "featuredShortcuts": [
+      "trial",
+      "primary",
+      "weekend",
+      "free"
+    ],
     "nearbyTowns": [
       "Lavesum"
     ]

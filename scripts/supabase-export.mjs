@@ -101,6 +101,20 @@ function mergeCategories(activities) {
 
 function cityRowsToData(cityRows, townRows) {
   const existingBySlug = new Map(existingCities.map((city) => [city.slug, city]));
+  const localFields = [
+    'kind',
+    'regionSlug',
+    'state',
+    'country',
+    'heroImage',
+    'mapPosition',
+    'coverageLabel',
+    'shortIntro',
+    'guide',
+    'bestFor',
+    'featuredShortcuts',
+    'sponsorship',
+  ];
   return cityRows.map((city) => {
     const towns = townRows
       .filter((town) => town.city_slug === city.slug)
@@ -115,7 +129,11 @@ function cityRowsToData(cityRows, townRows) {
     return {
       slug: city.slug,
       name: city.name,
-      ...(existing?.heroImage ? { heroImage: existing.heroImage } : {}),
+      ...Object.fromEntries(
+        localFields
+          .filter((field) => existing?.[field] !== undefined)
+          .map((field) => [field, existing[field]]),
+      ),
       nearbyTowns: ordered,
     };
   });

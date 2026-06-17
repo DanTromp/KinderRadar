@@ -51,8 +51,10 @@ async function collectI18nKeysFromBuiltSite() {
   const dataI18nAttrRe = /data-i18n-attr="([^"]+)"/g;
   const files = [
     join(DIST, 'index.html'),
-    join(DIST, 'cities/haltern-am-see/index.html'),
   ];
+  for (const slug of readdirSync(join(DIST, 'cities'))) {
+    files.push(join(DIST, 'cities', slug, 'index.html'));
+  }
   for (const slug of readdirSync(join(DIST, 'activities'))) {
     files.push(join(DIST, 'activities', slug, 'index.html'));
   }

@@ -228,6 +228,266 @@ function statsForActivities(items) {
   };
 }
 
+const DISCOVERY_SHORTCUTS = {
+  weekend: {
+    params: { chips: 'this-weekend' },
+    title: 'Weekend ready',
+    body: 'One-off ideas and regular activities that can work around school days.',
+    titleKey: 'city.discovery.weekend.title',
+    bodyKey: 'city.discovery.weekend.body',
+  },
+  free: {
+    params: { chips: 'free' },
+    title: 'Free options',
+    body: 'Start with listings that are marked free before checking paid courses.',
+    titleKey: 'city.discovery.free.title',
+    bodyKey: 'city.discovery.free.body',
+  },
+  'rainy-day': {
+    params: { chips: 'rainy-day' },
+    title: 'Rainy-day picks',
+    body: 'Indoor or mixed-setting ideas for wet days and colder afternoons.',
+    titleKey: 'city.discovery.rainy.title',
+    bodyKey: 'city.discovery.rainy.body',
+  },
+  trial: {
+    params: { chips: 'trial-available' },
+    title: 'Try before committing',
+    body: 'Find activities where a trial or first session is easier to arrange.',
+    titleKey: 'city.discovery.trial.title',
+    bodyKey: 'city.discovery.trial.body',
+  },
+  preschool: {
+    params: { age: '3-6' },
+    title: 'Ages 3-6',
+    body: 'Shortlist options for kindergarten and early primary years.',
+    titleKey: 'city.discovery.preschool.title',
+    bodyKey: 'city.discovery.preschool.body',
+  },
+  primary: {
+    params: { age: '6-10' },
+    title: 'Ages 6-10',
+    body: 'Browse activities that fit primary-school children.',
+    titleKey: 'city.discovery.primary.title',
+    bodyKey: 'city.discovery.primary.body',
+  },
+};
+
+function cityShortIntro(city) {
+  return city.shortIntro ?? `Browse family-friendly activities in ${city.name}.`;
+}
+
+function cityGuideText(city) {
+  return city.guide ?? `Start with ${city.name}, then use the filters to narrow by age, day, category, price, and confidence level.`;
+}
+
+function cityCoverage(city) {
+  return city.coverageLabel ?? city.nearbyTowns.join(', ');
+}
+
+function regionCitiesFor(city) {
+  const regionSlug = city.regionSlug ?? city.slug;
+  return cities.filter((candidate) => (candidate.regionSlug ?? candidate.slug) === regionSlug);
+}
+
+function firstTownForCity(city) {
+  return city.nearbyTowns[0] ?? city.name;
+}
+
+function cityLinkFrom(currentCity, targetCity) {
+  if (currentCity.slug === targetCity.slug) return '#listings-root';
+  return `../../cities/${escapeHtml(targetCity.slug)}/`;
+}
+
+function buildQuery(params) {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) query.set(key, value);
+  }
+  const text = query.toString();
+  return text ? `?${text}` : '';
+}
+
+function cityDiscoveryHtml(city) {
+  const shortcuts = (city.featuredShortcuts?.length ? city.featuredShortcuts : ['weekend', 'free', 'rainy-day', 'trial'])
+    .map((id) => DISCOVERY_SHORTCUTS[id])
+    .filter(Boolean);
+
+  if (!shortcuts.length) return '';
+
+  const cards = shortcuts.map((shortcut) => `        <a class="discovery-card" href="${escapeHtml(buildQuery(shortcut.params))}">
+          <strong data-i18n="${escapeHtml(shortcut.titleKey)}">${escapeHtml(shortcut.title)}</strong>
+          <span data-i18n="${escapeHtml(shortcut.bodyKey)}">${escapeHtml(shortcut.body)}</span>
+        </a>`).join('\n');
+
+  return `      <section class="discovery-panel" aria-labelledby="city-discovery-heading">
+        <div class="section-heading">
+          <h2 id="city-discovery-heading" data-i18n="city.discovery.heading">Start with what matters today</h2>
+          <p class="section-intro" data-i18n="city.discovery.intro">Shortcut into useful parent filters, then fine-tune the full list below.</p>
+        </div>
+        <div class="discovery-grid">
+${cards}
+        </div>
+      </section>`;
+}
+
+const PLANNER_BUCKETS = [
+  {
+    id: 'after-kindergarten',
+    title: 'After kindergarten',
+    titleKey: 'planner.afterKindergarten.title',
+    intro: 'Weekday ideas from 14:00 onward.',
+    introKey: 'planner.afterKindergarten.intro',
+    href: '?chips=after-kindergarten',
+    predicate: (listing) => CHIP_DEFINITIONS.find((chip) => chip.id === 'after-kindergarten')?.predicate(listing),
+  },
+  {
+    id: 'weekend',
+    title: 'Weekend ideas',
+    titleKey: 'planner.weekend.title',
+    intro: 'Easy options for Saturday or Sunday.',
+    introKey: 'planner.weekend.intro',
+    href: '?chips=this-weekend',
+    predicate: (listing) => CHIP_DEFINITIONS.find((chip) => chip.id === 'this-weekend')?.predicate(listing),
+  },
+  {
+    id: 'free-low-cost',
+    title: 'Free and low-cost',
+    titleKey: 'planner.free.title',
+    intro: 'Start with the gentler budget options.',
+    introKey: 'planner.free.intro',
+    href: '?chips=free',
+    predicate: (listing) => listing.price?.free === true || (typeof listing.price?.amount === 'number' && listing.price.amount <= 10),
+  },
+  {
+    id: 'rainy-day',
+    title: 'Rainy-day backup',
+    titleKey: 'planner.rainy.title',
+    intro: 'Indoor or mixed-setting ideas.',
+    introKey: 'planner.rainy.intro',
+    href: '?chips=rainy-day',
+    predicate: (listing) => CHIP_DEFINITIONS.find((chip) => chip.id === 'rainy-day')?.predicate(listing),
+  },
+];
+
+function activityUrl(prefix, listing) {
+  return `${prefix}/${escapeHtml(listing.slug)}/`;
+}
+
+function weeklyPlannerHtml({ city, items, activityPrefix, cityPrefix = '' }) {
+  const cards = PLANNER_BUCKETS.map((bucket) => {
+    const matches = sortByFreshness(items.filter((listing) => bucket.predicate(listing))).slice(0, 3);
+    const rows = matches.length
+      ? matches.map((listing) => `            <li>
+              <a href="${activityUrl(activityPrefix, listing)}">${escapeHtml(listing.name)}</a>
+              <span>${escapeHtml(listing.town)} · ${escapeHtml(listing.ageRange)} · ${escapeHtml(listing.timing)}</span>
+            </li>`).join('\n')
+      : `            <li class="planner-empty" data-i18n="planner.empty">No matching activities yet.</li>`;
+    const filterHref = cityPrefix
+      ? `${cityPrefix}${escapeHtml(city.slug)}/${escapeHtml(bucket.href)}`
+      : bucket.href;
+
+    return `        <article class="planner-card">
+          <div>
+            <h3 data-i18n="${escapeHtml(bucket.titleKey)}">${escapeHtml(bucket.title)}</h3>
+            <p data-i18n="${escapeHtml(bucket.introKey)}">${escapeHtml(bucket.intro)}</p>
+          </div>
+          <ul>
+${rows}
+          </ul>
+          <a class="text-link planner-link" href="${filterHref}" data-i18n="planner.viewFilter">View filtered list</a>
+        </article>`;
+  }).join('\n');
+
+  const sponsor = city.sponsorship?.weeklyPlanner;
+  const sponsorHtml = sponsor?.name
+    ? `        <aside class="sponsor-note">
+          <span data-i18n="planner.sponsor.label">Sponsored by</span>
+          <strong>${escapeHtml(sponsor.name)}</strong>
+          ${sponsor.url ? `<a class="text-link" href="${escapeHtml(sponsor.url)}" rel="noopener noreferrer" data-i18n="planner.sponsor.visit">Visit sponsor</a>` : ''}
+        </aside>`
+    : '';
+
+  return `      <section class="weekly-planner" aria-labelledby="weekly-planner-heading">
+        <div class="section-heading">
+          <h2 id="weekly-planner-heading" data-i18n="planner.heading">This week planner</h2>
+          <p class="section-intro" data-i18n="planner.intro">Fast routes for the moments parents actually plan around.</p>
+        </div>
+        <div class="planner-grid">
+${cards}
+        </div>
+${sponsorHtml}
+      </section>`;
+}
+
+function cityGuideHtml(city, stats, categories) {
+  const bestFor = Array.isArray(city.bestFor) && city.bestFor.length
+    ? city.bestFor
+    : categories.slice(0, 3).map((category) => category.toLowerCase());
+  const bestForText = bestFor.join(', ');
+  const cityType = city.kind === 'town' ? 'Town page' : 'Area page';
+
+  return `      <section class="city-guide" aria-labelledby="city-guide-heading">
+        <div>
+          <p class="eyebrow">${escapeHtml(cityType)}</p>
+          <h2 id="city-guide-heading" data-i18n="city.guide.heading">Local guide</h2>
+          <p>${escapeHtml(cityGuideText(city))}</p>
+        </div>
+        <dl class="guide-facts">
+          <div>
+            <dt data-i18n="city.guide.coverage">Coverage</dt>
+            <dd>${escapeHtml(cityCoverage(city))}</dd>
+          </div>
+          <div>
+            <dt data-i18n="city.guide.bestFor">Best for</dt>
+            <dd>${escapeHtml(bestForText)}</dd>
+          </div>
+          <div>
+            <dt data-i18n="city.guide.activeMix">Active mix</dt>
+            <dd>${stats.active} listings · ${stats.categories} categories</dd>
+          </div>
+        </dl>
+      </section>`;
+}
+
+function areaMapHtml(city) {
+  const regionCities = regionCitiesFor(city);
+  const pins = regionCities.map((targetCity) => {
+    const targetActivities = activeActivitiesForCity(targetCity);
+    const targetStats = statsForActivities(targetActivities);
+    const x = targetCity.mapPosition?.x ?? 50;
+    const y = targetCity.mapPosition?.y ?? 50;
+    const current = targetCity.slug === city.slug ? ' aria-current="page"' : '';
+    return `          <a class="map-pin" href="${cityLinkFrom(city, targetCity)}" style="--x: ${x}%; --y: ${y}%;"${current}>
+            <span class="pin-dot" aria-hidden="true"></span>
+            <strong>${escapeHtml(targetCity.name)}</strong>
+            <small>${targetStats.active} activities</small>
+          </a>`;
+  }).join('\n');
+  const townLinks = regionCities.map((targetCity) => {
+    const current = targetCity.slug === city.slug ? ' aria-current="page"' : '';
+    return `          <a href="${cityLinkFrom(city, targetCity)}"${current}>
+            <strong>${escapeHtml(targetCity.name)}</strong>
+            <span>${escapeHtml(firstTownForCity(targetCity))}</span>
+          </a>`;
+  }).join('\n');
+
+  return `      <section class="area-map-panel" aria-labelledby="area-map-heading">
+        <div class="section-heading">
+          <h2 id="area-map-heading" data-i18n="city.map.heading">Browse by area</h2>
+          <p class="section-intro" data-i18n="city.map.intro">Use the local map to jump between nearby town pages before narrowing by filters.</p>
+        </div>
+        <div class="area-map-shell">
+          <div class="area-map" role="img" aria-label="Nearby places map" data-i18n-attr="aria-label:city.map.aria">
+${pins}
+          </div>
+          <div class="area-map-list" aria-label="Nearby towns" data-i18n-attr="aria-label:city.map.towns">
+${townLinks}
+          </div>
+        </div>
+      </section>`;
+}
+
 function homePage() {
   const active = activities.filter((a) => a.status !== 'reported-closed');
   const stats = statsForActivities(active);
@@ -240,7 +500,8 @@ function homePage() {
           <span class="place-card-image" aria-hidden="true"></span>
           <span class="place-card-body">
             <strong>${escapeHtml(city.name)}</strong>
-            <span>${cityStats.active} activities · ${cityStats.categories} categories</span>
+            <span>${escapeHtml(cityShortIntro(city))}</span>
+            <small>${cityStats.active} activities · ${cityStats.categories} categories</small>
           </span>
         </a>`;
   }).join('\n');
@@ -289,6 +550,8 @@ ${placeCards}
 ${shortcuts}
         </div>
       </section>
+
+${weeklyPlannerHtml({ city: primaryCity, items: active, activityPrefix: 'activities', cityPrefix: 'cities/' })}
     </main>`;
 
   return layoutHtml({
@@ -307,6 +570,7 @@ ${shortcuts}
 function cityPage(city) {
   const cityActivities = activeActivitiesForCity(city);
   const cityStats = statsForActivities(cityActivities);
+  const categories = Array.from(new Set(cityActivities.map((a) => a.category))).sort();
   const sectionsHtml = sections
     .map((section) => {
       const inSection = sortByFreshness(cityActivities.filter((a) => a.section === section.id));
@@ -323,7 +587,6 @@ function cityPage(city) {
   const townOptions = city.nearbyTowns
     .map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
 
-  const categories = Array.from(new Set(cityActivities.map((a) => a.category))).sort();
   const categoryOptions = categories
     .map((c) => `<option value="${escapeHtml(c)}" data-i18n="enum.category.${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
 
@@ -346,7 +609,7 @@ function cityPage(city) {
         <div class="hero-copy">
           <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="${escapeHtml(JSON.stringify({ city: city.name }))}">KinderRadar ${escapeHtml(city.name)}</p>
           <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
-          <p data-i18n="city.intro" data-i18n-params="${escapeHtml(JSON.stringify(cityParams))}">${escapeHtml(description)} Curated for parents around ${escapeHtml(city.name)} (${escapeHtml(city.nearbyTowns.join(', '))}).</p>
+          <p data-i18n="city.intro" data-i18n-params="${escapeHtml(JSON.stringify(cityParams))}">${escapeHtml(cityShortIntro(city))} Curated for parents around ${escapeHtml(city.name)} (${escapeHtml(city.nearbyTowns.join(', '))}).</p>
           <div class="button-row">
             <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
           </div>
@@ -364,6 +627,14 @@ function cityPage(city) {
       <nav class="place-tabs" aria-label="Nearby places" data-i18n-attr="aria-label:city.places.label">
         ${placeLinks}
       </nav>
+
+${cityGuideHtml(city, cityStats, categories)}
+
+${areaMapHtml(city)}
+
+${cityDiscoveryHtml(city)}
+
+${weeklyPlannerHtml({ city, items: cityActivities, activityPrefix: '../../activities' })}
 
       <section class="filter-panel" aria-labelledby="filter-heading">
         <div class="filter-panel-heading">
@@ -570,6 +841,52 @@ function activityDetailPage(listing) {
     ? `<p><strong${i18nAttr('field.contactOrWebsite')}>Contact or website:</strong> <a class="text-link" href="${escapeHtml(listing.contactUrl)}" rel="noopener noreferrer" data-analytics="contact_click" data-i18n="listing.contact.organizer">Organizer website</a></p>`
     : '';
 
+  const bookingValue = listing.bookingRequired === true
+    ? `<span${i18nAttr('activity.plan.booking.required')}>Booking required</span>`
+    : (listing.bookingRequired === false
+      ? `<span${i18nAttr('activity.plan.booking.flexible')}>Drop-in may be possible</span>`
+      : `<span${i18nAttr('activity.plan.checkOrganizer')}>Check with organizer</span>`);
+  const trialRaw = listing.trial?.notes ?? listing.trialAvailability;
+  const trialValue = trialRaw
+    ? freeValue(trialRaw)
+    : `<span${i18nAttr('activity.plan.checkOrganizer')}>Check with organizer</span>`;
+  const planningRows = [
+    { labelKey: 'activity.plan.booking', label: 'Booking', value: bookingValue },
+    { labelKey: 'activity.plan.trial', label: 'Trial', value: trialValue },
+    { labelKey: 'activity.plan.setting', label: 'Setting', value: enumValue('enum.setting', listing.setting) || `<span${i18nAttr('enum.notSpecified')}>Not specified</span>` },
+    { labelKey: 'activity.plan.parent', label: 'Parent role', value: enumValue('enum.parentParticipation', listing.parentParticipation) || `<span${i18nAttr('enum.notSpecified')}>Not specified</span>` },
+    { labelKey: 'activity.plan.cost', label: 'Cost signal', value: freeValue(listing.cost) || `<span${i18nAttr('enum.notSpecified')}>Not specified</span>` },
+  ];
+  const planningPanel = `      <section class="panel planning-panel" aria-labelledby="planning-heading">
+        <h2 id="planning-heading" data-i18n="activity.plan.heading">Before you go</h2>
+        <dl class="planning-grid">
+${planningRows.map((row) => `          <div><dt data-i18n="${escapeHtml(row.labelKey)}">${escapeHtml(row.label)}</dt><dd>${row.value}</dd></div>`).join('\n')}
+        </dl>
+      </section>`;
+
+  const checklist = [
+    listing.bookingRequired === true
+      ? { key: 'activity.checklist.book', text: 'Book or confirm spaces before you go.' }
+      : { key: 'activity.checklist.confirm', text: 'Confirm the latest time and availability before setting off.' },
+    listing.setting === 'outdoor'
+      ? { key: 'activity.checklist.weather', text: 'Check the weather and bring suitable outdoor clothing.' }
+      : (listing.setting === 'indoor'
+        ? { key: 'activity.checklist.indoor', text: 'Good backup when the weather is not playing along.' }
+        : { key: 'activity.checklist.mixed', text: 'Check whether this session runs indoors, outdoors, or both.' }),
+    listing.parentParticipation === 'required'
+      ? { key: 'activity.checklist.parentRequired', text: 'Plan for a parent or caregiver to stay and participate.' }
+      : { key: 'activity.checklist.parentOptional', text: 'Ask whether parents wait, watch, or can leave during the session.' },
+    listing.trial?.available || listing.trialAvailability
+      ? { key: 'activity.checklist.trial', text: 'Ask about trial-session rules before committing.' }
+      : { key: 'activity.checklist.trialUnknown', text: 'Ask whether a trial or first taster session is possible.' },
+  ];
+  const checklistPanel = `      <section class="panel checklist-panel" aria-labelledby="checklist-heading">
+        <h2 id="checklist-heading" data-i18n="activity.checklist.heading">Parent checklist</h2>
+        <ul>
+${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${escapeHtml(item.text)}</li>`).join('\n')}
+        </ul>
+      </section>`;
+
   const backCity = cityForTown(listing.town);
 
   // Trust panel: source, verifier, last checked, status — all surfaced so a
@@ -635,6 +952,10 @@ function activityDetailPage(listing) {
 ${fields}
 ${contactLink}
       </section>
+
+${planningPanel}
+
+${checklistPanel}
 
 ${trustPanel}
 

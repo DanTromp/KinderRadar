@@ -22,6 +22,26 @@ test('every activity town is covered by some city', () => {
   }
 });
 
+test('city metadata supports scalable place pages', () => {
+  const knownShortcuts = new Set(['weekend', 'free', 'rainy-day', 'trial', 'preschool', 'primary']);
+  for (const city of cities) {
+    assert.match(city.slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, `bad city slug: ${city.slug}`);
+    assert.ok(['region', 'town'].includes(city.kind), `city ${city.slug} needs kind region/town`);
+    assert.equal(typeof city.heroImage, 'string', `city ${city.slug} needs heroImage`);
+    assert.ok(city.shortIntro?.trim(), `city ${city.slug} needs shortIntro`);
+    assert.ok(city.guide?.trim(), `city ${city.slug} needs guide`);
+    assert.equal(typeof city.mapPosition?.x, 'number', `city ${city.slug} needs mapPosition.x`);
+    assert.equal(typeof city.mapPosition?.y, 'number', `city ${city.slug} needs mapPosition.y`);
+    assert.ok(city.mapPosition.x >= 0 && city.mapPosition.x <= 100, `city ${city.slug} mapPosition.x out of range`);
+    assert.ok(city.mapPosition.y >= 0 && city.mapPosition.y <= 100, `city ${city.slug} mapPosition.y out of range`);
+    assert.ok(Array.isArray(city.bestFor) && city.bestFor.length > 0, `city ${city.slug} needs bestFor`);
+    assert.ok(Array.isArray(city.featuredShortcuts) && city.featuredShortcuts.length > 0, `city ${city.slug} needs featuredShortcuts`);
+    for (const shortcut of city.featuredShortcuts) {
+      assert.ok(knownShortcuts.has(shortcut), `city ${city.slug} has unknown shortcut ${shortcut}`);
+    }
+  }
+});
+
 test('slugs are unique', () => {
   const seen = new Set();
   for (const a of activities) {

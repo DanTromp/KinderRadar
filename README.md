@@ -46,6 +46,8 @@ npm run build:supabase # export Supabase data, then run the static build
 npm test        # run unit tests
 npm run supabase:status # show table counts from Supabase
 npm run supabase:updates # list new parent/organizer reports
+npm run supabase:review # write a local HTML review pack to review/activity-updates.html
+npm run supabase:update-status -- --id=<uuid> --status=applied
 ```
 
 `npm run build` exits non-zero if any activity is missing required fields,
@@ -127,6 +129,21 @@ Each listing detail page and the city page include Supabase-backed forms.
 Parents and organizers can submit, update, confirm, claim, or report closures
 without an account. Every report lands in `activity_updates` with
 `status: "new"` for review.
+
+### Review workflow
+
+Use the service-role key only locally in `.env`; it is never exposed to the
+deployed site. Typical flow:
+
+```bash
+npm run supabase:updates
+npm run supabase:review
+npm run supabase:update-status -- --id=<uuid> --status=needs_review
+```
+
+`npm run supabase:review` writes `review/activity-updates.html`, which is
+ignored by git. After applying a data change and exporting/building, mark the
+row `applied`; use `rejected` for spam or unverifiable reports.
 
 ## Deploy
 

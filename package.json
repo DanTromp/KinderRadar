@@ -14,6 +14,8 @@
     "supabase:export": "node scripts/supabase-export.mjs",
     "supabase:import": "node scripts/supabase-import.mjs",
     "supabase:status": "node scripts/supabase-status.mjs",
-    "supabase:updates": "node scripts/supabase-updates.mjs"
+    "supabase:updates": "node scripts/supabase-updates.mjs",
+    "supabase:review": "node scripts/supabase-updates.mjs --format=html --out=review/activity-updates.html",
+    "supabase:update-status": "node scripts/supabase-update-status.mjs"
   }
 }

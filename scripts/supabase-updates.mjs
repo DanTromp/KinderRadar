@@ -1,4 +1,7 @@
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+
+import { describeUpdate, renderHtml, renderMarkdown } from './review-utils.mjs';
 
 function parseEnv(contents) {
   const env = {};
@@ -24,12 +27,29 @@ async function loadEnv() {
   return { url: url.replace(/\/$/, ''), key };
 }
 
+function arg(name, fallback = '') {
+  const prefix = `--${name}=`;
+  return process.argv.find((item) => item.startsWith(prefix))?.slice(prefix.length) ?? fallback;
+}
+
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log(`Usage:
+  node scripts/supabase-updates.mjs [--status=new] [--format=text|markdown|html|json] [--out=path] [--limit=50]
+
+Examples:
+  npm run supabase:updates
+  npm run supabase:updates -- --status=needs_review --format=markdown
+  npm run supabase:review
+`);
+  process.exit(0);
+}
+
 async function fetchUpdates(config, status = 'new') {
   const query = new URLSearchParams({
     select: 'id,created_at,update_type,status,activity_slug,evidence_url,reporter_email,payload',
     status: `eq.${status}`,
     order: 'created_at.desc',
-    limit: '25',
+    limit: arg('limit', '50'),
   });
   const response = await fetch(`${config.url}/rest/v1/activity_updates?${query.toString()}`, {
     headers: {
@@ -45,22 +65,25 @@ async function fetchUpdates(config, status = 'new') {
   return response.json();
 }
 
-function describe(update) {
-  const payload = update.payload ?? {};
-  const subject = update.activity_slug || payload.activityName || '(missing activity name)';
-  const town = payload.town ? `, ${payload.town}` : '';
-  const evidence = update.evidence_url ? `\n  evidence: ${update.evidence_url}` : '';
-  const notes = payload.notes ? `\n  notes: ${String(payload.notes).slice(0, 180)}` : '';
-  return `[${update.update_type}] ${subject}${town}\n  id: ${update.id}\n  created: ${update.created_at}${evidence}${notes}`;
+function render(updates, { status, format }) {
+  if (format === 'json') return `${JSON.stringify(updates, null, 2)}\n`;
+  if (format === 'markdown' || format === 'md') return renderMarkdown(updates, { status });
+  if (format === 'html') return renderHtml(updates, { status });
+  if (updates.length === 0) return `No ${status} activity updates.\n`;
+  return `${updates.length} ${status} activity update(s):\n\n${updates.map(describeUpdate).join('\n\n')}\n`;
 }
 
-const statusArg = process.argv.find((arg) => arg.startsWith('--status='))?.split('=').at(1) ?? 'new';
+const status = arg('status', 'new');
+const format = arg('format', 'text');
+const out = arg('out');
 const config = await loadEnv();
-const updates = await fetchUpdates(config, statusArg);
+const updates = await fetchUpdates(config, status);
+const output = render(updates, { status, format });
 
-if (updates.length === 0) {
-  console.log(`No ${statusArg} activity updates.`);
+if (out) {
+  await mkdir(dirname(out), { recursive: true });
+  await writeFile(out, output, 'utf8');
+  console.log(`Wrote ${updates.length} update(s) to ${out}`);
 } else {
-  console.log(`${updates.length} ${statusArg} activity update(s):\n`);
-  console.log(updates.map(describe).join('\n\n'));
+  process.stdout.write(output);
 }

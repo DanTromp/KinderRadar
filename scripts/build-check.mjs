@@ -32,6 +32,8 @@ const CONTACT_METHODS = new Set(['email', 'phone', 'form', 'whatsapp']);
 const PRICE_UNITS = new Set([
   'free', 'per-session', 'per-week', 'per-day', 'per-block', 'membership', 'donation',
 ]);
+const CITY_KINDS = new Set(['region', 'town']);
+const FEATURED_SHORTCUTS = new Set(['weekend', 'free', 'rainy-day', 'trial', 'preschool', 'primary']);
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -139,10 +141,80 @@ function validateActivity(a, sectionIds) {
   return errors;
 }
 
+function validateCity(city) {
+  const errors = [];
+  for (const key of ['slug', 'name', 'heroImage', 'nearbyTowns']) {
+    if (city[key] === undefined || city[key] === null || city[key] === '') {
+      errors.push(`missing required field "${key}"`);
+    }
+  }
+  if (city.slug !== undefined && !SLUG_RE.test(city.slug)) {
+    errors.push(`slug "${city.slug}" must be kebab-case ([a-z0-9-])`);
+  }
+  if (city.kind !== undefined && !CITY_KINDS.has(city.kind)) {
+    errors.push(`kind "${city.kind}" must be one of ${[...CITY_KINDS].join(', ')}`);
+  }
+  if (!Array.isArray(city.nearbyTowns) || city.nearbyTowns.length === 0) {
+    errors.push('nearbyTowns must contain at least one town');
+  }
+  for (const field of ['shortIntro', 'guide', 'coverageLabel']) {
+    if (city[field] !== undefined && (typeof city[field] !== 'string' || city[field].trim() === '')) {
+      errors.push(`${field} must be a non-empty string when provided`);
+    }
+  }
+  if (city.bestFor !== undefined && (!Array.isArray(city.bestFor) || city.bestFor.some((value) => typeof value !== 'string' || !value.trim()))) {
+    errors.push('bestFor must be an array of non-empty strings when provided');
+  }
+  if (city.mapPosition !== undefined) {
+    const { x, y } = city.mapPosition ?? {};
+    if (typeof city.mapPosition !== 'object' || city.mapPosition === null
+        || typeof x !== 'number' || typeof y !== 'number'
+        || x < 0 || x > 100 || y < 0 || y > 100) {
+      errors.push('mapPosition must be { x: 0-100, y: 0-100 } when provided');
+    }
+  }
+  if (city.featuredShortcuts !== undefined) {
+    if (!Array.isArray(city.featuredShortcuts)) {
+      errors.push('featuredShortcuts must be an array when provided');
+    } else {
+      for (const shortcut of city.featuredShortcuts) {
+        if (!FEATURED_SHORTCUTS.has(shortcut)) {
+          errors.push(`featuredShortcuts contains unknown shortcut "${shortcut}"`);
+        }
+      }
+    }
+  }
+  if (city.sponsorship !== undefined) {
+    const slot = city.sponsorship?.weeklyPlanner;
+    if (typeof city.sponsorship !== 'object' || city.sponsorship === null) {
+      errors.push('sponsorship must be an object when provided');
+    } else if (slot !== undefined) {
+      if (typeof slot !== 'object' || slot === null) {
+        errors.push('sponsorship.weeklyPlanner must be an object when provided');
+      } else {
+        if (typeof slot.name !== 'string' || !slot.name.trim()) {
+          errors.push('sponsorship.weeklyPlanner.name must be a non-empty string');
+        }
+        if (slot.url !== undefined && !validUrl(slot.url)) {
+          errors.push(`sponsorship.weeklyPlanner.url "${slot.url}" is not a valid http(s) URL`);
+        }
+      }
+    }
+  }
+  return errors;
+}
+
 export function validateData() {
   const errors = [];
   const sectionIds = new Set(sections.map((s) => s.id));
   const seenSlugs = new Set();
+
+  for (const city of cities) {
+    const id = city.slug ?? city.name ?? '<unknown>';
+    for (const e of validateCity(city)) {
+      errors.push(`city "${id}": ${e}`);
+    }
+  }
 
   for (const a of activities) {
     const id = a.slug ?? a.name ?? '<unknown>';
