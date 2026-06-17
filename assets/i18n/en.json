@@ -2,6 +2,10 @@
   "lang.toggle.label": "Language",
   "lang.en": "EN",
   "lang.de": "DE",
+  "theme.toggle.label": "Theme",
+  "theme.light": "Light",
+  "theme.night": "Night",
+  "theme.forest": "Forest",
 
   "home.title": "KinderRadar Haltern am See | Kids' activities kept fresh",
   "home.description": "Find kids' activities in Haltern am See that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh.",
@@ -16,6 +20,9 @@
   "city.heading": "Find kids' activities that fit your child, schedule, budget, and confidence level.",
   "city.intro": "Curated for parents around {city} ({towns}).",
   "city.submit": "Submit or update an activity",
+  "city.stats.activities": "active listings",
+  "city.stats.categories": "categories",
+  "city.stats.weekend": "weekend ideas",
 
   "city.filters.heading": "Filter activities",
   "city.filters.search.label": "Search",
@@ -30,6 +37,7 @@
   "city.filters.day.any": "Any day",
   "city.filters.day.weekend": "Weekend",
   "city.filters.day.weekday": "Weekdays",
+  "city.filters.loading": "Tuning radar...",
   "city.filters.beginner.label": "Beginner-friendly",
   "city.filters.beginner.any": "Any",
   "city.filters.beginner.yes": "Yes",

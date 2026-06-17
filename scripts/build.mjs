@@ -110,18 +110,26 @@ const layoutHtml = ({
     <link rel="stylesheet" href="${escapeHtml(assetPrefix)}assets/styles.css" />
 ${analyticsConfig}${supabaseConfig}  </head>
   <body>
-${languageToggleHtml()}
+${appChromeHtml()}
 ${body}
     <script type="module" src="${escapeHtml(assetPrefix)}assets/i18n.js"></script>
+    <script type="module" src="${escapeHtml(assetPrefix)}assets/theme.js"></script>
   </body>
 </html>
 `;
 };
 
-function languageToggleHtml() {
-  return `    <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
-      <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
-      <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+function appChromeHtml() {
+  return `    <nav class="app-controls" aria-label="Display controls">
+      <div class="theme-toggle" data-theme-toggle aria-label="Theme" data-i18n-attr="aria-label:theme.toggle.label">
+        <button type="button" data-theme-value="light" aria-pressed="true" data-i18n="theme.light">Light</button>
+        <button type="button" data-theme-value="night" aria-pressed="false" data-i18n="theme.night">Night</button>
+        <button type="button" data-theme-value="forest" aria-pressed="false" data-i18n="theme.forest">Forest</button>
+      </div>
+      <div class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
+        <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+      </div>
     </nav>`;
 }
 
@@ -205,6 +213,8 @@ function cityPage(city) {
   const cityActivities = activities
     .filter((a) => city.nearbyTowns.includes(a.town))
     .filter((a) => a.status !== 'reported-closed');
+  const activeCategories = new Set(cityActivities.map((a) => a.category).filter(Boolean));
+  const weekendCount = cityActivities.filter((a) => /sat|sun/i.test(a.dayOfWeek ?? '')).length;
   const sectionsHtml = sections
     .map((section) => {
       const inSection = sortByFreshness(cityActivities.filter((a) => a.section === section.id));
@@ -234,17 +244,33 @@ function cityPage(city) {
   const cityParams = { city: city.name, towns: city.nearbyTowns.join(', ') };
 
   const body = `    <main class="page stack">
-      <header class="page-header">
-        <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="${escapeHtml(JSON.stringify({ city: city.name }))}">KinderRadar ${escapeHtml(city.name)}</p>
-        <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
-        <p data-i18n="city.intro" data-i18n-params="${escapeHtml(JSON.stringify(cityParams))}">${escapeHtml(description)} Curated for parents around ${escapeHtml(city.name)} (${escapeHtml(city.nearbyTowns.join(', '))}).</p>
-        <div class="button-row">
-          <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+      <header class="page-header hero-shell">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="${escapeHtml(JSON.stringify({ city: city.name }))}">KinderRadar ${escapeHtml(city.name)}</p>
+          <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
+          <p data-i18n="city.intro" data-i18n-params="${escapeHtml(JSON.stringify(cityParams))}">${escapeHtml(description)} Curated for parents around ${escapeHtml(city.name)} (${escapeHtml(city.nearbyTowns.join(', '))}).</p>
+          <div class="button-row">
+            <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+          </div>
+        </div>
+        <dl class="hero-stats" aria-label="Activity overview">
+          <div><dt>${cityActivities.length}</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>${activeCategories.size}</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>${weekendCount}</dt><dd data-i18n="city.stats.weekend">weekend ideas</dd></div>
+        </dl>
+        <div class="radar-loader hero-loader" aria-hidden="true">
+          <span></span>
         </div>
       </header>
 
-      <section class="panel" aria-labelledby="filter-heading">
-        <h2 id="filter-heading" data-i18n="city.filters.heading">Filter activities</h2>
+      <section class="filter-panel" aria-labelledby="filter-heading">
+        <div class="filter-panel-heading">
+          <h2 id="filter-heading" data-i18n="city.filters.heading">Filter activities</h2>
+          <div id="filter-loader" class="filter-loader" hidden aria-live="polite">
+            <span class="radar-loader" aria-hidden="true"><span></span></span>
+            <span data-i18n="city.filters.loading">Tuning radar...</span>
+          </div>
+        </div>
         <form id="activity-filters" class="filters" novalidate>
           <label>
             <span data-i18n="city.filters.search.label">Search</span>
@@ -317,7 +343,7 @@ function cityPage(city) {
 ${sectionsHtml}
       </div>
 
-      <section class="panel trust-explainer" aria-labelledby="trust-explainer-heading">
+      <section class="trust-explainer" aria-labelledby="trust-explainer-heading">
         <h2 id="trust-explainer-heading" data-i18n="city.trust.heading">How we keep this fresh</h2>
         <ul>
           <li><strong data-i18n="city.trust.curated.title">Editor curated.</strong> <span data-i18n="city.trust.curated.text">Every listing starts from a public organizer page; the source link is on each detail page.</span></li>

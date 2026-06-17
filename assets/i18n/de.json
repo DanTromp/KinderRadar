@@ -2,6 +2,10 @@
   "lang.toggle.label": "Sprache",
   "lang.en": "EN",
   "lang.de": "DE",
+  "theme.toggle.label": "Design",
+  "theme.light": "Hell",
+  "theme.night": "Nacht",
+  "theme.forest": "Wald",
 
   "home.title": "KinderRadar Haltern am See | Kinderaktivitäten aktuell gehalten",
   "home.description": "Finde Kinderaktivitäten in Haltern am See, die zu deinem Kind, Zeitplan, Budget und Selbstvertrauen passen — mit Einträgen, die tatsächlich aktuell gehalten werden.",
@@ -16,6 +20,9 @@
   "city.heading": "Finde Kinderaktivitäten, die zu deinem Kind, Zeitplan, Budget und Selbstvertrauen passen.",
   "city.intro": "Kuratiert für Eltern rund um {city} ({towns}).",
   "city.submit": "Aktivität einreichen oder aktualisieren",
+  "city.stats.activities": "aktive Einträge",
+  "city.stats.categories": "Kategorien",
+  "city.stats.weekend": "Wochenendideen",
 
   "city.filters.heading": "Aktivitäten filtern",
   "city.filters.search.label": "Suche",
@@ -30,6 +37,7 @@
   "city.filters.day.any": "Alle Tage",
   "city.filters.day.weekend": "Wochenende",
   "city.filters.day.weekday": "Wochentage",
+  "city.filters.loading": "Radar wird abgestimmt...",
   "city.filters.beginner.label": "Anfängerfreundlich",
   "city.filters.beginner.any": "Beliebig",
   "city.filters.beginner.yes": "Ja",

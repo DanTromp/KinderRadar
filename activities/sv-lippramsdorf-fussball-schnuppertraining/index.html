@@ -18,9 +18,16 @@
     <script>window.KINDERRADAR_SUPABASE={"url":"https://jxcekrfgwvpnmratafxr.supabase.co","publishableKey":"sb_publishable_wPNgjEZ-ot67AtFh-sWiyw_X6o5Enqh"};</script>
   </head>
   <body>
-    <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
-      <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
-      <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+    <nav class="app-controls" aria-label="Display controls">
+      <div class="theme-toggle" data-theme-toggle aria-label="Theme" data-i18n-attr="aria-label:theme.toggle.label">
+        <button type="button" data-theme-value="light" aria-pressed="true" data-i18n="theme.light">Light</button>
+        <button type="button" data-theme-value="night" aria-pressed="false" data-i18n="theme.night">Night</button>
+        <button type="button" data-theme-value="forest" aria-pressed="false" data-i18n="theme.forest">Forest</button>
+      </div>
+      <div class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
+        <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+      </div>
     </nav>
     <main class="page stack">
       <header class="page-header">
@@ -102,5 +109,6 @@
     <script type="module" src="../../assets/analytics.js"></script>
     <script type="module" src="../../assets/update-form.js"></script>
     <script type="module" src="../../assets/i18n.js"></script>
+    <script type="module" src="../../assets/theme.js"></script>
   </body>
 </html>

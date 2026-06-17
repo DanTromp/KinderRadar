@@ -94,6 +94,7 @@ function init() {
   const searchInput = document.getElementById('activity-search');
   const emptyState = document.getElementById('empty-state');
   const missingLink = document.getElementById('missing-listing-link');
+  const filterLoader = document.getElementById('filter-loader');
   if (!root || !form || !chipContainer || !emptyState) return;
 
   const citySlug = citySlugFromDocument();
@@ -176,6 +177,20 @@ function init() {
   let zeroFiredFor = null;
   let lastTrackedQuery = '';
   let searchTimer = null;
+  let loaderTimer = null;
+
+  const pulseFilterLoader = (source) => {
+    if (!filterLoader || source === 'init') return;
+    clearTimeout(loaderTimer);
+    filterLoader.hidden = false;
+    filterLoader.classList.add('is-active');
+    root.classList.add('is-filtering');
+    loaderTimer = setTimeout(() => {
+      filterLoader.classList.remove('is-active');
+      filterLoader.hidden = true;
+      root.classList.remove('is-filtering');
+    }, 380);
+  };
 
   const updateMissingLink = (query) => {
     if (!missingLink) return;
@@ -188,6 +203,7 @@ function init() {
   };
 
   const render = ({ source } = {}) => {
+    pulseFilterLoader(source);
     const selected = readSelectedFilters(form);
     const chips = readActiveChips(chipContainer);
     const query = searchInput ? searchInput.value : '';

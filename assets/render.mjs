@@ -252,9 +252,11 @@ export function renderSectionHtml(section, listings, {
   })).join('\n');
   const labelKey = `section.${section.id}.label`;
   const introKey = `section.${section.id}.intro`;
-  return `<section class="panel" data-section-id="${escapeHtml(section.id)}" aria-labelledby="${escapeHtml(section.id)}-heading">
-      <h2 id="${escapeHtml(section.id)}-heading"${i18nAttrs(labelKey)}>${escapeHtml(section.label)}</h2>
-      <p class="section-intro"${i18nAttrs(introKey)}>${escapeHtml(section.intro)}</p>
+  return `<section class="activity-section" data-section-id="${escapeHtml(section.id)}" aria-labelledby="${escapeHtml(section.id)}-heading">
+      <div class="section-heading">
+        <h2 id="${escapeHtml(section.id)}-heading"${i18nAttrs(labelKey)}>${escapeHtml(section.label)}</h2>
+        <p class="section-intro"${i18nAttrs(introKey)}>${escapeHtml(section.intro)}</p>
+      </div>
       <div class="listing-grid">
 ${cards}
       </div>

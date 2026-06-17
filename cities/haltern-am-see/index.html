@@ -18,22 +18,45 @@
     <script>window.KINDERRADAR_SUPABASE={"url":"https://jxcekrfgwvpnmratafxr.supabase.co","publishableKey":"sb_publishable_wPNgjEZ-ot67AtFh-sWiyw_X6o5Enqh"};</script>
   </head>
   <body>
-    <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
-      <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
-      <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+    <nav class="app-controls" aria-label="Display controls">
+      <div class="theme-toggle" data-theme-toggle aria-label="Theme" data-i18n-attr="aria-label:theme.toggle.label">
+        <button type="button" data-theme-value="light" aria-pressed="true" data-i18n="theme.light">Light</button>
+        <button type="button" data-theme-value="night" aria-pressed="false" data-i18n="theme.night">Night</button>
+        <button type="button" data-theme-value="forest" aria-pressed="false" data-i18n="theme.forest">Forest</button>
+      </div>
+      <div class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
+        <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+      </div>
     </nav>
     <main class="page stack">
-      <header class="page-header">
-        <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="{&quot;city&quot;:&quot;Haltern am See&quot;}">KinderRadar Haltern am See</p>
-        <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
-        <p data-i18n="city.intro" data-i18n-params="{&quot;city&quot;:&quot;Haltern am See&quot;,&quot;towns&quot;:&quot;Haltern am See, Sythen, Hullern, Lavesum&quot;}">Find kids&#39; activities in Haltern am See that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh. Curated for parents around Haltern am See (Haltern am See, Sythen, Hullern, Lavesum).</p>
-        <div class="button-row">
-          <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+      <header class="page-header hero-shell">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="{&quot;city&quot;:&quot;Haltern am See&quot;}">KinderRadar Haltern am See</p>
+          <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
+          <p data-i18n="city.intro" data-i18n-params="{&quot;city&quot;:&quot;Haltern am See&quot;,&quot;towns&quot;:&quot;Haltern am See, Sythen, Hullern, Lavesum&quot;}">Find kids&#39; activities in Haltern am See that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh. Curated for parents around Haltern am See (Haltern am See, Sythen, Hullern, Lavesum).</p>
+          <div class="button-row">
+            <a class="button secondary" href="#submit-activity" data-analytics="submit_activity_click" data-i18n="city.submit">Submit or update an activity</a>
+          </div>
+        </div>
+        <dl class="hero-stats" aria-label="Activity overview">
+          <div><dt>40</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>8</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>15</dt><dd data-i18n="city.stats.weekend">weekend ideas</dd></div>
+        </dl>
+        <div class="radar-loader hero-loader" aria-hidden="true">
+          <span></span>
         </div>
       </header>
 
-      <section class="panel" aria-labelledby="filter-heading">
-        <h2 id="filter-heading" data-i18n="city.filters.heading">Filter activities</h2>
+      <section class="filter-panel" aria-labelledby="filter-heading">
+        <div class="filter-panel-heading">
+          <h2 id="filter-heading" data-i18n="city.filters.heading">Filter activities</h2>
+          <div id="filter-loader" class="filter-loader" hidden aria-live="polite">
+            <span class="radar-loader" aria-hidden="true"><span></span></span>
+            <span data-i18n="city.filters.loading">Tuning radar...</span>
+          </div>
+        </div>
         <form id="activity-filters" class="filters" novalidate>
           <label>
             <span data-i18n="city.filters.search.label">Search</span>
@@ -103,9 +126,11 @@
       </p>
 
       <div id="listings-root">
-<section class="panel" data-section-id="weekly-activities" aria-labelledby="weekly-activities-heading">
-      <h2 id="weekly-activities-heading" data-i18n="section.weekly-activities.label">Weekly activities</h2>
-      <p class="section-intro" data-i18n="section.weekly-activities.intro">Recurring local options for families who want a regular activity during the week.</p>
+<section class="activity-section" data-section-id="weekly-activities" aria-labelledby="weekly-activities-heading">
+      <div class="section-heading">
+        <h2 id="weekly-activities-heading" data-i18n="section.weekly-activities.label">Weekly activities</h2>
+        <p class="section-intro" data-i18n="section.weekly-activities.intro">Recurring local options for families who want a regular activity during the week.</p>
+      </div>
       <div class="listing-grid">
 <article class="listing" data-slug="dlrg-haltern-anfaengerschwimmen" data-section="weekly-activities" data-age-min="5" data-age-max="8" data-town="Haltern am See" data-category="Swimming" data-beginner-friendly="true" data-day-of-week="Wednesday" data-start-time="17:00" data-end-time="18:00" data-recurring="weekly" data-price-free="false" data-price-unit="per-block" data-trial-available="false" data-booking-required="true" data-setting="indoor" data-parent-participation="optional" data-language="de" data-status="active" data-last-verified="2026-06-16">
       <div class="listing-header">
@@ -466,9 +491,11 @@
     </article>
       </div>
     </section>
-<section class="panel" data-section-id="weekend-family-ideas" aria-labelledby="weekend-family-ideas-heading">
-      <h2 id="weekend-family-ideas-heading" data-i18n="section.weekend-family-ideas.label">Weekend family ideas</h2>
-      <p class="section-intro" data-i18n="section.weekend-family-ideas.intro">Easy weekend options for families looking for a one-off outing nearby.</p>
+<section class="activity-section" data-section-id="weekend-family-ideas" aria-labelledby="weekend-family-ideas-heading">
+      <div class="section-heading">
+        <h2 id="weekend-family-ideas-heading" data-i18n="section.weekend-family-ideas.label">Weekend family ideas</h2>
+        <p class="section-intro" data-i18n="section.weekend-family-ideas.intro">Easy weekend options for families looking for a one-off outing nearby.</p>
+      </div>
       <div class="listing-grid">
 <article class="listing" data-slug="biologische-station-kreis-re-naturtag" data-section="weekend-family-ideas" data-age-min="5" data-age-max="12" data-town="Lavesum" data-category="Nature" data-beginner-friendly="true" data-day-of-week="Saturday" data-start-time="10:00" data-end-time="13:00" data-recurring="monthly" data-price-free="false" data-price-unit="donation" data-trial-available="false" data-booking-required="true" data-setting="outdoor" data-parent-participation="required" data-language="de" data-status="active" data-last-verified="2026-06-16">
       <div class="listing-header">
@@ -661,9 +688,11 @@
     </article>
       </div>
     </section>
-<section class="panel" data-section-id="school-holiday-activities" aria-labelledby="school-holiday-activities-heading">
-      <h2 id="school-holiday-activities-heading" data-i18n="section.school-holiday-activities.label">School holiday activities</h2>
-      <p class="section-intro" data-i18n="section.school-holiday-activities.intro">Shortlist camps and holiday clubs for school break planning.</p>
+<section class="activity-section" data-section-id="school-holiday-activities" aria-labelledby="school-holiday-activities-heading">
+      <div class="section-heading">
+        <h2 id="school-holiday-activities-heading" data-i18n="section.school-holiday-activities.label">School holiday activities</h2>
+        <p class="section-intro" data-i18n="section.school-holiday-activities.intro">Shortlist camps and holiday clubs for school break planning.</p>
+      </div>
       <div class="listing-grid">
 <article class="listing" data-slug="dlrg-ferien-schwimmkurs" data-section="school-holiday-activities" data-age-min="5" data-age-max="9" data-town="Haltern am See" data-category="Swimming" data-beginner-friendly="true" data-day-of-week="Monday-Friday" data-start-time="09:30" data-end-time="10:30" data-recurring="one-off" data-price-free="false" data-price-unit="per-block" data-trial-available="false" data-booking-required="true" data-setting="indoor" data-parent-participation="optional" data-language="de" data-status="active" data-last-verified="2026-06-16">
       <div class="listing-header">
@@ -814,9 +843,11 @@
     </article>
       </div>
     </section>
-<section class="panel" data-section-id="beginner-friendly-trial-activities" aria-labelledby="beginner-friendly-trial-activities-heading">
-      <h2 id="beginner-friendly-trial-activities-heading" data-i18n="section.beginner-friendly-trial-activities.label">Beginner-friendly trial activities</h2>
-      <p class="section-intro" data-i18n="section.beginner-friendly-trial-activities.intro">Options that clearly welcome first-timers and make it easy to try before committing.</p>
+<section class="activity-section" data-section-id="beginner-friendly-trial-activities" aria-labelledby="beginner-friendly-trial-activities-heading">
+      <div class="section-heading">
+        <h2 id="beginner-friendly-trial-activities-heading" data-i18n="section.beginner-friendly-trial-activities.label">Beginner-friendly trial activities</h2>
+        <p class="section-intro" data-i18n="section.beginner-friendly-trial-activities.intro">Options that clearly welcome first-timers and make it easy to try before committing.</p>
+      </div>
       <div class="listing-grid">
 <article class="listing" data-slug="pfadfinder-haltern-schnuppergruppenstunde" data-section="beginner-friendly-trial-activities" data-age-min="7" data-age-max="10" data-town="Haltern am See" data-category="Nature" data-beginner-friendly="true" data-day-of-week="Friday" data-start-time="17:00" data-end-time="18:30" data-recurring="weekly" data-price-free="true" data-price-unit="free" data-trial-available="true" data-booking-required="false" data-setting="mixed" data-parent-participation="none" data-language="de" data-status="active" data-last-verified="2026-06-16">
       <div class="listing-header">
@@ -969,7 +1000,7 @@
     </section>
       </div>
 
-      <section class="panel trust-explainer" aria-labelledby="trust-explainer-heading">
+      <section class="trust-explainer" aria-labelledby="trust-explainer-heading">
         <h2 id="trust-explainer-heading" data-i18n="city.trust.heading">How we keep this fresh</h2>
         <ul>
           <li><strong data-i18n="city.trust.curated.title">Editor curated.</strong> <span data-i18n="city.trust.curated.text">Every listing starts from a public organizer page; the source link is on each detail page.</span></li>
@@ -1019,5 +1050,6 @@
     <script type="module" src="../../assets/analytics.js"></script>
     <script type="module" src="../../assets/update-form.js"></script>
     <script type="module" src="../../assets/i18n.js"></script>
+    <script type="module" src="../../assets/theme.js"></script>
   </body>
 </html>

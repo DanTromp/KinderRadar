@@ -26,21 +26,34 @@
     <script>window.location.replace('cities/haltern-am-see/');</script>
   </head>
   <body>
-    <nav class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
-      <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
-      <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+    <nav class="app-controls" aria-label="Display controls">
+      <div class="theme-toggle" data-theme-toggle aria-label="Theme" data-i18n-attr="aria-label:theme.toggle.label">
+        <button type="button" data-theme-value="light" aria-pressed="true" data-i18n="theme.light">Light</button>
+        <button type="button" data-theme-value="night" aria-pressed="false" data-i18n="theme.night">Night</button>
+        <button type="button" data-theme-value="forest" aria-pressed="false" data-i18n="theme.forest">Forest</button>
+      </div>
+      <div class="lang-toggle" data-lang-toggle aria-label="Language" data-i18n-attr="aria-label:lang.toggle.label">
+        <button type="button" data-lang="en" aria-pressed="true" data-i18n="lang.en">EN</button>
+        <button type="button" data-lang="de" aria-pressed="false" data-i18n="lang.de">DE</button>
+      </div>
     </nav>
     <main class="page page-home stack">
-      <section class="hero">
-        <p class="eyebrow" data-i18n="home.eyebrow">KinderRadar Haltern am See</p>
-        <h1 data-i18n="home.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
-        <p data-i18n="home.intro">
+      <section class="hero hero-shell">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="home.eyebrow">KinderRadar Haltern am See</p>
+          <h1 data-i18n="home.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
+          <p data-i18n="home.intro">
           Curated listings for parents around Haltern am See — including Sythen, Hullern, and Lavesum —
           that are actually kept fresh.
-        </p>
-        <a class="button" href="cities/haltern-am-see/" data-i18n="home.browse">Browse activities</a>
+          </p>
+          <a class="button" href="cities/haltern-am-see/" data-i18n="home.browse">Browse activities</a>
+        </div>
+        <div class="radar-loader hero-loader" aria-hidden="true">
+          <span></span>
+        </div>
       </section>
     </main>
     <script type="module" src="assets/i18n.js"></script>
+    <script type="module" src="assets/theme.js"></script>
   </body>
 </html>
