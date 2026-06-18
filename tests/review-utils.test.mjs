@@ -8,6 +8,7 @@ import {
   renderMarkdown,
   subjectForUpdate,
   suggestedAction,
+  townForUpdate,
 } from '../scripts/review-utils.mjs';
 
 const update = {
@@ -29,6 +30,17 @@ test('subjectForUpdate falls back to payload activity name', () => {
   assert.equal(subjectForUpdate(update), 'Kids Tennis');
 });
 
+test('digest signups are labelled for review', () => {
+  const digest = {
+    ...update,
+    evidence_url: null,
+    payload: { type: 'digest_signup', cityName: 'Dülmen', citySlug: 'duelmen' },
+  };
+  assert.equal(subjectForUpdate(digest), 'Digest signup: Dülmen');
+  assert.equal(townForUpdate(digest), 'Dülmen');
+  assert.match(suggestedAction(digest), /digest audience/);
+});
+
 test('suggestedAction maps update types to editor actions', () => {
   assert.match(suggestedAction(update), /Verify source/);
   assert.match(suggestedAction({ update_type: 'closed' }), /Confirm closure/);
@@ -45,7 +57,7 @@ test('describeUpdate includes action, evidence, and notes', () => {
 
 test('renderMarkdown includes status commands', () => {
   const markdown = renderMarkdown([update], { status: 'new' });
-  assert.match(markdown, /# KinderRadar Review Queue/);
+  assert.match(markdown, /# My Kids Radar Review Queue/);
   assert.match(markdown, /npm run supabase:update-status -- --id=123 --status=needs_review/);
   assert.match(markdown, /npm run supabase:update-status -- --id=123 --status=applied/);
 });

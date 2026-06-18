@@ -2,7 +2,9 @@
 // Reads activities-data.mjs and writes a deployable static site into dist/:
 //   dist/index.html
 //   dist/cities/<slug>/index.html
+//   dist/collections/<slug>/index.html
 //   dist/activities/<slug>/index.html
+//   dist/organizers/<slug>/index.html
 // Pages are progressively enhanced: the rendered HTML is fully usable
 // without JS, and the client-side filter script then takes over.
 
@@ -12,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 import { activities, sections, cities } from '../assets/activities-data.mjs';
+import { organizers, organizerForActivity } from '../assets/organizers.mjs';
 import {
   renderSectionHtml,
   freshnessBadge,
@@ -47,13 +50,15 @@ function parseLocalEnv() {
 const localEnv = parseLocalEnv();
 const envValue = (name, fallback = '') => process.env[name] ?? localEnv[name] ?? fallback;
 
-const REPO_SLUG = envValue('KINDERRADAR_REPO', 'DanTromp/KinderRadar');
+const BRAND_EN = 'My Kids Radar';
+
+const REPO_SLUG = envValue('MEINKINDERRADAR_REPO', 'DanTromp/MeinKinderRadar');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const DIST = join(ROOT, 'dist');
 
-const SITE_BASE_URL = envValue('KINDERRADAR_BASE_URL', 'https://dantromp.github.io/KinderRadar');
-const PLAUSIBLE_DOMAIN = envValue('KINDERRADAR_PLAUSIBLE_DOMAIN');
+const SITE_BASE_URL = envValue('MEINKINDERRADAR_BASE_URL', 'https://meinkinderradar.de');
+const PLAUSIBLE_DOMAIN = envValue('MEINKINDERRADAR_PLAUSIBLE_DOMAIN');
 const PUBLIC_SUPABASE_URL = envValue('SUPABASE_URL');
 const PUBLIC_SUPABASE_KEY = envValue('SUPABASE_PUBLISHABLE_KEY');
 
@@ -94,10 +99,10 @@ const layoutHtml = ({
     ? ` data-i18n-attr="content:${escapeHtml(descriptionI18nKey)}"${descriptionI18nParams ? ` data-i18n-params="${escapeHtml(JSON.stringify(descriptionI18nParams))}"` : ''}`
     : '';
   const analyticsConfig = PLAUSIBLE_DOMAIN
-    ? `    <script>window.KINDERRADAR_PLAUSIBLE_DOMAIN=${JSON.stringify(PLAUSIBLE_DOMAIN)};</script>\n`
+    ? `    <script>window.MEINKINDERRADAR_PLAUSIBLE_DOMAIN=${JSON.stringify(PLAUSIBLE_DOMAIN)};</script>\n`
     : '';
   const supabaseConfig = PUBLIC_SUPABASE_URL && PUBLIC_SUPABASE_KEY
-    ? `    <script>window.KINDERRADAR_SUPABASE=${JSON.stringify({ url: PUBLIC_SUPABASE_URL, publishableKey: PUBLIC_SUPABASE_KEY })};</script>\n`
+    ? `    <script>window.MEINKINDERRADAR_SUPABASE=${JSON.stringify({ url: PUBLIC_SUPABASE_URL, publishableKey: PUBLIC_SUPABASE_KEY })};</script>\n`
     : '';
   return `<!doctype html>
 <html lang="${escapeHtml(lang)}" data-repo-slug="${escapeHtml(REPO_SLUG)}">
@@ -110,7 +115,7 @@ const layoutHtml = ({
     <meta property="og:title" content="${escapeHtml(oTitle)}" />
     <meta property="og:description" content="${escapeHtml(oDesc)}" />
     <meta property="og:url" content="${escapeHtml(absUrl)}" />
-    <meta property="og:site_name" content="KinderRadar Haltern am See" />
+    <meta property="og:site_name" content="${BRAND_EN}" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="${escapeHtml(oTitle)}" />
     <meta name="twitter:description" content="${escapeHtml(oDesc)}" />
@@ -118,17 +123,23 @@ const layoutHtml = ({
     <link rel="stylesheet" href="${escapeHtml(assetPrefix)}assets/styles.css" />
 ${analyticsConfig}${supabaseConfig}  </head>
   <body>
-${appChromeHtml()}
+${appChromeHtml(assetPrefix)}
 ${body}
     <script type="module" src="${escapeHtml(assetPrefix)}assets/i18n.js"></script>
     <script type="module" src="${escapeHtml(assetPrefix)}assets/theme.js"></script>
+    <script type="module" src="${escapeHtml(assetPrefix)}assets/saved.js"></script>
+    <script type="module" src="${escapeHtml(assetPrefix)}assets/digest-form.js"></script>
   </body>
 </html>
 `;
 };
 
-function appChromeHtml() {
+function appChromeHtml(assetPrefix = '') {
   return `    <nav class="app-controls" aria-label="Display controls">
+      <a class="shortlist-nav" href="${escapeHtml(assetPrefix)}shortlist/" aria-label="Saved shortlist" data-i18n-attr="aria-label:shortlist.nav.aria">
+        <span data-i18n="shortlist.nav">Shortlist</span>
+        <strong data-save-count>0</strong>
+      </a>
       <div class="theme-toggle" data-theme-toggle aria-label="Theme" data-i18n-attr="aria-label:theme.toggle.label">
         <button type="button" data-theme-value="light" aria-pressed="true" data-i18n="theme.light">Light</button>
         <button type="button" data-theme-value="night" aria-pressed="false" data-i18n="theme.night">Night</button>
@@ -145,10 +156,55 @@ function contributionStatusHtml() {
   return '<p class="form-status" data-form-status aria-live="polite"></p>';
 }
 
+function digestSignupHtml({
+  headingId = 'digest-signup-heading',
+  city = cities[0],
+  interest = 'weekend',
+} = {}) {
+  const cityOptions = cities
+    .map((candidate) => {
+      const selected = candidate.slug === city?.slug ? ' selected' : '';
+      return `<option value="${escapeHtml(candidate.slug)}" data-city-name="${escapeHtml(candidate.name)}"${selected}>${escapeHtml(candidate.name)}</option>`;
+    })
+    .join('');
+
+  return `      <section class="panel digest-panel" aria-labelledby="${escapeHtml(headingId)}">
+        <div>
+          <p class="eyebrow" data-i18n="digest.eyebrow">Weekend digest</p>
+          <h2 id="${escapeHtml(headingId)}" data-i18n="digest.heading">Get local ideas before the weekend</h2>
+          <p class="section-intro" data-i18n="digest.intro">A light email with fresh activities, useful collections, and family-friendly ideas near your area.</p>
+        </div>
+        <form class="digest-form contribution-form" data-meinkinderradar-digest novalidate>
+          <input type="hidden" name="interest" value="${escapeHtml(interest)}" />
+          <input type="hidden" name="cityName" value="${escapeHtml(city?.name ?? '')}" />
+          <label>
+            <span data-i18n="digest.email.label">Email</span>
+            <input name="email" type="email" autocomplete="email" placeholder="you@example.com" data-i18n-attr="placeholder:digest.email.placeholder" required />
+          </label>
+          <label>
+            <span data-i18n="digest.city.label">Area</span>
+            <select name="citySlug">
+${cityOptions}
+            </select>
+          </label>
+          <label class="checkbox-label">
+            <input name="consent" type="checkbox" required />
+            <span data-i18n="digest.consent">Send me the My Kids Radar digest. I can unsubscribe later.</span>
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit" data-i18n="digest.submit">Join digest</button>
+          ${contributionStatusHtml()}
+        </form>
+      </section>`;
+}
+
 function citySubmissionForm(city, townOptions) {
   return `      <section id="submit-activity" class="panel contribution-panel" aria-labelledby="submit-activity-heading">
         <h2 id="submit-activity-heading">Submit a missing activity</h2>
-        <form class="contribution-form" data-kinderradar-update data-update-type="submission" data-city="${escapeHtml(city.name)}" novalidate>
+        <form class="contribution-form" data-meinkinderradar-update data-update-type="submission" data-city="${escapeHtml(city.name)}" novalidate>
           <label>
             Activity name
             <input name="activityName" autocomplete="off" required />
@@ -185,7 +241,7 @@ function citySubmissionForm(city, townOptions) {
 function activityUpdateForm(listing) {
   return `      <section class="panel contribution-panel" aria-labelledby="activity-update-heading">
         <h2 id="activity-update-heading">Help keep this accurate</h2>
-        <form class="contribution-form" data-kinderradar-update data-activity-slug="${escapeHtml(listing.slug)}" data-activity-name="${escapeHtml(listing.name)}" data-town="${escapeHtml(listing.town)}" novalidate>
+        <form class="contribution-form" data-meinkinderradar-update data-activity-slug="${escapeHtml(listing.slug)}" data-activity-name="${escapeHtml(listing.name)}" data-town="${escapeHtml(listing.town)}" novalidate>
           <label>
             What are you reporting?
             <select name="updateType" required>
@@ -233,6 +289,172 @@ function statsForActivities(items) {
     checked90: freshness.checked90,
     checked90Pct: freshness.checked90Pct,
   };
+}
+
+function activeActivitiesForOrganizer(organizer) {
+  const slugs = new Set(organizer.activitySlugs);
+  return sortByFreshness(activities
+    .filter((activity) => slugs.has(activity.slug))
+    .filter((activity) => activity.status !== 'reported-closed'));
+}
+
+function organizerLink(prefix, organizer) {
+  return `${prefix}/organizers/${escapeHtml(organizer.slug)}/`;
+}
+
+function organizerClaimUrl(organizer) {
+  if (!REPO_SLUG) return '#claim-profile';
+  const params = new URLSearchParams({
+    template: 'organizer-claim.yml',
+    title: `[Claim] ${organizer.name}`,
+    organizer: organizer.name,
+    website: organizer.websiteUrl ?? '',
+  });
+  return `https://github.com/${REPO_SLUG}/issues/new?${params.toString()}`;
+}
+
+function organizerCardHtml(organizer, {
+  hrefPrefix = '../..',
+  activityCount,
+  categories,
+  towns,
+} = {}) {
+  const count = activityCount ?? organizer.activityCount;
+  const categoryCount = categories ?? organizer.categories.length;
+  const townList = towns ?? organizer.towns;
+  return `        <a class="organizer-card" href="${organizerLink(hrefPrefix, organizer)}">
+          <strong>${escapeHtml(organizer.name)}</strong>
+          <span>${escapeHtml(townList.slice(0, 3).join(', '))}</span>
+          <small>${count} activities · ${categoryCount} categories</small>
+        </a>`;
+}
+
+function cityOrganizersHtml(city, cityActivities) {
+  const bySlug = new Map();
+  for (const activity of cityActivities) {
+    const organizer = organizerForActivity(activity);
+    if (!organizer) continue;
+    const row = bySlug.get(organizer.slug) ?? {
+      organizer,
+      activities: [],
+      towns: new Set(),
+      categories: new Set(),
+    };
+    row.activities.push(activity);
+    row.towns.add(activity.town);
+    row.categories.add(activity.category);
+    bySlug.set(organizer.slug, row);
+  }
+
+  const cards = [...bySlug.values()]
+    .sort((a, b) => b.activities.length - a.activities.length || a.organizer.name.localeCompare(b.organizer.name))
+    .slice(0, 6)
+    .map((row) => organizerCardHtml(row.organizer, {
+      activityCount: row.activities.length,
+      categories: row.categories.size,
+      towns: [...row.towns].sort(),
+    }))
+    .join('\n');
+
+  if (!cards) return '';
+
+  return `      <section class="organizers-panel" aria-labelledby="organizers-heading">
+        <div class="section-heading">
+          <h2 id="organizers-heading" data-i18n="organizers.city.heading">Active organizers nearby</h2>
+          <p class="section-intro" data-i18n="organizers.city.intro">Browse clubs, venues, and local providers before choosing a specific activity.</p>
+        </div>
+        <div class="organizer-grid">
+${cards}
+        </div>
+      </section>`;
+}
+
+function chipPredicate(id) {
+  return CHIP_DEFINITIONS.find((chip) => chip.id === id)?.predicate ?? (() => false);
+}
+
+const COLLECTIONS = [
+  {
+    slug: 'weekend-ideas',
+    title: 'Weekend ideas',
+    eyebrow: 'Weekend planning',
+    intro: 'One-off outings and regular activities that can work around school days.',
+    bestFor: ['Saturday options', 'Sunday outings', 'low-planning family time'],
+    predicate: chipPredicate('this-weekend'),
+  },
+  {
+    slug: 'free-and-low-cost',
+    title: 'Free and low-cost activities',
+    eyebrow: 'Budget-friendly',
+    intro: 'Start with free listings and gentler paid options before committing to bigger courses.',
+    bestFor: ['free starts', 'low-risk trials', 'budget checks'],
+    predicate: (activity) => activity.price?.free === true || (typeof activity.price?.amount === 'number' && activity.price.amount <= 10),
+  },
+  {
+    slug: 'rainy-day',
+    title: 'Rainy-day activities',
+    eyebrow: 'Indoor backup',
+    intro: 'Indoor and mixed-setting ideas for wet days, cold afternoons, and last-minute plan changes.',
+    bestFor: ['bad weather', 'indoor options', 'short-notice plans'],
+    predicate: chipPredicate('rainy-day'),
+  },
+  {
+    slug: 'trial-friendly',
+    title: 'Trial-friendly activities',
+    eyebrow: 'Try first',
+    intro: 'Activities where a taster, drop-in, or first session is easier to ask about.',
+    bestFor: ['first-timers', 'switching hobbies', 'commitment-light starts'],
+    predicate: chipPredicate('trial-available'),
+  },
+  {
+    slug: 'ages-3-6',
+    title: 'Activities for ages 3-6',
+    eyebrow: 'Preschool and early primary',
+    intro: 'Shortlist options for kindergarten children and younger primary-school starters.',
+    bestFor: ['younger children', 'gentler starts', 'parent-friendly planning'],
+    predicate: (activity) => activity.ageMin <= 6 && activity.ageMax >= 3,
+  },
+  {
+    slug: 'holiday-camps',
+    title: 'Holiday camps and school-break ideas',
+    eyebrow: 'School holidays',
+    intro: 'Camps, workshops, and school-break activities for planning ahead.',
+    bestFor: ['holiday cover', 'workshops', 'school-break planning'],
+    predicate: (activity) => activity.section === 'school-holiday-activities',
+  },
+];
+
+function collectionLink(prefix, collection) {
+  return prefix ? `${prefix}/collections/${escapeHtml(collection.slug)}/` : `collections/${escapeHtml(collection.slug)}/`;
+}
+
+function activitiesForCollection(collection) {
+  return sortByFreshness(activities
+    .filter((activity) => activity.status !== 'reported-closed')
+    .filter((activity) => collection.predicate(activity)));
+}
+
+function collectionCardHtml(collection, {
+  hrefPrefix = '',
+  currentSlug = '',
+} = {}) {
+  const items = activitiesForCollection(collection);
+  const stats = statsForActivities(items);
+  const current = currentSlug === collection.slug ? ' aria-current="page"' : '';
+  return `        <a class="collection-card" href="${collectionLink(hrefPrefix, collection)}"${current}>
+          <span>${escapeHtml(collection.eyebrow)}</span>
+          <strong>${escapeHtml(collection.title)}</strong>
+          <small>${stats.active} activities - ${stats.categories} categories</small>
+        </a>`;
+}
+
+function collectionGridHtml({
+  hrefPrefix = '',
+  currentSlug = '',
+} = {}) {
+  return COLLECTIONS
+    .map((collection) => collectionCardHtml(collection, { hrefPrefix, currentSlug }))
+    .join('\n');
 }
 
 const DISCOVERY_SHORTCUTS = {
@@ -397,7 +619,7 @@ function cityIntentHtml() {
   return `      <section class="intent-panel" aria-labelledby="intent-panel-heading">
         <div class="section-heading">
           <h2 id="intent-panel-heading" data-i18n="city.intent.heading">Pick a quick starting point</h2>
-          <p class="section-intro" data-i18n="city.intent.intro">Choose the first parent goal and KinderRadar will pre-fill the filters for you.</p>
+          <p class="section-intro" data-i18n="city.intent.intro">Choose the first parent goal and My Kids Radar will pre-fill the filters for you.</p>
         </div>
         <div class="intent-grid">
 ${cards}
@@ -446,6 +668,35 @@ const PLANNER_BUCKETS = [
 
 function activityUrl(prefix, listing) {
   return `${prefix}/${escapeHtml(listing.slug)}/`;
+}
+
+function activityOrganizerHtml(listing) {
+  const organizer = organizerForActivity(listing);
+  if (!organizer) return '';
+  const organizerActivities = activeActivitiesForOrganizer(organizer);
+  const related = organizerActivities
+    .filter((activity) => activity.slug !== listing.slug)
+    .slice(0, 3)
+    .map((activity) => `<li><a class="text-link" href="../../activities/${escapeHtml(activity.slug)}/">${escapeHtml(activity.name)}</a><span>${escapeHtml(activity.town)} · ${escapeHtml(activity.ageRange)}</span></li>`)
+    .join('\n');
+  const relatedHtml = related
+    ? `<ul class="compact-link-list">
+${related}
+        </ul>`
+    : '';
+
+  return `      <section class="panel organizer-summary-panel" aria-labelledby="activity-organizer-heading">
+        <div>
+          <p class="eyebrow" data-i18n="organizer.label">Organizer</p>
+          <h2 id="activity-organizer-heading">${escapeHtml(organizer.name)}</h2>
+          <p class="muted">${escapeHtml(organizer.activityCount)} activities · ${escapeHtml(organizer.towns.join(', '))}</p>
+        </div>
+        ${relatedHtml}
+        <div class="button-row">
+          <a class="button secondary" href="../../organizers/${escapeHtml(organizer.slug)}/" data-i18n="organizer.viewProfile">View organizer profile</a>
+          <a class="text-link" href="${escapeHtml(organizerClaimUrl(organizer))}" rel="noopener noreferrer" data-analytics="organizer_claim_click" data-i18n="organizer.claim">Claim this profile</a>
+        </div>
+      </section>`;
 }
 
 function weeklyPlannerHtml({ city, items, activityPrefix, cityPrefix = '' }) {
@@ -564,7 +815,7 @@ function homePage() {
   const placeCards = cities.map((city) => {
     const cityActivities = activeActivitiesForCity(city);
     const cityStats = statsForActivities(cityActivities);
-    return `        <a class="place-card" href="cities/${escapeHtml(city.slug)}/" style="--hero-image: url('${escapeHtml(city.heroImage ?? 'kinderradar-hero.png')}')">
+    return `        <a class="place-card" href="cities/${escapeHtml(city.slug)}/" style="--hero-image: url('${escapeHtml(city.heroImage ?? 'meinkinderradar-hero.png')}')">
           <span class="place-card-image" aria-hidden="true"></span>
           <span class="place-card-body">
             <strong>${escapeHtml(city.name)}</strong>
@@ -575,16 +826,17 @@ function homePage() {
   }).join('\n');
 
   const shortcuts = [
-    { href: `cities/${shortcutCity}/?chips=this-weekend`, label: 'Weekend ideas', key: 'home.shortcut.weekend' },
-    { href: `cities/${shortcutCity}/?chips=free`, label: 'Free activities', key: 'home.shortcut.free' },
-    { href: `cities/${shortcutCity}/?chips=rainy-day`, label: 'Rainy-day picks', key: 'home.shortcut.rainy' },
-    { href: `cities/${shortcutCity}/?chips=trial-available`, label: 'Trial available', key: 'home.shortcut.trial' },
+    { href: 'collections/weekend-ideas/', label: 'Weekend ideas', key: 'home.shortcut.weekend' },
+    { href: 'collections/free-and-low-cost/', label: 'Free activities', key: 'home.shortcut.free' },
+    { href: 'collections/rainy-day/', label: 'Rainy-day picks', key: 'home.shortcut.rainy' },
+    { href: 'collections/trial-friendly/', label: 'Trial available', key: 'home.shortcut.trial' },
   ].map((shortcut) => `        <a class="shortcut-card" href="${escapeHtml(shortcut.href)}" data-i18n="${escapeHtml(shortcut.key)}">${escapeHtml(shortcut.label)}</a>`).join('\n');
+  const collectionCards = collectionGridHtml();
 
   const body = `    <main class="page page-home stack">
-      <section class="hero hero-shell" style="--hero-image: url('${escapeHtml(primaryCity?.heroImage ?? 'kinderradar-hero.png')}')">
+      <section class="hero hero-shell" style="--hero-image: url('${escapeHtml(primaryCity?.heroImage ?? 'meinkinderradar-hero.png')}')">
         <div class="hero-copy">
-          <p class="eyebrow" data-i18n="home.eyebrow">KinderRadar</p>
+          <p class="eyebrow" data-i18n="home.eyebrow">${BRAND_EN}</p>
           <h1 data-i18n="home.heading">Find kids' activities around Haltern am See.</h1>
           <p data-i18n="home.intro">Choose a nearby place, or jump straight into parent-friendly shortcuts for weekends, rainy days, free options, and trial sessions.</p>
           <a class="button secondary" href="cities/${escapeHtml(shortcutCity)}/" data-i18n="home.browse">Browse all activities</a>
@@ -619,19 +871,212 @@ ${shortcuts}
         </div>
       </section>
 
+      <section class="home-section" aria-labelledby="home-collections-heading">
+        <div class="section-heading">
+          <h2 id="home-collections-heading" data-i18n="collections.home.heading">Browse by need</h2>
+          <p class="section-intro" data-i18n="collections.home.intro">Parent-friendly collections for the situations families actually plan around.</p>
+        </div>
+        <div class="collection-grid">
+${collectionCards}
+        </div>
+      </section>
+
+${digestSignupHtml({ headingId: 'home-digest-heading', city: primaryCity, interest: 'home' })}
+
 ${weeklyPlannerHtml({ city: primaryCity, items: active, activityPrefix: 'activities', cityPrefix: 'cities/' })}
     </main>`;
 
   return layoutHtml({
-    title: 'KinderRadar | Kids activities around Haltern am See',
+    title: `${BRAND_EN} | Kids activities around Haltern am See`,
     description: 'Find kids activities around Haltern am See, Sythen, Hullern, and Lavesum with listings that are kept fresh.',
     body,
-    ogTitle: 'KinderRadar',
+    ogTitle: BRAND_EN,
     ogDescription: 'Find kids activities around Haltern am See, Sythen, Hullern, and Lavesum.',
     ogUrl: '/',
     titleI18nKey: 'home.title',
     descriptionI18nKey: 'home.description',
     assetPrefix: '',
+  });
+}
+
+function collectionOrganizersHtml(collectionActivities) {
+  const bySlug = new Map();
+  for (const activity of collectionActivities) {
+    const organizer = organizerForActivity(activity);
+    if (!organizer) continue;
+    const row = bySlug.get(organizer.slug) ?? {
+      organizer,
+      activities: [],
+      towns: new Set(),
+      categories: new Set(),
+    };
+    row.activities.push(activity);
+    row.towns.add(activity.town);
+    row.categories.add(activity.category);
+    bySlug.set(organizer.slug, row);
+  }
+
+  const cards = [...bySlug.values()]
+    .sort((a, b) => b.activities.length - a.activities.length || a.organizer.name.localeCompare(b.organizer.name))
+    .slice(0, 4)
+    .map((row) => organizerCardHtml(row.organizer, {
+      activityCount: row.activities.length,
+      categories: row.categories.size,
+      towns: [...row.towns].sort(),
+    }))
+    .join('\n');
+
+  if (!cards) return '';
+
+  return `      <section class="organizers-panel" aria-labelledby="collection-organizers-heading">
+        <div class="section-heading">
+          <h2 id="collection-organizers-heading" data-i18n="collections.organizers.heading">Organizers in this collection</h2>
+          <p class="section-intro" data-i18n="collections.organizers.intro">Jump to clubs, venues, and providers with multiple matching ideas.</p>
+        </div>
+        <div class="organizer-grid">
+${cards}
+        </div>
+      </section>`;
+}
+
+function collectionPage(collection) {
+  const collectionActivities = activitiesForCollection(collection);
+  const stats = statsForActivities(collectionActivities);
+  const primaryCity = cities[0];
+  const towns = [...new Set(collectionActivities.map((activity) => activity.town))].sort();
+  const cityLinks = cities
+    .filter((city) => collectionActivities.some((activity) => city.nearbyTowns.includes(activity.town)))
+    .map((city) => `<a href="../../cities/${escapeHtml(city.slug)}/">${escapeHtml(city.name)}</a>`)
+    .join('');
+  const bestFor = collection.bestFor
+    .map((item) => `<span>${escapeHtml(item)}</span>`)
+    .join('');
+  const otherCollections = collectionGridHtml({ hrefPrefix: '../..', currentSlug: collection.slug });
+  const sectionsHtml = sections
+    .map((section) => {
+      const inSection = collectionActivities.filter((activity) => activity.section === section.id);
+      if (inSection.length === 0) return '';
+      return renderSectionHtml(section, inSection, {
+        sections,
+        repoSlug: REPO_SLUG,
+        activityHrefPrefix: '../../activities',
+      });
+    })
+    .filter(Boolean)
+    .join('\n');
+
+  const body = `    <main class="page stack">
+      <header class="page-header hero-shell" style="--hero-image: url('../../assets/${escapeHtml(primaryCity?.heroImage ?? 'meinkinderradar-hero.png')}')">
+        <div class="hero-copy">
+          <a class="back-link" href="../../" data-i18n="collections.back">← Back to home</a>
+          <p class="eyebrow">${escapeHtml(collection.eyebrow)}</p>
+          <h1>${escapeHtml(collection.title)}</h1>
+          <p>${escapeHtml(collection.intro)}</p>
+          <div class="button-row">
+            <a class="button secondary" href="#collection-listings" data-i18n="collections.browse">Browse matching activities</a>
+            <a class="text-link" href="../../cities/${escapeHtml(primaryCity?.slug ?? 'haltern-am-see')}/#submit-activity" data-i18n="collections.submit">Suggest a missing activity</a>
+          </div>
+        </div>
+        <dl class="hero-stats" aria-label="Collection overview">
+          <div><dt>${stats.active}</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>${stats.categories}</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>${towns.length}</dt><dd data-i18n="organizer.stats.towns">towns</dd></div>
+        </dl>
+      </header>
+
+      <section class="collection-guide panel" aria-labelledby="collection-guide-heading">
+        <div>
+          <h2 id="collection-guide-heading" data-i18n="collections.guide.heading">Good for</h2>
+          <div class="tag-list">
+${bestFor}
+          </div>
+        </div>
+        <div>
+          <h2 data-i18n="collections.areas.heading">Areas covered</h2>
+          <nav class="inline-link-row" aria-label="Collection areas" data-i18n-attr="aria-label:collections.areas.aria">
+${cityLinks}
+          </nav>
+        </div>
+      </section>
+
+      <section class="home-section" aria-labelledby="collection-more-heading">
+        <div class="section-heading">
+          <h2 id="collection-more-heading" data-i18n="collections.more.heading">Other useful collections</h2>
+          <p class="section-intro" data-i18n="collections.more.intro">Switch the parent goal without starting from scratch.</p>
+        </div>
+        <div class="collection-grid">
+${otherCollections}
+        </div>
+      </section>
+
+${collectionOrganizersHtml(collectionActivities)}
+
+${digestSignupHtml({ headingId: 'collection-digest-heading', city: primaryCity, interest: collection.slug })}
+
+      <div id="collection-listings">
+${sectionsHtml}
+      </div>
+    </main>
+
+    <script type="module" src="../../assets/analytics.js"></script>`;
+
+  return layoutHtml({
+    title: `${collection.title} | ${BRAND_EN}`,
+    description: collection.intro,
+    body,
+    ogTitle: `${collection.title} | ${BRAND_EN}`,
+    ogDescription: collection.intro,
+    ogUrl: `/collections/${collection.slug}/`,
+    assetPrefix: '../../',
+  });
+}
+
+function shortlistPage() {
+  const primaryCity = cities[0];
+  const body = `    <main class="page stack shortlist-page" data-shortlist-page>
+      <header class="page-header hero-shell" style="--hero-image: url('../assets/${escapeHtml(primaryCity?.heroImage ?? 'meinkinderradar-hero.png')}')">
+        <div class="hero-copy">
+          <a class="back-link" href="../" data-i18n="shortlist.back">← Back to home</a>
+          <p class="eyebrow" data-i18n="shortlist.eyebrow">Saved shortlist</p>
+          <h1 data-i18n="shortlist.heading">Your saved activities</h1>
+          <p data-i18n="shortlist.intro">Keep a temporary shortlist while you compare times, costs, trial options, and organizer details.</p>
+          <div class="button-row">
+            <a class="button secondary" href="../collections/weekend-ideas/" data-i18n="shortlist.findMore">Find more ideas</a>
+            <button type="button" class="button secondary" data-share-shortlist data-i18n="shortlist.share">Copy share link</button>
+            <button type="button" class="text-link shortlist-print" data-print-shortlist data-i18n="shortlist.print">Print</button>
+            <button type="button" class="text-link shortlist-clear" data-clear-shortlist data-i18n="shortlist.clear">Clear shortlist</button>
+          </div>
+          <p class="form-status shortlist-status" data-shortlist-status aria-live="polite"></p>
+        </div>
+        <dl class="hero-stats" aria-label="Shortlist overview">
+          <div><dt data-save-count>0</dt><dd data-i18n="shortlist.savedCount">saved</dd></div>
+          <div><dt>local</dt><dd data-i18n="shortlist.storage">on this device</dd></div>
+          <div><dt>0</dt><dd data-shortlist-town-count data-i18n="organizer.stats.towns">towns</dd></div>
+        </dl>
+      </header>
+
+      <section class="panel shortlist-empty" data-shortlist-empty>
+        <h2 data-i18n="shortlist.empty.heading">Nothing saved yet</h2>
+        <p class="section-intro" data-i18n="shortlist.empty.text">Save activities from city, collection, organizer, or detail pages and they will appear here.</p>
+        <div class="button-row">
+          <a class="button" href="../collections/trial-friendly/" data-i18n="shortlist.empty.trial">Browse trial-friendly ideas</a>
+          <a class="text-link" href="../collections/free-and-low-cost/" data-i18n="shortlist.empty.free">Browse free and low-cost</a>
+        </div>
+      </section>
+
+${digestSignupHtml({ headingId: 'shortlist-digest-heading', city: primaryCity, interest: 'shortlist' })}
+
+      <div id="shortlist-listings"></div>
+    </main>`;
+
+  return layoutHtml({
+    title: `Saved shortlist | ${BRAND_EN}`,
+    description: `Saved ${BRAND_EN} activities on this device.`,
+    body,
+    ogTitle: `Saved shortlist | ${BRAND_EN}`,
+    ogDescription: 'Keep a temporary shortlist of kids activities while comparing options.',
+    ogUrl: '/shortlist/',
+    assetPrefix: '../',
   });
 }
 
@@ -678,9 +1123,9 @@ function cityPage(city) {
   const cityParams = { city: city.name, towns: city.nearbyTowns.join(', ') };
 
   const body = `    <main class="page stack">
-      <header class="page-header hero-shell" style="--hero-image: url('../../assets/${escapeHtml(city.heroImage ?? 'kinderradar-hero.png')}')">
+      <header class="page-header hero-shell" style="--hero-image: url('../../assets/${escapeHtml(city.heroImage ?? 'meinkinderradar-hero.png')}')">
         <div class="hero-copy">
-          <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="${escapeHtml(JSON.stringify({ city: city.name }))}">KinderRadar ${escapeHtml(city.name)}</p>
+          <p class="eyebrow" data-i18n="city.eyebrow" data-i18n-params="${escapeHtml(JSON.stringify({ city: city.name }))}">${BRAND_EN} ${escapeHtml(city.name)}</p>
           <h1 data-i18n="city.heading">Find kids' activities that fit your child, schedule, budget, and confidence level.</h1>
           <p data-i18n="city.intro" data-i18n-params="${escapeHtml(JSON.stringify(cityParams))}">${escapeHtml(cityShortIntro(city))} Curated for parents around ${escapeHtml(city.name)} (${escapeHtml(city.nearbyTowns.join(', '))}).</p>
           <div class="button-row">
@@ -710,6 +1155,10 @@ ${cityDiscoveryHtml(city)}
 ${weeklyPlannerHtml({ city, items: cityActivities, activityPrefix: '../../activities' })}
 
 ${cityIntentHtml()}
+
+${cityOrganizersHtml(city, cityActivities)}
+
+${digestSignupHtml({ headingId: 'city-digest-heading', city, interest: city.slug })}
 
       <section class="filter-panel" aria-labelledby="filter-heading">
         <div class="filter-panel-heading">
@@ -813,10 +1262,10 @@ ${citySubmissionForm(city, townOptions)}
     <script type="module" src="../../assets/update-form.js"></script>`;
 
   return layoutHtml({
-    title: `KinderRadar ${city.name} | Kids' activities kept fresh`,
+    title: `${BRAND_EN} ${city.name} | Kids' activities kept fresh`,
     description,
     body,
-    ogTitle: `KinderRadar ${city.name}`,
+    ogTitle: `${BRAND_EN} ${city.name}`,
     ogDescription: description,
     ogUrl: `/cities/${city.slug}/`,
     titleI18nKey: 'city.title',
@@ -828,6 +1277,79 @@ ${citySubmissionForm(city, townOptions)}
     '<html ',
     `<html data-city-slug="${escapeHtml(city.slug)}" data-city-towns="${escapeHtml(city.nearbyTowns.join('|'))}" `,
   );
+}
+
+function organizerProfilePage(organizer) {
+  const organizerActivities = activeActivitiesForOrganizer(organizer);
+  const organizerStats = statsForActivities(organizerActivities);
+  const primaryCity = organizerActivities[0] ? cityForTown(organizerActivities[0].town) : cities[0];
+  const sectionPanels = sections
+    .map((section) => {
+      const inSection = organizerActivities.filter((activity) => activity.section === section.id);
+      if (inSection.length === 0) return '';
+      return renderSectionHtml(section, inSection, {
+        sections,
+        repoSlug: REPO_SLUG,
+        activityHrefPrefix: '../../activities',
+      });
+    })
+    .filter(Boolean)
+    .join('\n');
+  const website = organizer.websiteUrl
+    ? `<a class="text-link" href="${escapeHtml(organizer.websiteUrl)}" rel="noopener noreferrer" data-analytics="contact_click" data-i18n="organizer.website">Organizer website</a>`
+    : `<span class="muted" data-i18n="listing.contact.notListed">Not listed yet</span>`;
+
+  const body = `    <main class="page stack">
+      <header class="page-header hero-shell" style="--hero-image: url('../../assets/${escapeHtml(primaryCity.heroImage ?? 'meinkinderradar-hero.png')}')">
+        <div class="hero-copy">
+          <a class="back-link" href="../../cities/${escapeHtml(primaryCity.slug)}/" data-i18n="organizer.back">← Back to local activities</a>
+          <p class="eyebrow" data-i18n="organizer.label">Organizer</p>
+          <h1>${escapeHtml(organizer.name)}</h1>
+          <p data-i18n="organizer.intro">A local provider profile with current My Kids Radar listings, source links, and parent-friendly planning signals.</p>
+          <div class="button-row">
+            ${website}
+            <a class="button secondary" href="#claim-profile" data-analytics="organizer_claim_click" data-i18n="organizer.claim">Claim this profile</a>
+          </div>
+        </div>
+        <dl class="hero-stats" aria-label="Organizer overview">
+          <div><dt>${organizerStats.active}</dt><dd data-i18n="city.stats.activities">active listings</dd></div>
+          <div><dt>${organizerStats.categories}</dt><dd data-i18n="city.stats.categories">categories</dd></div>
+          <div><dt>${organizer.towns.length}</dt><dd data-i18n="organizer.stats.towns">towns</dd></div>
+        </dl>
+      </header>
+
+      <section class="panel organizer-profile-panel" aria-labelledby="organizer-profile-heading">
+        <h2 id="organizer-profile-heading" data-i18n="organizer.profile.heading">Profile snapshot</h2>
+        <dl class="planning-grid">
+          <div><dt data-i18n="organizer.profile.coverage">Coverage</dt><dd>${escapeHtml(organizer.towns.join(', '))}</dd></div>
+          <div><dt data-i18n="organizer.profile.categories">Categories</dt><dd>${escapeHtml(organizer.categories.join(', '))}</dd></div>
+          <div><dt data-i18n="field.contactMethod">Contact method:</dt><dd>${escapeHtml(organizer.contactMethod || 'Not specified')}</dd></div>
+        </dl>
+      </section>
+
+      <section id="claim-profile" class="panel organizer-upgrade-panel" aria-labelledby="claim-profile-heading">
+        <h2 id="claim-profile-heading" data-i18n="organizer.claim.heading">Claim or upgrade this profile</h2>
+        <p class="section-intro" data-i18n="organizer.claim.intro">Organizer profiles can become richer over time with a logo, gallery, priority contact links, trial-session notes, and sponsorship placement.</p>
+        <div class="button-row">
+          <a class="button" href="${escapeHtml(organizerClaimUrl(organizer))}" rel="noopener noreferrer" data-analytics="organizer_claim_click" data-i18n="organizer.claim.start">Start claim</a>
+          ${organizer.websiteUrl ? `<a class="text-link" href="${escapeHtml(organizer.websiteUrl)}" rel="noopener noreferrer" data-i18n="organizer.website">Organizer website</a>` : ''}
+        </div>
+      </section>
+
+${sectionPanels}
+    </main>
+
+    <script type="module" src="../../assets/analytics.js"></script>`;
+
+  return layoutHtml({
+    title: `${organizer.name} | ${BRAND_EN} organizer profile`,
+    description: `Activities from ${organizer.name} across ${organizer.towns.join(', ')}.`,
+    body,
+    ogTitle: `${organizer.name} | ${BRAND_EN}`,
+    ogDescription: `Browse current ${BRAND_EN} listings from ${organizer.name}.`,
+    ogUrl: `/organizers/${organizer.slug}/`,
+    assetPrefix: '../../',
+  });
 }
 
 function activityDetailPage(listing) {
@@ -999,7 +1521,7 @@ ${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${e
         <p class="muted small" data-i18n="activity.trust.note">Spotted a change? Send it for review so the listing can be checked and refreshed.</p>
       </section>`;
 
-  const ogTitle = `${listing.name} | KinderRadar Haltern am See`;
+  const ogTitle = `${listing.name} | ${BRAND_EN} Haltern am See`;
   const ogDesc = `${listing.name} — ${listing.category} for ages ${listing.ageRange} in ${listing.town}. ${listing.timing}.`;
 
   const nameDisplay = (() => {
@@ -1031,6 +1553,9 @@ ${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${e
           <h1${nameDisplay.attrs}>${nameDisplay.en}</h1>
           <span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}"${i18nAttr(badge.i18nKey, badge.i18nParams)}>${escapeHtml(badge.label)}</span>
         </div>
+        <div class="button-row">
+          <button type="button" class="button secondary save-button" data-save-activity="${escapeHtml(listing.slug)}" aria-pressed="false"><span data-save-label data-i18n="shortlist.save">Save</span></button>
+        </div>
         ${closedBanner}
         ${verifierLine}
       </header>
@@ -1039,6 +1564,8 @@ ${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${e
 ${fields}
 ${contactLink}
       </section>
+
+${activityOrganizerHtml(listing)}
 
 ${planningPanel}
 
@@ -1053,7 +1580,7 @@ ${activityUpdateForm(listing)}
     <script type="module" src="../../assets/update-form.js"></script>`;
 
   return layoutHtml({
-    title: `${listing.name} | KinderRadar`,
+    title: `${listing.name} | ${BRAND_EN}`,
     description: ogDesc,
     body,
     ogTitle,
@@ -1078,9 +1605,24 @@ export async function generate() {
   await writeFile(join(DIST, 'index.html'), homePage(), 'utf8');
   written += 1;
 
+  await writeFileEnsuringDir(join(DIST, 'shortlist', 'index.html'), shortlistPage());
+  written += 1;
+
+  for (const collection of COLLECTIONS) {
+    const out = join(DIST, 'collections', collection.slug, 'index.html');
+    await writeFileEnsuringDir(out, collectionPage(collection));
+    written += 1;
+  }
+
   for (const city of cities) {
     const out = join(DIST, 'cities', city.slug, 'index.html');
     await writeFileEnsuringDir(out, cityPage(city));
+    written += 1;
+  }
+
+  for (const organizer of organizers) {
+    const out = join(DIST, 'organizers', organizer.slug, 'index.html');
+    await writeFileEnsuringDir(out, organizerProfilePage(organizer));
     written += 1;
   }
 
@@ -1094,7 +1636,10 @@ export async function generate() {
   // robots.txt + sitemap.xml so the deployed site is discoverable.
   const urls = [
     { loc: '/', changefreq: 'weekly' },
+    { loc: '/shortlist/', changefreq: 'monthly' },
+    ...COLLECTIONS.map((c) => ({ loc: `/collections/${c.slug}/`, changefreq: 'weekly' })),
     ...cities.map((c) => ({ loc: `/cities/${c.slug}/`, changefreq: 'weekly' })),
+    ...organizers.map((o) => ({ loc: `/organizers/${o.slug}/`, changefreq: 'weekly' })),
     ...activities
       .filter((a) => a.status !== 'reported-closed')
       .map((a) => ({ loc: `/activities/${a.slug}/`, changefreq: 'monthly', lastmod: a.lastVerified })),

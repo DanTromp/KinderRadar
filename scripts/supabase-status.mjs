@@ -44,6 +44,6 @@ async function countRows(config, table) {
 }
 
 const config = await loadEnv();
-for (const table of ['cities', 'towns', 'activities', 'activity_sources', 'feed_items', 'activity_updates']) {
+for (const table of ['cities', 'towns', 'organizers', 'activities', 'activity_sources', 'feed_items', 'activity_updates']) {
   console.log(`${table}: ${await countRows(config, table)}`);
 }

@@ -47,7 +47,7 @@ export const cities = [
     "regionSlug": "haltern-am-see",
     "state": "North Rhine-Westphalia",
     "country": "DE",
-    "heroImage": "kinderradar-hero.png",
+    "heroImage": "meinkinderradar-hero.png",
     "mapPosition": {
       "x": 47,
       "y": 48
@@ -80,7 +80,7 @@ export const cities = [
     "regionSlug": "haltern-am-see",
     "state": "North Rhine-Westphalia",
     "country": "DE",
-    "heroImage": "kinderradar-hero-sythen.png",
+    "heroImage": "meinkinderradar-hero-sythen.png",
     "mapPosition": {
       "x": 31,
       "y": 34
@@ -110,7 +110,7 @@ export const cities = [
     "regionSlug": "haltern-am-see",
     "state": "North Rhine-Westphalia",
     "country": "DE",
-    "heroImage": "kinderradar-hero-hullern.png",
+    "heroImage": "meinkinderradar-hero-hullern.png",
     "mapPosition": {
       "x": 58,
       "y": 65
@@ -140,7 +140,7 @@ export const cities = [
     "regionSlug": "haltern-am-see",
     "state": "North Rhine-Westphalia",
     "country": "DE",
-    "heroImage": "kinderradar-hero-lavesum.png",
+    "heroImage": "meinkinderradar-hero-lavesum.png",
     "mapPosition": {
       "x": 76,
       "y": 30
@@ -170,7 +170,7 @@ export const cities = [
     "regionSlug": "duelmen",
     "state": "North Rhine-Westphalia",
     "country": "DE",
-    "heroImage": "kinderradar-hero.png",
+    "heroImage": "meinkinderradar-hero.png",
     "mapPosition": {
       "x": 64,
       "y": 44
@@ -203,7 +203,7 @@ export const cities = [
     "regionSlug": "dorsten",
     "state": "North Rhine-Westphalia",
     "country": "DE",
-    "heroImage": "kinderradar-hero.png",
+    "heroImage": "meinkinderradar-hero.png",
     "mapPosition": {
       "x": 34,
       "y": 56

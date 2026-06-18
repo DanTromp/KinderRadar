@@ -12,7 +12,7 @@ function installBrowserStub({ plausibleDomain = '', doNotTrack = '0', plausible 
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
     value: {
-      KINDERRADAR_PLAUSIBLE_DOMAIN: plausibleDomain,
+      MEINKINDERRADAR_PLAUSIBLE_DOMAIN: plausibleDomain,
       plausible,
     },
   });
@@ -55,13 +55,13 @@ async function importAnalytics() {
 }
 
 test('analytics initializes Plausible when configured', async () => {
-  const { appended } = installBrowserStub({ plausibleDomain: 'haltern.kinderradar.de' });
+  const { appended } = installBrowserStub({ plausibleDomain: 'haltern.meinkinderradar.de' });
   try {
     await importAnalytics();
     assert.equal(typeof window.plausible, 'function');
     assert.equal(appended.length, 1);
     assert.equal(appended[0].src, 'https://plausible.io/js/script.js');
-    assert.equal(appended[0].dataset.domain, 'haltern.kinderradar.de');
+    assert.equal(appended[0].dataset.domain, 'haltern.meinkinderradar.de');
   } finally {
     cleanupBrowserStub();
   }
@@ -69,7 +69,7 @@ test('analytics initializes Plausible when configured', async () => {
 
 test('analytics respects do-not-track before loading Plausible', async () => {
   const { appended } = installBrowserStub({
-    plausibleDomain: 'haltern.kinderradar.de',
+    plausibleDomain: 'haltern.meinkinderradar.de',
     doNotTrack: '1',
   });
   try {

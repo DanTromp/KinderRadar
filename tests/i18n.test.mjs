@@ -51,12 +51,19 @@ async function collectI18nKeysFromBuiltSite() {
   const dataI18nAttrRe = /data-i18n-attr="([^"]+)"/g;
   const files = [
     join(DIST, 'index.html'),
+    join(DIST, 'shortlist', 'index.html'),
   ];
   for (const slug of readdirSync(join(DIST, 'cities'))) {
     files.push(join(DIST, 'cities', slug, 'index.html'));
   }
+  for (const slug of readdirSync(join(DIST, 'collections'))) {
+    files.push(join(DIST, 'collections', slug, 'index.html'));
+  }
   for (const slug of readdirSync(join(DIST, 'activities'))) {
     files.push(join(DIST, 'activities', slug, 'index.html'));
+  }
+  for (const slug of readdirSync(join(DIST, 'organizers'))) {
+    files.push(join(DIST, 'organizers', slug, 'index.html'));
   }
   for (const f of files) {
     const html = await readFile(f, 'utf8');
@@ -80,11 +87,11 @@ test('every data-i18n key in generated pages exists in en.json', async () => {
   assert.deepEqual(missing, [], `i18n keys used in HTML but missing from en.json:\n${missing.join('\n')}`);
 });
 
-test('home page canonical uses the full GitHub Pages URL', async () => {
+test('home page canonical uses the full production URL', async () => {
   const html = await readFile(join(DIST, 'index.html'), 'utf8');
   assert.match(
     html,
-    /<link rel="canonical" href="https:\/\/dantromp\.github\.io\/KinderRadar\/" \/>/,
+    /<link rel="canonical" href="https:\/\/meinkinderradar\.de\/" \/>/,
   );
 });
 
@@ -107,9 +114,9 @@ test('generated pages avoid root-relative internal assets and links', async () =
   for (const file of collectHtmlFiles(DIST)) {
     const html = await readFile(file, 'utf8');
     for (const pattern of [
-      /\s(?:href|src)="\/(?:assets|cities|activities)\//g,
-      /url=\/(?:cities|activities)\//g,
-      /window\.location\.replace\('\/(?:cities|activities)\//g,
+      /\s(?:href|src)="\/(?:assets|cities|collections|shortlist|activities|organizers)\//g,
+      /url=\/(?:cities|collections|shortlist|activities|organizers)\//g,
+      /window\.location\.replace\('\/(?:cities|collections|shortlist|activities|organizers)\//g,
     ]) {
       for (const match of html.matchAll(pattern)) {
         offenders.push(`${file}: ${match[0]}`);

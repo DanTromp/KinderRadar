@@ -1,7 +1,7 @@
 import { track } from './analytics.js';
 
 function config() {
-  const cfg = window.KINDERRADAR_SUPABASE;
+  const cfg = window.MEINKINDERRADAR_SUPABASE;
   if (!cfg?.url || !cfg?.publishableKey) return null;
   return {
     url: String(cfg.url).replace(/\/$/, ''),
@@ -116,4 +116,4 @@ function wireForm(form) {
   });
 }
 
-document.querySelectorAll('[data-kinderradar-update]').forEach(wireForm);
+document.querySelectorAll('[data-meinkinderradar-update]').forEach(wireForm);

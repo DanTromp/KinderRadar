@@ -1,4 +1,4 @@
-// KinderRadar analytics shim.
+// My Kids Radar analytics shim.
 //
 // Goals (per launch plan §2):
 //   - Cookieless, privacy-respecting; no cookie banner needed.
@@ -22,10 +22,10 @@
 //   contact_click       (no props)
 //
 // To enable a vendor, set one of:
-//   window.KINDERRADAR_PLAUSIBLE_DOMAIN = 'haltern.kinderradar.de';
-//   window.KINDERRADAR_CF_BEACON = '<cloudflare token>';
+//   window.MEINKINDERRADAR_PLAUSIBLE_DOMAIN = 'haltern.meinkinderradar.de';
+//   window.MEINKINDERRADAR_CF_BEACON = '<cloudflare token>';
 // Without either, events are still validated locally (and visible in the
-// devtools console when KINDERRADAR_DEBUG = true) but never leave the page.
+// devtools console when MEINKINDERRADAR_DEBUG = true) but never leave the page.
 
 const MAX_QUERY_LENGTH = 60;
 
@@ -41,7 +41,7 @@ function sanitizeQuery(q) {
 
 function debugEnabled() {
   try {
-    return Boolean(window.KINDERRADAR_DEBUG);
+    return Boolean(window.MEINKINDERRADAR_DEBUG);
   } catch {
     return false;
   }
@@ -79,7 +79,7 @@ export function track(name, props = {}) {
 
 function initPlausible() {
   if (isDoNotTrack() || typeof window === 'undefined' || typeof document === 'undefined') return;
-  const domain = String(window.KINDERRADAR_PLAUSIBLE_DOMAIN ?? '').trim();
+  const domain = String(window.MEINKINDERRADAR_PLAUSIBLE_DOMAIN ?? '').trim();
   if (!domain) return;
 
   if (typeof window.plausible !== 'function') {
@@ -89,10 +89,10 @@ function initPlausible() {
     };
   }
 
-  if (document.querySelector('script[data-kinderradar-plausible]')) return;
+  if (document.querySelector('script[data-meinkinderradar-plausible]')) return;
   const script = document.createElement('script');
   script.defer = true;
-  script.dataset.kinderradarPlausible = 'true';
+  script.dataset.meinkinderradarPlausible = 'true';
   script.dataset.domain = domain;
   script.src = 'https://plausible.io/js/script.js';
   document.head.appendChild(script);

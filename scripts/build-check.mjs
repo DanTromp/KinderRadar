@@ -13,15 +13,17 @@ const requiredFiles = [
   'assets/styles.css',
   'assets/filters.js',
   'assets/update-form.js',
+  'assets/digest-form.js',
+  'assets/saved.js',
   'assets/analytics.js',
   'assets/theme.js',
   'assets/filtering.mjs',
   'assets/render.mjs',
   'assets/activities-data.mjs',
-  'assets/kinderradar-hero.png',
-  'assets/kinderradar-hero-sythen.png',
-  'assets/kinderradar-hero-hullern.png',
-  'assets/kinderradar-hero-lavesum.png',
+  'assets/meinkinderradar-hero.png',
+  'assets/meinkinderradar-hero-sythen.png',
+  'assets/meinkinderradar-hero-hullern.png',
+  'assets/meinkinderradar-hero-lavesum.png',
 ];
 
 const RECURRING_VALUES = new Set(['weekly', 'monthly', 'one-off']);

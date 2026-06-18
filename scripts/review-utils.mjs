@@ -21,14 +21,21 @@ function payload(update) {
 
 export function subjectForUpdate(update) {
   const data = payload(update);
+  if (data.type === 'digest_signup') {
+    return `Digest signup: ${compact(data.cityName || data.citySlug, 'unknown area')}`;
+  }
   return compact(update?.activity_slug || data.activityName, '(missing activity name)');
 }
 
 export function townForUpdate(update) {
-  return compact(payload(update).town);
+  const data = payload(update);
+  return compact(data.town || data.cityName);
 }
 
 export function suggestedAction(update) {
+  if (payload(update).type === 'digest_signup') {
+    return 'Add to the digest audience list, then mark applied.';
+  }
   switch (update?.update_type) {
     case 'submission':
       return 'Verify source, add activity data, then mark accepted/applied.';
@@ -64,7 +71,7 @@ export function describeUpdate(update) {
 
 export function renderMarkdown(updates, { status = 'new' } = {}) {
   const lines = [
-    `# KinderRadar Review Queue`,
+    `# My Kids Radar Review Queue`,
     '',
     `Status: \`${status}\``,
     `Updates: ${updates.length}`,
@@ -136,7 +143,7 @@ export function renderHtml(updates, { status = 'new' } = {}) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>KinderRadar Review Queue</title>
+    <title>My Kids Radar Review Queue</title>
     <style>
       body { margin: 0; font: 15px/1.5 system-ui, sans-serif; color: #172033; background: #f8f2e7; }
       main { width: min(1120px, calc(100% - 2rem)); margin: 2rem auto; }
@@ -157,7 +164,7 @@ export function renderHtml(updates, { status = 'new' } = {}) {
   </head>
   <body>
     <main>
-      <h1>KinderRadar Review Queue</h1>
+      <h1>My Kids Radar Review Queue</h1>
       <p class="meta">Status: ${escapeHtml(status)} · Updates: ${updates.length}</p>
       <section class="grid">
 ${cards}

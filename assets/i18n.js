@@ -154,7 +154,7 @@ async function loadTranslations() {
   } catch (err) {
     // Network failure: fall back to whatever was rendered (English) and
     // expose the failure on the console without breaking the page.
-    console.warn('KinderRadar i18n: failed to load translations', err);
+    console.warn('My Kids Radar i18n: failed to load translations', err);
   }
 }
 

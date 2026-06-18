@@ -1,4 +1,4 @@
-// Pure rendering helpers for KinderRadar.
+// Pure rendering helpers for My Kids Radar.
 // Produces both HTML strings (used by the static generator) and DOM nodes
 // (used by the in-browser script). Browser-only code paths are guarded so
 // this module can be imported under Node for tests and build-time use.
@@ -261,6 +261,7 @@ export function renderListingHtml(listing, {
       <p><strong${i18nAttrs('field.cost')}>Cost:</strong> <span${costText.attrs}>${costText.en}</span></p>
       <p class="listing-actions">
         <a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/" data-i18n="listing.viewDetails">View details</a>
+        <button type="button" class="text-link muted-link save-button" data-save-activity="${escapeHtml(listing.slug)}" aria-pressed="false"><span data-save-label data-i18n="shortlist.save">Save</span></button>
         <a class="text-link muted-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a>
       </p>
     </article>`;

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validateData } from '../scripts/build-check.mjs';
 import { activities, sections, cities } from '../assets/activities-data.mjs';
+import { organizers, organizerForActivity } from '../assets/organizers.mjs';
 
 test('seed data passes validation', () => {
   const errors = validateData();
@@ -47,5 +48,21 @@ test('slugs are unique', () => {
   for (const a of activities) {
     assert.ok(!seen.has(a.slug), `duplicate slug: ${a.slug}`);
     seen.add(a.slug);
+  }
+});
+
+test('organizer profiles are derived for every activity', () => {
+  assert.ok(organizers.length > 10, 'expected organizer profiles from seeded data');
+  const organizerSlugs = new Set();
+  for (const organizer of organizers) {
+    assert.match(organizer.slug, /^[a-z0-9]+(?:-[a-z0-9]+)*$/, `bad organizer slug: ${organizer.slug}`);
+    assert.ok(!organizerSlugs.has(organizer.slug), `duplicate organizer slug: ${organizer.slug}`);
+    organizerSlugs.add(organizer.slug);
+    assert.ok(organizer.name.trim(), `organizer ${organizer.slug} needs a name`);
+    assert.ok(organizer.activitySlugs.length > 0, `organizer ${organizer.slug} needs activities`);
+  }
+
+  for (const activity of activities) {
+    assert.ok(organizerForActivity(activity), `missing organizer for ${activity.slug}`);
   }
 });

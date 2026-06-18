@@ -1,4 +1,4 @@
--- KinderRadar back-office schema.
+-- My Kids Radar back-office schema.
 -- Run this once in Supabase SQL Editor before importing data.
 
 create extension if not exists pgcrypto;
@@ -196,6 +196,7 @@ alter table public.feed_items enable row level security;
 grant usage on schema public to anon, authenticated;
 grant select on public.cities to anon, authenticated;
 grant select on public.towns to anon, authenticated;
+grant select on public.organizers to anon, authenticated;
 grant select on public.activities to anon, authenticated;
 grant select on public.activity_sources to anon, authenticated;
 grant select on public.feed_items to anon, authenticated;
@@ -207,6 +208,10 @@ for select using (true);
 
 drop policy if exists "public read towns" on public.towns;
 create policy "public read towns" on public.towns
+for select using (true);
+
+drop policy if exists "public read organizers" on public.organizers;
+create policy "public read organizers" on public.organizers
 for select using (true);
 
 drop policy if exists "public read published activities" on public.activities;

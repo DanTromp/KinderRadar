@@ -1,4 +1,4 @@
-# KinderRadar
+# Mein Kinder Radar / My Kids Radar
 
 > **Find kids' activities that fit your child, schedule, budget, and confidence level — with listings that are actually kept fresh.**
 
@@ -96,13 +96,13 @@ Convention: one PR per batch of issues, prefixed `data:` in the commit message.
 The site uses a cookieless analytics shim (`assets/analytics.js`) that:
 - Respects `navigator.doNotTrack` — no events sent.
 - Strips PII; only the search input is logged (trimmed, lowercased, ≤60 chars).
-- Talks to **Plausible** if `window.KINDERRADAR_PLAUSIBLE_DOMAIN` is set,
-  otherwise no-ops (and prints to devtools console when `KINDERRADAR_DEBUG`
+- Talks to **Plausible** if `window.MEINKINDERRADAR_PLAUSIBLE_DOMAIN` is set,
+  otherwise no-ops (and prints to devtools console when `MEINKINDERRADAR_DEBUG`
   is true). Cloudflare Web Analytics page views work out of the box if
   the CF beacon `<script>` is added to `scripts/build.mjs`'s `layoutHtml`.
 
 For Cloudflare Pages, set the environment variable
-`KINDERRADAR_PLAUSIBLE_DOMAIN` to enable Plausible during the deploy build.
+`MEINKINDERRADAR_PLAUSIBLE_DOMAIN` to enable Plausible during the deploy build.
 Leave it unset for a no-op analytics build.
 
 ### Event schema (keep stable)
@@ -153,17 +153,17 @@ row `applied`; use `rejected` for spam or unverifiable reports.
 The default deployment target is **Cloudflare Pages** using its native Git
 integration. Do not add a GitHub Pages deploy workflow; Cloudflare should own
 the production deploy. Set the Cloudflare environment variable
-`KINDERRADAR_BASE_URL` (e.g. `https://haltern.kinderradar.de`) once a custom
+`MEINKINDERRADAR_BASE_URL` (e.g. `https://meinkinderradar.de`) once a custom
 domain is in place; the value is baked into Open Graph URLs and `sitemap.xml`.
 
 Internal links and assets are emitted as relative URLs, so the site works
-both on a GitHub Pages project URL (`/KinderRadar/`) and on a custom root
+both on a project subpath (`/MeinKinderRadar/`) and on a custom root
 domain.
 
 Point Cloudflare Pages at the repo and use:
 - Build command: `npm run build`
 - Output directory: `dist`
-- Environment variable: `KINDERRADAR_BASE_URL`
+- Environment variable: `MEINKINDERRADAR_BASE_URL`
 
 This project does not require Wrangler for normal Cloudflare Pages Git
 deployment: it is a static site with no `wrangler.toml` and the build writes
@@ -175,7 +175,7 @@ the deploy step must authenticate to Cloudflare and upload a prepared static
 asset directory:
 
 ```bash
-wrangler pages deploy dist --project-name kinderradar
+wrangler pages deploy dist --project-name meinkinderradar
 ```
 
 Set these deployment secrets/environment variables in the CI or Cloudflare

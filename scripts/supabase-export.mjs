@@ -110,8 +110,8 @@ function slugify(value) {
     .replace(/^-+|-+$/g, '');
 }
 
-function defaultHeroImage(slug, fallback = 'kinderradar-hero.png') {
-  const candidate = `kinderradar-hero-${slug}.png`;
+function defaultHeroImage(slug, fallback = 'meinkinderradar-hero.png') {
+  const candidate = `meinkinderradar-hero-${slug}.png`;
   return existsSync(new URL(`../assets/${candidate}`, import.meta.url)) ? candidate : fallback;
 }
 
@@ -152,10 +152,10 @@ function cityRowsToData(cityRows, townRows) {
       regionSlug: existing?.regionSlug ?? city.slug,
       state: existing?.state ?? 'North Rhine-Westphalia',
       country: existing?.country ?? 'DE',
-      heroImage: existing?.heroImage ?? 'kinderradar-hero.png',
+      heroImage: existing?.heroImage ?? 'meinkinderradar-hero.png',
       mapPosition: existing?.mapPosition ?? { x: 50, y: 50 },
       coverageLabel: existing?.coverageLabel ?? nearbyTowns.join(', '),
-      shortIntro: existing?.shortIntro ?? `A local KinderRadar page for families around ${city.name}.`,
+      shortIntro: existing?.shortIntro ?? `A local My Kids Radar page for families around ${city.name}.`,
       guide: existing?.guide ?? `Use this page to browse activities around ${city.name}, then narrow by age, day, category, price, and beginner confidence.`,
       bestFor: existing?.bestFor ?? ['local browsing', 'weekend ideas', 'trial-friendly options'],
       featuredShortcuts: existing?.featuredShortcuts ?? ['weekend', 'free', 'rainy-day', 'trial'],
@@ -176,7 +176,7 @@ function cityRowsToData(cityRows, townRows) {
 
       const region = regionBySlug.get(town.city_slug);
       const existing = existingBySlug.get(slug);
-      const fallbackHero = defaultHeroImage(slug, region?.heroImage ?? 'kinderradar-hero.png');
+      const fallbackHero = defaultHeroImage(slug, region?.heroImage ?? 'meinkinderradar-hero.png');
 
       return {
         slug,
@@ -191,7 +191,7 @@ function cityRowsToData(cityRows, townRows) {
           y: 32 + (Math.floor(index / 4) * 22),
         },
         coverageLabel: existing?.coverageLabel ?? town.name,
-        shortIntro: existing?.shortIntro ?? `A focused KinderRadar page for families around ${town.name}.`,
+        shortIntro: existing?.shortIntro ?? `A focused My Kids Radar page for families around ${town.name}.`,
         guide: existing?.guide ?? `Use this page to stay close to ${town.name} first, then widen to the wider ${region?.name ?? 'local'} area when needed.`,
         bestFor: existing?.bestFor ?? ['close-to-home checks', 'local activities', 'weekend ideas'],
         featuredShortcuts: existing?.featuredShortcuts ?? ['weekend', 'free', 'rainy-day', 'trial'],

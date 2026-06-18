@@ -5,7 +5,7 @@ import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const root = resolve(process.env.KINDERRADAR_STATIC_ROOT ?? join(projectRoot, 'dist'));
+const root = resolve(process.env.MEINKINDERRADAR_STATIC_ROOT ?? join(projectRoot, 'dist'));
 const preferredPort = Number.parseInt(process.env.PORT ?? '4173', 10);
 
 const contentTypes = new Map([
@@ -102,7 +102,7 @@ function listen(port, attemptsLeft = 10) {
   server.listen(port, () => {
     const address = server.address();
     const activePort = typeof address === 'object' && address ? address.port : port;
-    console.log(`KinderRadar is running at http://localhost:${activePort}/`);
+    console.log(`My Kids Radar is running at http://localhost:${activePort}/`);
   });
 }
 

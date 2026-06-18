@@ -1,6 +1,6 @@
 # Supabase Back Office
 
-This folder contains the first database layer for KinderRadar.
+This folder contains the first database layer for My Kids Radar.
 
 ## Setup
 

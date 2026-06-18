@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { activities, cities } from '../assets/activities-data.mjs';
+import { organizers } from '../assets/organizers.mjs';
 
 function parseEnv(contents) {
   const env = {};
@@ -137,6 +138,13 @@ async function main() {
     name: city.name,
   })), 'slug');
 
+  await upsert(config, 'organizers', organizers.map((organizer) => ({
+    slug: organizer.slug,
+    name: organizer.name,
+    website_url: organizer.websiteUrl || null,
+    contact_method: organizer.contactMethod || null,
+  })), 'slug');
+
   await upsert(config, 'towns', cities.flatMap((city) => (
     city.nearbyTowns.map((town) => ({
       city_slug: city.slug,
@@ -167,7 +175,7 @@ async function main() {
     }
   }
 
-  console.log(`Imported ${cities.length} city/cities and ${activities.length} activities into Supabase.`);
+  console.log(`Imported ${cities.length} city/cities, ${organizers.length} organizers, and ${activities.length} activities into Supabase.`);
 }
 
 try {
