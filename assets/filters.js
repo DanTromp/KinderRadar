@@ -266,7 +266,7 @@ function init() {
     if (selected.beginnerFriendly) {
       actions.push({
         id: 'clear-beginner',
-        label: 'Include all confidence levels',
+        label: 'Show all levels',
         labelKey: 'city.empty.clearBeginner',
         apply() {
           form.elements.beginnerFriendly.value = '';
@@ -405,7 +405,12 @@ function init() {
   }
   document.querySelectorAll('[data-intent-id]').forEach((button) => {
     button.addEventListener('click', () => {
-      const filters = JSON.parse(button.dataset.intentFilters || '{}');
+      let filters = {};
+      try {
+        filters = JSON.parse(button.dataset.intentFilters || '{}');
+      } catch {
+        filters = {};
+      }
       const chips = String(button.dataset.intentChips ?? '')
         .split(',')
         .map((value) => value.trim())

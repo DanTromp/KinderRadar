@@ -718,7 +718,7 @@ ${cityDiscoveryHtml(city)}
 
 ${weeklyPlannerHtml({ city, items: cityActivities, activityPrefix: '../../activities' })}
 
-${cityIntentHtml(city)}
+${cityIntentHtml()}
 
       <section class="filter-panel" aria-labelledby="filter-heading">
         <div class="filter-panel-heading">
