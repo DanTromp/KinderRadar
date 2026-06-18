@@ -50,8 +50,8 @@
   "city.guide.activeMix": "Aktiver Mix",
   "city.guide.freshness": "Aktualitätsfenster",
   "city.guide.freshness.value": "{checked90}/{active} in den letzten 90 Tagen geprüft",
-  "city.map.heading": "Nach Ort stöbern",
-  "city.map.intro": "Nutze die lokale Karte, um zwischen nahegelegenen Ortsseiten zu wechseln, bevor du mit Filtern eingrenzt.",
+  "city.map.heading": "Nahegelegene Bereiche",
+  "city.map.intro": "Wechsle zwischen nahegelegenen Ortsseiten und grenze danach mit Filtern ein.",
   "city.map.aria": "Karte der Orte in der Nähe",
   "city.map.towns": "Orte in der Nähe",
   "city.discovery.heading": "Starte mit dem, was heute wichtig ist",
@@ -252,5 +252,6 @@
   "freshness.neutral": "Vor {days} Tagen geprüft",
   "freshness.stale": "Aktualisierung nötig",
   "freshness.closed": "Als geschlossen gemeldet",
-  "freshness.unknown": "Verifizierung unbekannt"
+  "freshness.unknown": "Verifizierung unbekannt",
+  "city.map.current": "Aktuelle Seite"
 }

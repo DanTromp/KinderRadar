@@ -297,10 +297,6 @@ function regionCitiesFor(city) {
   return cities.filter((candidate) => (candidate.regionSlug ?? candidate.slug) === regionSlug);
 }
 
-function firstTownForCity(city) {
-  return city.nearbyTowns[0] ?? city.name;
-}
-
 function cityLinkFrom(currentCity, targetCity) {
   if (currentCity.slug === targetCity.slug) return '#listings-root';
   return `../../cities/${escapeHtml(targetCity.slug)}/`;
@@ -532,40 +528,30 @@ function cityGuideHtml(city, stats, categories) {
       </section>`;
 }
 
-function areaMapHtml(city) {
+function nearbyAreasHtml(city) {
   const regionCities = regionCitiesFor(city);
-  const pins = regionCities.map((targetCity) => {
+  const areaCards = regionCities.map((targetCity) => {
     const targetActivities = activeActivitiesForCity(targetCity);
     const targetStats = statsForActivities(targetActivities);
-    const x = targetCity.mapPosition?.x ?? 50;
-    const y = targetCity.mapPosition?.y ?? 50;
     const current = targetCity.slug === city.slug ? ' aria-current="page"' : '';
-    return `          <a class="map-pin" href="${cityLinkFrom(city, targetCity)}" style="--x: ${x}%; --y: ${y}%;"${current}>
-            <span class="pin-dot" aria-hidden="true"></span>
+    const currentBadge = targetCity.slug === city.slug
+      ? '<span class="area-current" data-i18n="city.map.current">Current page</span>'
+      : '';
+    return `          <a class="area-card" href="${cityLinkFrom(city, targetCity)}"${current}>
+            ${currentBadge}
             <strong>${escapeHtml(targetCity.name)}</strong>
-            <small>${targetStats.active} activities</small>
-          </a>`;
-  }).join('\n');
-  const townLinks = regionCities.map((targetCity) => {
-    const current = targetCity.slug === city.slug ? ' aria-current="page"' : '';
-    return `          <a href="${cityLinkFrom(city, targetCity)}"${current}>
-            <strong>${escapeHtml(targetCity.name)}</strong>
-            <span>${escapeHtml(firstTownForCity(targetCity))}</span>
+            <span>${escapeHtml(cityShortIntro(targetCity))}</span>
+            <small>${targetStats.active} activities · ${targetStats.categories} categories</small>
           </a>`;
   }).join('\n');
 
-  return `      <section class="area-map-panel" aria-labelledby="area-map-heading">
+  return `      <section class="nearby-areas-panel" aria-labelledby="nearby-areas-heading">
         <div class="section-heading">
-          <h2 id="area-map-heading" data-i18n="city.map.heading">Browse by area</h2>
-          <p class="section-intro" data-i18n="city.map.intro">Use the local map to jump between nearby town pages before narrowing by filters.</p>
+          <h2 id="nearby-areas-heading" data-i18n="city.map.heading">Nearby areas</h2>
+          <p class="section-intro" data-i18n="city.map.intro">Jump between nearby town pages, then narrow by filters.</p>
         </div>
-        <div class="area-map-shell">
-          <div class="area-map" role="img" aria-label="Nearby places map" data-i18n-attr="aria-label:city.map.aria">
-${pins}
-          </div>
-          <div class="area-map-list" aria-label="Nearby towns" data-i18n-attr="aria-label:city.map.towns">
-${townLinks}
-          </div>
+        <div class="area-card-grid" aria-label="Nearby towns" data-i18n-attr="aria-label:city.map.towns">
+${areaCards}
         </div>
       </section>`;
 }
@@ -670,7 +656,12 @@ function cityPage(city) {
     .map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
 
   const categoryOptions = categories
-    .map((c) => `<option value="${escapeHtml(c)}" data-i18n="enum.category.${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+    .map((c) => {
+      const i18n = KNOWN_DETAIL_ENUMS['enum.category'].has(c)
+        ? ` data-i18n="enum.category.${escapeHtml(c)}"`
+        : '';
+      return `<option value="${escapeHtml(c)}"${i18n}>${escapeHtml(c)}</option>`;
+    }).join('');
 
   const chipsHtml = CHIP_DEFINITIONS
     .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" data-i18n="${escapeHtml(c.labelKey)}" aria-pressed="false">${escapeHtml(c.label)}</button>`)
@@ -712,7 +703,7 @@ function cityPage(city) {
 
 ${cityGuideHtml(city, cityStats, categories)}
 
-${areaMapHtml(city)}
+${nearbyAreasHtml(city)}
 
 ${cityDiscoveryHtml(city)}
 
