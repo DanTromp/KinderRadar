@@ -15,7 +15,10 @@ import { activities, sections, cities } from '../assets/activities-data.mjs';
 import {
   renderSectionHtml,
   freshnessBadge,
+  freshnessCoverage,
   verifierLabel,
+  sourceSignal,
+  confidenceSignal,
   escapeHtml,
 } from '../assets/render.mjs';
 import { sortByFreshness, CHIP_DEFINITIONS } from '../assets/filtering.mjs';
@@ -221,10 +224,14 @@ function activeActivitiesForCity(city) {
 }
 
 function statsForActivities(items) {
+  const freshness = freshnessCoverage(items);
   return {
     active: items.length,
     categories: new Set(items.map((a) => a.category).filter(Boolean)).size,
     weekend: items.filter((a) => /sat|sun/i.test(a.dayOfWeek ?? '')).length,
+    fresh30: freshness.fresh30,
+    checked90: freshness.checked90,
+    checked90Pct: freshness.checked90Pct,
   };
 }
 
@@ -326,6 +333,77 @@ function cityDiscoveryHtml(city) {
           <p class="section-intro" data-i18n="city.discovery.intro">Shortcut into useful parent filters, then fine-tune the full list below.</p>
         </div>
         <div class="discovery-grid">
+${cards}
+        </div>
+      </section>`;
+}
+
+const QUICK_INTENTS = [
+  {
+    id: 'ages-3-6',
+    title: 'Ages 3-6',
+    titleKey: 'city.intent.preschool.title',
+    body: 'Start with preschool-friendly options.',
+    bodyKey: 'city.intent.preschool.body',
+    filters: { age: '3-6' },
+    chips: [],
+  },
+  {
+    id: 'weekend',
+    title: 'This weekend',
+    titleKey: 'city.intent.weekend.title',
+    body: 'Jump straight to Saturday and Sunday ideas.',
+    bodyKey: 'city.intent.weekend.body',
+    filters: { day: 'weekend' },
+    chips: ['this-weekend'],
+  },
+  {
+    id: 'free',
+    title: 'Free or low-cost',
+    titleKey: 'city.intent.free.title',
+    body: 'Surface the easier budget options first.',
+    bodyKey: 'city.intent.free.body',
+    filters: {},
+    chips: ['free'],
+  },
+  {
+    id: 'after-kindergarten',
+    title: 'After kindergarten',
+    titleKey: 'city.intent.afterKindergarten.title',
+    body: 'Focus on weekday sessions from 14:00 onward.',
+    bodyKey: 'city.intent.afterKindergarten.body',
+    filters: {},
+    chips: ['after-kindergarten'],
+  },
+  {
+    id: 'rainy-day',
+    title: 'Indoor / rainy day',
+    titleKey: 'city.intent.rainy.title',
+    body: 'Indoor or mixed-setting backups for bad weather.',
+    bodyKey: 'city.intent.rainy.body',
+    filters: {},
+    chips: ['rainy-day'],
+  },
+];
+
+function cityIntentHtml() {
+  const cards = QUICK_INTENTS.map((intent) => `        <button
+          type="button"
+          class="intent-card"
+          data-intent-id="${escapeHtml(intent.id)}"
+          data-intent-filters="${escapeHtml(JSON.stringify(intent.filters))}"
+          data-intent-chips="${escapeHtml(intent.chips.join(','))}"
+        >
+          <strong data-i18n="${escapeHtml(intent.titleKey)}">${escapeHtml(intent.title)}</strong>
+          <span data-i18n="${escapeHtml(intent.bodyKey)}">${escapeHtml(intent.body)}</span>
+        </button>`).join('\n');
+
+  return `      <section class="intent-panel" aria-labelledby="intent-panel-heading">
+        <div class="section-heading">
+          <h2 id="intent-panel-heading" data-i18n="city.intent.heading">Pick a quick starting point</h2>
+          <p class="section-intro" data-i18n="city.intent.intro">Choose the first parent goal and KinderRadar will pre-fill the filters for you.</p>
+        </div>
+        <div class="intent-grid">
 ${cards}
         </div>
       </section>`;
@@ -445,6 +523,10 @@ function cityGuideHtml(city, stats, categories) {
           <div>
             <dt data-i18n="city.guide.activeMix">Active mix</dt>
             <dd>${stats.active} listings · ${stats.categories} categories</dd>
+          </div>
+          <div>
+            <dt data-i18n="city.guide.freshness">Freshness window</dt>
+            <dd data-i18n="city.guide.freshness.value" data-i18n-params="${escapeHtml(JSON.stringify({ checked90: stats.checked90, active: stats.active, fresh30: stats.fresh30 }))}">${stats.checked90}/${stats.active} checked ≤90 days</dd>
           </div>
         </dl>
       </section>`;
@@ -636,6 +718,8 @@ ${cityDiscoveryHtml(city)}
 
 ${weeklyPlannerHtml({ city, items: cityActivities, activityPrefix: '../../activities' })}
 
+${cityIntentHtml()}
+
       <section class="filter-panel" aria-labelledby="filter-heading">
         <div class="filter-panel-heading">
           <h2 id="filter-heading" data-i18n="city.filters.heading">Filter activities</h2>
@@ -711,6 +795,10 @@ ${weeklyPlannerHtml({ city, items: cityActivities, activityPrefix: '../../activi
         <span data-i18n="city.empty.text">No activities match the selected filters yet. Try widening your criteria —</span>
         <span data-i18n="city.empty.or">or</span> <a id="missing-listing-link" class="text-link" href="#submit-activity" data-analytics="missing_listing_click" data-i18n="city.empty.link">tell us what's missing</a>.
       </p>
+      <div id="empty-recovery" class="empty-recovery" hidden aria-live="polite">
+        <span class="empty-recovery-label" data-i18n="city.empty.try">Try:</span>
+        <div id="empty-recovery-actions" class="empty-recovery-actions"></div>
+      </div>
 
       <div id="listings-root">
 ${sectionsHtml}
@@ -754,6 +842,8 @@ ${citySubmissionForm(city, townOptions)}
 function activityDetailPage(listing) {
   const badge = freshnessBadge(listing);
   const verifier = verifierLabel(listing.verifiedBy);
+  const source = sourceSignal(listing);
+  const confidence = confidenceSignal(listing);
   const closed = badge.tone === 'closed';
   const closedBanner = closed
     ? '<p class="status-banner" role="status" data-i18n="activity.closedBanner">This activity was reported closed. Please verify before going.</p>'
@@ -903,10 +993,16 @@ ${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${e
     : '<dt data-i18n="activity.trust.source">Source</dt><dd class="muted" data-i18n="activity.trust.noSource">No source URL on file</dd>';
   const trustPanel = `      <section class="panel trust-panel" aria-labelledby="trust-heading">
         <h2 id="trust-heading" data-i18n="activity.trust.heading">Why you can trust this listing</h2>
+        <div class="trust-cues detail-trust-cues">
+         <span class="trust-pill trust-pill-${escapeHtml(confidence.tone)}" data-i18n="${escapeHtml(confidence.i18nKey)}">${escapeHtml(confidence.label)}</span>
+         <span class="trust-pill trust-pill-${escapeHtml(source.tone)}" data-i18n="${escapeHtml(source.i18nKey)}">${escapeHtml(source.label)}</span>
+         ${verifier ? `<span class="trust-pill trust-pill-verifier" data-i18n="${escapeHtml(verifier.i18nKey)}">${escapeHtml(verifier.label)}</span>` : ''}
+        </div>
         <dl class="trust-grid">
-          ${sourceTrustLine}
-          <dt data-i18n="activity.trust.verifiedBy">Verified by</dt>${verifierTrust}
-          <dt data-i18n="activity.trust.lastChecked">Last checked</dt><dd><span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}"${i18nAttr(badge.i18nKey, badge.i18nParams)}>${escapeHtml(badge.label)}</span> <span class="muted">(${escapeHtml(listing.lastVerified ?? 'unknown')})</span></dd>
+         <dt data-i18n="activity.trust.confidence">Confidence</dt><dd data-i18n="${escapeHtml(confidence.i18nKey)}">${escapeHtml(confidence.label)}</dd>
+         ${sourceTrustLine}
+         <dt data-i18n="activity.trust.verifiedBy">Verified by</dt>${verifierTrust}
+         <dt data-i18n="activity.trust.lastChecked">Last checked</dt><dd><span class="freshness freshness-${badge.tone}" title="${escapeHtml(listing.lastVerified ?? '')}"${i18nAttr(badge.i18nKey, badge.i18nParams)}>${escapeHtml(badge.label)}</span> <span class="muted">(${escapeHtml(listing.lastVerified ?? 'unknown')})</span></dd>
           <dt data-i18n="activity.trust.status">Status</dt><dd data-i18n="${escapeHtml(statusKey)}">${escapeHtml(statusText)}</dd>
         </dl>
         <p class="muted small" data-i18n="activity.trust.note">Spotted a change? Send it for review so the listing can be checked and refreshed.</p>
@@ -937,7 +1033,7 @@ ${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${e
   })();
 
   const body = `    <main class="page stack">
-      <header class="page-header">
+      <header class="page-header" data-analytics-detail="${escapeHtml(listing.slug)}" data-analytics-town="${escapeHtml(backCity.slug)}" data-analytics-confidence="${escapeHtml(confidence.tone)}">
         <a class="back-link" href="../../cities/${escapeHtml(backCity.slug)}/" data-i18n="activity.back">← Back to activities</a>
         <p class="eyebrow"${townDisplay.attrs}>${townDisplay.en}</p>
         <div class="listing-header">

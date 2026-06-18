@@ -87,12 +87,21 @@ function buildChipBar(container) {
   });
 }
 
+function setActiveChips(container, chipIds) {
+  const active = new Set(chipIds);
+  container.querySelectorAll('.chip').forEach((el) => {
+    el.setAttribute('aria-pressed', active.has(el.dataset.chipId) ? 'true' : 'false');
+  });
+}
+
 function init() {
   const root = document.getElementById('listings-root');
   const form = document.getElementById('activity-filters');
   const chipContainer = document.getElementById('filter-chips');
   const searchInput = document.getElementById('activity-search');
   const emptyState = document.getElementById('empty-state');
+  const emptyRecovery = document.getElementById('empty-recovery');
+  const emptyRecoveryActions = document.getElementById('empty-recovery-actions');
   const missingLink = document.getElementById('missing-listing-link');
   const filterLoader = document.getElementById('filter-loader');
   if (!root || !form || !chipContainer || !emptyState) return;
@@ -202,6 +211,110 @@ function init() {
     } catch { /* malformed href, ignore */ }
   };
 
+  const recoveryActions = ({ selected, chips, query }) => {
+    const actions = [];
+    if (query.trim()) {
+      actions.push({
+        id: 'clear-search',
+        label: 'Clear search',
+        labelKey: 'city.empty.clearSearch',
+        apply() {
+          if (searchInput) searchInput.value = '';
+        },
+      });
+    }
+    if (selected.town) {
+      actions.push({
+        id: 'clear-town',
+        label: 'Search all towns',
+        labelKey: 'city.empty.clearTown',
+        apply() {
+          form.elements.town.value = '';
+        },
+      });
+    }
+    if (selected.age) {
+      actions.push({
+        id: 'clear-age',
+        label: 'Try all ages',
+        labelKey: 'city.empty.clearAge',
+        apply() {
+          form.elements.age.value = '';
+        },
+      });
+    }
+    if (selected.category) {
+      actions.push({
+        id: 'clear-category',
+        label: 'Remove category',
+        labelKey: 'city.empty.clearCategory',
+        apply() {
+          form.elements.category.value = '';
+        },
+      });
+    }
+    if (selected.day) {
+      actions.push({
+        id: 'clear-day',
+        label: 'Try any day',
+        labelKey: 'city.empty.clearDay',
+        apply() {
+          form.elements.day.value = '';
+        },
+      });
+    }
+    if (selected.beginnerFriendly) {
+      actions.push({
+        id: 'clear-beginner',
+        label: 'Show all levels',
+        labelKey: 'city.empty.clearBeginner',
+        apply() {
+          form.elements.beginnerFriendly.value = '';
+        },
+      });
+    }
+    if (chips.length) {
+      actions.push({
+        id: 'clear-chips',
+        label: 'Remove quick filters',
+        labelKey: 'city.empty.clearChips',
+        apply() {
+          setActiveChips(chipContainer, []);
+        },
+      });
+    }
+    if (actions.length > 1) {
+      actions.push({
+        id: 'reset-all',
+        label: 'Reset all filters',
+        labelKey: 'city.empty.resetAll',
+        apply() {
+          form.reset();
+          setActiveChips(chipContainer, []);
+          if (searchInput) searchInput.value = '';
+        },
+      });
+    }
+    return actions.slice(0, 4);
+  };
+
+  const renderRecovery = (visibleCount, state) => {
+    if (!emptyRecovery || !emptyRecoveryActions) return;
+    if (visibleCount > 0) {
+      emptyRecovery.hidden = true;
+      emptyRecoveryActions.innerHTML = '';
+      return;
+    }
+    const actions = recoveryActions(state);
+    emptyRecoveryActions.innerHTML = actions
+      .map((action) => `<button type="button" class="recovery-button" data-recovery-action="${action.id}" data-i18n="${action.labelKey}">${action.label}</button>`)
+      .join('');
+    emptyRecovery.hidden = actions.length === 0;
+    if (actions.length) {
+      document.dispatchEvent(new CustomEvent('kr:dom-updated', { detail: { root: emptyRecovery } }));
+    }
+  };
+
   const render = ({ source } = {}) => {
     pulseFilterLoader(source);
     const selected = readSelectedFilters(form);
@@ -229,6 +342,7 @@ function init() {
     emptyState.hidden = visibleCount > 0;
     updateMissingLink(query);
     syncUrlState({ selected, chips, query });
+    renderRecovery(visibleCount, { selected, chips, query });
 
     // Sort whenever it changes.
     if (selected.sort !== lastValues.sort) {
@@ -257,6 +371,19 @@ function init() {
   };
 
   form.addEventListener('change', () => render({ source: 'form' }));
+  emptyRecoveryActions?.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-recovery-action]');
+    if (!button) return;
+    const selected = readSelectedFilters(form);
+    const chips = readActiveChips(chipContainer);
+    const query = searchInput ? searchInput.value : '';
+    const action = recoveryActions({ selected, chips, query })
+      .find((candidate) => candidate.id === button.dataset.recoveryAction);
+    if (!action) return;
+    action.apply();
+    const visibleCount = render({ source: 'recovery' });
+    analytics.emptyStateRecovery(action.id, visibleCount);
+  });
   chipContainer.addEventListener('chipchange', (event) => {
     const visibleCount = render({ source: 'chip' });
     const detail = event?.detail;
@@ -276,8 +403,29 @@ function init() {
       }, 600);
     });
   }
+  document.querySelectorAll('[data-intent-id]').forEach((button) => {
+    button.addEventListener('click', () => {
+      let filters = {};
+      try {
+        filters = JSON.parse(button.dataset.intentFilters || '{}');
+      } catch {
+        filters = {};
+      }
+      const chips = String(button.dataset.intentChips ?? '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+      form.reset();
+      if (searchInput) searchInput.value = '';
+      for (const [name, value] of Object.entries(filters)) {
+        if (form.elements[name]) form.elements[name].value = value;
+      }
+      setActiveChips(chipContainer, chips);
+      const visibleCount = render({ source: 'intent' });
+      analytics.intentSelect(button.dataset.intentId, visibleCount);
+    });
+  });
   render({ source: 'init' });
 }
 
 init();
-

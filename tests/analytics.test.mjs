@@ -104,3 +104,28 @@ test('track sanitizes string props before sending', async () => {
     cleanupBrowserStub();
   }
 });
+
+test('analytics helpers send detail and intent events', async () => {
+  const calls = [];
+  installBrowserStub({
+    plausible(name, payload) {
+      calls.push({ name, payload });
+    },
+  });
+  try {
+    const { analytics } = await importAnalytics();
+    analytics.detailView('demo', 'haltern-am-see', 'strong');
+    analytics.intentSelect('weekend', 3);
+    analytics.emptyStateRecovery('clear-age', 8);
+
+    assert.deepEqual(
+      calls.map((call) => call.name),
+      ['detail_view', 'intent_select', 'empty_state_recovery'],
+    );
+    assert.equal(calls[0].payload.props.slug, 'demo');
+    assert.equal(calls[1].payload.props.results, 3);
+    assert.equal(calls[2].payload.props.action, 'clear-age');
+  } finally {
+    cleanupBrowserStub();
+  }
+});

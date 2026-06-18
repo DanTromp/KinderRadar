@@ -14,6 +14,9 @@
 //   zero_results        { q: string, town, age, category, day, beginnerFriendly,
 //                         chips: string }
 //   listing_click       { slug: string }
+//   detail_view         { slug: string, town: string, confidence: string }
+//   intent_select       { intent: string, results: number }
+//   empty_state_recovery { action: string, results: number }
 //   suggest_update_click, report_closed_click, confirm_still_running_click,
 //   organizer_claim_click, submit_activity_click, missing_listing_click,
 //   contact_click       (no props)
@@ -116,6 +119,15 @@ export const analytics = {
   listingClick(slug) {
     track('listing_click', { slug: String(slug ?? '') });
   },
+  detailView(slug, town, confidence) {
+    track('detail_view', { slug: String(slug ?? ''), town: String(town ?? ''), confidence: String(confidence ?? '') });
+  },
+  intentSelect(intent, results) {
+    track('intent_select', { intent: String(intent ?? ''), results: Number(results) || 0 });
+  },
+  emptyStateRecovery(action, results) {
+    track('empty_state_recovery', { action: String(action ?? ''), results: Number(results) || 0 });
+  },
 };
 
 // Auto-wire any link tagged with data-analytics="event_name". Page-level
@@ -145,6 +157,15 @@ function wireDataAnalytics() {
     },
     { capture: true },
   );
+
+  const detailRoot = document.querySelector('[data-analytics-detail]');
+  if (detailRoot) {
+    analytics.detailView(
+      detailRoot.dataset.analyticsDetail,
+      detailRoot.dataset.analyticsTown,
+      detailRoot.dataset.analyticsConfidence,
+    );
+  }
 }
 
 initPlausible();

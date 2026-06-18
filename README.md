@@ -113,6 +113,9 @@ Leave it unset for a no-op analytics build.
 | `filter_change`                | `name`, `value`, `results` (also fires for chip toggles as `name: "chip:<id>"`) |
 | `zero_results`                 | `q`, `town`, `age`, `category`, `day`, `beginnerFriendly`, `chips` |
 | `listing_click`                | `slug`                                                |
+| `detail_view`                  | `slug`, `town`, `confidence`                          |
+| `intent_select`                | `intent`, `results`                                   |
+| `empty_state_recovery`         | `action`, `results`                                   |
 | `suggest_update_click`         | —                                                     |
 | `report_closed_click`          | —                                                     |
 | `confirm_still_running_click`  | —                                                     |
