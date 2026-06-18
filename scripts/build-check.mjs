@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { activities, sections, categories, cities } from '../assets/activities-data.mjs';
+import { freshnessCoverage } from '../assets/render.mjs';
 
 const requiredFiles = [
   'assets/styles.css',
@@ -36,6 +37,10 @@ const CITY_KINDS = new Set(['region', 'town']);
 const FEATURED_SHORTCUTS = new Set(['weekend', 'free', 'rainy-day', 'trial', 'preschool', 'primary']);
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const FRESHNESS_TARGETS = {
+  checked90Pct: 80,
+  fresh30Pct: 35,
+};
 
 function validUrl(value) {
   if (typeof value !== 'string') return false;
@@ -272,6 +277,26 @@ export function collectWarnings(now = new Date()) {
   for (const cat of categories) {
     if (!usedCategories.has(cat)) {
       warnings.push(`category "${cat}" has 0 active listings`);
+    }
+  }
+
+  for (const city of cities) {
+    const scoped = active.filter((a) => city.nearbyTowns.includes(a.town));
+    if (scoped.length === 0) continue;
+    const coverage = freshnessCoverage(scoped, now);
+    if (coverage.checked90Pct < FRESHNESS_TARGETS.checked90Pct) {
+      warnings.push(`city "${city.slug}" freshness coverage is ${coverage.checked90Pct}% within 90 days (<${FRESHNESS_TARGETS.checked90Pct}%)`);
+    }
+    if (coverage.fresh30Pct < FRESHNESS_TARGETS.fresh30Pct) {
+      warnings.push(`city "${city.slug}" freshness coverage is ${coverage.fresh30Pct}% within 30 days (<${FRESHNESS_TARGETS.fresh30Pct}%)`);
+    }
+  }
+  for (const cat of categories) {
+    const scoped = active.filter((a) => a.category === cat);
+    if (scoped.length === 0) continue;
+    const coverage = freshnessCoverage(scoped, now);
+    if (coverage.checked90Pct < FRESHNESS_TARGETS.checked90Pct) {
+      warnings.push(`category "${cat}" freshness coverage is ${coverage.checked90Pct}% within 90 days (<${FRESHNESS_TARGETS.checked90Pct}%)`);
     }
   }
 

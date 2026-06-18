@@ -4,7 +4,10 @@ import {
   slugify,
   daysSince,
   freshnessBadge,
+  freshnessCoverage,
   verifierLabel,
+  sourceSignal,
+  confidenceSignal,
   escapeHtml,
   renderListingHtml,
 } from '../assets/render.mjs';
@@ -54,6 +57,43 @@ test('freshnessBadge exposes i18n key and params for translation', () => {
   assert.equal(freshnessBadge({}, now).i18nKey, 'freshness.unknown');
 });
 
+test('freshnessCoverage summarizes active listings by 30/90-day windows', () => {
+  const now = new Date('2026-06-15T12:00:00Z');
+  const stats = freshnessCoverage([
+    { lastVerified: '2026-06-14', status: 'active' },
+    { lastVerified: '2026-05-20', status: 'active' },
+    { lastVerified: '2025-01-01', status: 'active' },
+    { lastVerified: '2026-06-01', status: 'reported-closed' },
+  ], now);
+  assert.deepEqual(stats, {
+    total: 3,
+    fresh30: 2,
+    checked90: 2,
+    stale: 1,
+    fresh30Pct: 67,
+    checked90Pct: 67,
+  });
+});
+
+test('sourceSignal and confidenceSignal summarize trust cues', () => {
+  const now = new Date('2026-06-15T12:00:00Z');
+  assert.deepEqual(sourceSignal({ sourceUrl: 'https://example.com' }), {
+    tone: 'linked',
+    label: 'Public source linked',
+    i18nKey: 'trust.source.linked',
+  });
+  assert.equal(confidenceSignal({
+    sourceUrl: 'https://example.com',
+    lastVerified: '2026-06-10',
+    verifiedBy: 'organizer',
+  }, now).tone, 'strong');
+  assert.equal(confidenceSignal({
+    sourceUrl: '',
+    lastVerified: '2026-06-10',
+    verifiedBy: 'editor',
+  }, now).tone, 'caution');
+});
+
 const sampleListing = {
   slug: 'demo',
   name: 'Demo Activity',
@@ -101,6 +141,7 @@ test('renderListingHtml includes a freshness badge and a detail-page link', () =
   const html = renderListingHtml({ ...sampleListing, lastVerified: now.toISOString().slice(0, 10) }, { sections });
   assert.match(html, /class="freshness/);
   assert.match(html, /href="\/activities\/demo\/"/);
+  assert.match(html, /trust-pill/);
 });
 
 test('renderListingHtml supports relative activity links for project-page hosting', () => {

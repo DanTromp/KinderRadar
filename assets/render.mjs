@@ -49,6 +49,33 @@ export function freshnessBadge(listing, now = new Date()) {
   return { tone: 'stale', label: 'Needs update', i18nKey: 'freshness.stale', i18nParams: null };
 }
 
+export function freshnessCoverage(listings, now = new Date()) {
+  const items = Array.isArray(listings) ? listings : [];
+  let total = 0;
+  let fresh30 = 0;
+  let checked90 = 0;
+  let stale = 0;
+
+  for (const listing of items) {
+    if (!listing || listing.status === 'reported-closed') continue;
+    total += 1;
+    const days = daysSince(listing.lastVerified, now);
+    if (days !== null && days < 30) fresh30 += 1;
+    if (days !== null && days <= 90) checked90 += 1;
+    else stale += 1;
+  }
+
+  const percent = (value) => (total ? Math.round((value / total) * 100) : 0);
+  return {
+    total,
+    fresh30,
+    checked90,
+    stale,
+    fresh30Pct: percent(fresh30),
+    checked90Pct: percent(checked90),
+  };
+}
+
 // verifierLabel returns { label, i18nKey } for known values, null otherwise.
 export function verifierLabel(verifiedBy) {
   switch (verifiedBy) {
@@ -57,6 +84,33 @@ export function verifierLabel(verifiedBy) {
     case 'editor': return { label: 'Editor curated', i18nKey: 'enum.verifier.editor' };
     default: return null;
   }
+}
+
+export function sourceSignal(listing) {
+  const url = String(listing?.sourceUrl ?? '').trim();
+  if (/^https?:\/\//i.test(url)) {
+    return { tone: 'linked', label: 'Public source linked', i18nKey: 'trust.source.linked' };
+  }
+  return { tone: 'missing', label: 'Source still needed', i18nKey: 'trust.source.missing' };
+}
+
+export function confidenceSignal(listing, now = new Date()) {
+  if (listing?.status === 'reported-closed') {
+    return { tone: 'watch', label: 'Reported closed', i18nKey: 'trust.confidence.closed' };
+  }
+
+  const days = daysSince(listing?.lastVerified, now);
+  const source = sourceSignal(listing);
+  if (source.tone === 'missing' || days === null) {
+    return { tone: 'caution', label: 'Needs more proof', i18nKey: 'trust.confidence.low' };
+  }
+  if (days <= 30 && listing?.verifiedBy === 'organizer') {
+    return { tone: 'strong', label: 'High confidence', i18nKey: 'trust.confidence.high' };
+  }
+  if (days <= 90) {
+    return { tone: 'good', label: 'Solid confidence', i18nKey: 'trust.confidence.medium' };
+  }
+  return { tone: 'caution', label: 'Needs re-check', i18nKey: 'trust.confidence.watch' };
 }
 
 // Escape for safe interpolation into HTML text and attribute contexts.
@@ -148,6 +202,8 @@ export function renderListingHtml(listing, {
   const tagInfo = tagInfoForSection(listing.section, sections);
   const badge = freshnessBadge(listing);
   const verifier = verifierLabel(listing.verifiedBy);
+  const source = sourceSignal(listing);
+  const confidence = confidenceSignal(listing);
   const closed = badge.tone === 'closed';
 
   const dataAttrs = [
@@ -177,9 +233,11 @@ export function renderListingHtml(listing, {
     ? `<p class="status-banner" role="status"${i18nAttrs('activity.closedBanner')}>This activity was reported closed. Please verify before going.</p>`
     : '';
 
-  const verifierLine = verifier
-    ? `<p class="verifier muted"${i18nAttrs(verifier.i18nKey)}>${escapeHtml(verifier.label)}</p>`
-    : '';
+  const trustCues = [
+    `<span class="trust-pill trust-pill-${escapeHtml(confidence.tone)}"${i18nAttrs(confidence.i18nKey)}>${escapeHtml(confidence.label)}</span>`,
+    `<span class="trust-pill trust-pill-${escapeHtml(source.tone)}"${i18nAttrs(source.i18nKey)}>${escapeHtml(source.label)}</span>`,
+    verifier ? `<span class="trust-pill trust-pill-verifier"${i18nAttrs(verifier.i18nKey)}>${escapeHtml(verifier.label)}</span>` : '',
+  ].filter(Boolean).join('');
 
   const nameText = freeText(listing.name);
   const timingText = freeText(listing.timing);
@@ -198,9 +256,9 @@ export function renderListingHtml(listing, {
         <span>${escapeHtml(listing.ageRange)}</span>
         <span${townText.attrs}>${townText.en}</span>
       </div>
+      <div class="trust-cues">${trustCues}</div>
       <p><strong${i18nAttrs('field.when')}>When:</strong> <span${timingText.attrs}>${timingText.en}</span></p>
       <p><strong${i18nAttrs('field.cost')}>Cost:</strong> <span${costText.attrs}>${costText.en}</span></p>
-      ${verifierLine}
       <p class="listing-actions">
         <a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/" data-i18n="listing.viewDetails">View details</a>
         <a class="text-link muted-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a>
