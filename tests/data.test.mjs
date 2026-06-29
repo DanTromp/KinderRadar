@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateData } from '../scripts/build-check.mjs';
+import { collectWarnings, validateActivity, validateData } from '../scripts/build-check.mjs';
 import { activities, sections, cities } from '../assets/activities-data.mjs';
 import { organizers, organizerForActivity } from '../assets/organizers.mjs';
 
@@ -65,4 +65,51 @@ test('organizer profiles are derived for every activity', () => {
   for (const activity of activities) {
     assert.ok(organizerForActivity(activity), `missing organizer for ${activity.slug}`);
   }
+});
+
+test('metadata quality gaps are warnings, not hard validation errors', () => {
+  const warnings = collectWarnings(new Date('2026-06-29T12:00:00Z'));
+  assert.ok(warnings.some((warning) => /missing accessibility metadata/.test(warning)));
+  assert.ok(warnings.some((warning) => /missing address\/geodata/.test(warning)));
+  assert.ok(warnings.some((warning) => /missing startTime/.test(warning)));
+});
+
+test('invalid geodata is detected as a hard validation error', () => {
+  const sectionIds = new Set(sections.map((s) => s.id));
+  const errors = validateActivity({
+    slug: 'bad-geo',
+    name: 'Bad Geo',
+    section: sections[0].id,
+    category: 'Sports',
+    ageRange: '4-8',
+    ageMin: 4,
+    ageMax: 8,
+    town: cities[0].nearbyTowns[0],
+    timing: 'Tuesday 16:00',
+    cost: 'Free',
+    beginnerFriendly: true,
+    lastVerified: '2026-06-20',
+    geo: { lat: 120, lng: 8 },
+  }, sectionIds);
+  assert.ok(errors.some((error) => /valid latitude\/longitude/.test(error)));
+});
+
+test('accessibility object values are validated without requiring every listing to have them', () => {
+  const sectionIds = new Set(sections.map((s) => s.id));
+  const errors = validateActivity({
+    slug: 'bad-accessibility',
+    name: 'Bad Accessibility',
+    section: sections[0].id,
+    category: 'Sports',
+    ageRange: '4-8',
+    ageMin: 4,
+    ageMax: 8,
+    town: cities[0].nearbyTowns[0],
+    timing: 'Tuesday 16:00',
+    cost: 'Free',
+    beginnerFriendly: true,
+    lastVerified: '2026-06-20',
+    accessibility: { strollerFriendly: 'yes' },
+  }, sectionIds);
+  assert.ok(errors.some((error) => /accessibility\.strollerFriendly/.test(error)));
 });

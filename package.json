@@ -11,11 +11,13 @@
     "build": "node scripts/build-check.mjs && node scripts/build.mjs",
     "build:supabase": "node scripts/supabase-export.mjs && npm run build",
     "test": "npm run build && node --test tests/*.test.mjs",
+    "coverage:report": "node scripts/coverage-report.mjs",
     "supabase:export": "node scripts/supabase-export.mjs",
     "supabase:import": "node scripts/supabase-import.mjs",
     "supabase:status": "node scripts/supabase-status.mjs",
     "supabase:updates": "node scripts/supabase-updates.mjs",
     "supabase:review": "node scripts/supabase-updates.mjs --format=html --out=review/activity-updates.html",
+    "admin:review": "node scripts/supabase-updates.mjs --status=all --format=admin-html --out=review/admin/review/index.html",
     "supabase:update-status": "node scripts/supabase-update-status.mjs"
   }
 }

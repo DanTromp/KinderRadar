@@ -53,6 +53,9 @@ async function upsert({ url, serviceRole }, table, rows, conflict) {
 }
 
 function activityRow(activity) {
+  const accessibilityText = typeof activity.accessibility === 'string'
+    ? activity.accessibility
+    : (typeof activity.accessibility?.notes === 'string' ? activity.accessibility.notes : null);
   return {
     slug: activity.slug,
     name: activity.name,
@@ -76,7 +79,7 @@ function activityRow(activity) {
     setting: activity.setting ?? null,
     parent_participation: activity.parentParticipation ?? null,
     language: activity.language ?? null,
-    accessibility: activity.accessibility ?? null,
+    accessibility: accessibilityText,
     contact_url: activity.contactUrl ?? null,
     contact_method: activity.contactMethod ?? null,
     source_url: activity.sourceUrl ?? null,

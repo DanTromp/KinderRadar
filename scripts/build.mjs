@@ -23,8 +23,10 @@ import {
   sourceSignal,
   confidenceSignal,
   escapeHtml,
+  normalizedAccessibility,
+  normalizedLocation,
 } from '../assets/render.mjs';
-import { sortByFreshness, CHIP_DEFINITIONS } from '../assets/filtering.mjs';
+import { sortByFreshness, CHIP_DEFINITIONS, isLowCost } from '../assets/filtering.mjs';
 
 function cityForTown(town) {
   return cities.find((c) => c.name === town && c.nearbyTowns.length === 1)
@@ -302,15 +304,8 @@ function organizerLink(prefix, organizer) {
   return `${prefix}/organizers/${escapeHtml(organizer.slug)}/`;
 }
 
-function organizerClaimUrl(organizer) {
-  if (!REPO_SLUG) return '#claim-profile';
-  const params = new URLSearchParams({
-    template: 'organizer-claim.yml',
-    title: `[Claim] ${organizer.name}`,
-    organizer: organizer.name,
-    website: organizer.websiteUrl ?? '',
-  });
-  return `https://github.com/${REPO_SLUG}/issues/new?${params.toString()}`;
+function organizerClaimHref(prefix, organizer) {
+  return `${organizerLink(prefix, organizer)}#claim-profile`;
 }
 
 function organizerCardHtml(organizer, {
@@ -327,6 +322,64 @@ function organizerCardHtml(organizer, {
           <span>${escapeHtml(townList.slice(0, 3).join(', '))}</span>
           <small>${count} activities · ${categoryCount} categories</small>
         </a>`;
+}
+
+function organizerClaimForm(organizer) {
+  return `      <form class="contribution-form" data-meinkinderradar-update data-update-type="organizer_claim" data-organizer-id="${escapeHtml(organizer.slug)}" data-organizer-name="${escapeHtml(organizer.name)}" novalidate>
+          <label>
+            Your name
+            <input name="claimantName" autocomplete="name" required />
+          </label>
+          <label>
+            Work email
+            <input name="claimantEmail" type="email" autocomplete="email" required />
+          </label>
+          <label>
+            Role
+            <input name="claimantRole" autocomplete="organization-title" placeholder="Coach, committee member, owner..." />
+          </label>
+          <label>
+            Website or verification URL
+            <input name="verificationUrl" type="url" inputmode="url" placeholder="https://..." />
+          </label>
+          <label class="full-span">
+            Message
+            <textarea name="message" rows="4" placeholder="Tell us what should be updated or how we can verify you."></textarea>
+          </label>
+          <label class="hp-field">
+            Leave this empty
+            <input name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <button class="button" type="submit">Send claim for review</button>
+          <p class="form-status" data-form-status aria-live="polite"></p>
+        </form>`;
+}
+
+function organizerProfileRows(organizer) {
+  const rows = [
+    { key: 'organizer.profile.coverage', label: 'Coverage', value: organizer.towns.join(', '), show: organizer.towns.length > 0 },
+    { key: 'organizer.profile.categories', label: 'Categories', value: organizer.categories.join(', '), show: organizer.categories.length > 0 },
+    { key: 'organizer.website', label: 'Website', value: organizer.websiteUrl, show: !!organizer.websiteUrl, link: true },
+    { key: 'organizer.profile.email', label: 'Contact email', value: organizer.contactEmail, show: !!organizer.contactEmail },
+    { key: 'organizer.profile.phone', label: 'Phone', value: organizer.phone, show: !!organizer.phone },
+    { key: 'organizer.profile.address', label: 'Address', value: organizer.address, show: !!organizer.address },
+    { key: 'organizer.profile.description', label: 'Description', value: organizer.description, show: !!organizer.description },
+    { key: 'organizer.profile.logo', label: 'Logo', value: organizer.logoUrl, show: !!organizer.logoUrl, link: true },
+    { key: 'organizer.profile.verification', label: 'Verification', value: organizer.verificationStatus, show: !!organizer.verificationStatus },
+    { key: 'field.contactMethod', label: 'Contact method', value: organizer.contactMethod, show: !!organizer.contactMethod },
+    { key: 'organizer.profile.status', label: 'Profile status', value: organizer.claimed ? 'Claimed' : '', show: organizer.claimed === true },
+    { key: 'organizer.profile.host', label: 'Source host', value: organizer.host, show: !!organizer.host },
+  ];
+
+  return rows
+    .filter((row) => row.show)
+    .map((row) => {
+      const value = row.link
+        ? `<a class="text-link" href="${escapeHtml(row.value)}" rel="noopener noreferrer">${escapeHtml(row.value)}</a>`
+        : escapeHtml(row.value);
+      return `          <div><dt data-i18n="${escapeHtml(row.key)}">${escapeHtml(row.label)}</dt><dd>${value}</dd></div>`;
+    })
+    .join('\n');
 }
 
 function cityOrganizersHtml(city, cityActivities) {
@@ -388,7 +441,7 @@ const COLLECTIONS = [
     eyebrow: 'Budget-friendly',
     intro: 'Start with free listings and gentler paid options before committing to bigger courses.',
     bestFor: ['free starts', 'low-risk trials', 'budget checks'],
-    predicate: (activity) => activity.price?.free === true || (typeof activity.price?.amount === 'number' && activity.price.amount <= 10),
+    predicate: isLowCost,
   },
   {
     slug: 'rainy-day',
@@ -466,9 +519,9 @@ const DISCOVERY_SHORTCUTS = {
     bodyKey: 'city.discovery.weekend.body',
   },
   free: {
-    params: { chips: 'free' },
-    title: 'Free options',
-    body: 'Start with listings that are marked free before checking paid courses.',
+    params: { chips: 'low-cost' },
+    title: 'Free or low-cost',
+    body: 'Start with free listings and gentler paid options before bigger courses.',
     titleKey: 'city.discovery.free.title',
     bodyKey: 'city.discovery.free.body',
   },
@@ -582,7 +635,7 @@ const QUICK_INTENTS = [
     body: 'Surface the easier budget options first.',
     bodyKey: 'city.intent.free.body',
     filters: {},
-    chips: ['free'],
+    chips: ['low-cost'],
   },
   {
     id: 'after-kindergarten',
@@ -652,8 +705,8 @@ const PLANNER_BUCKETS = [
     titleKey: 'planner.free.title',
     intro: 'Start with the gentler budget options.',
     introKey: 'planner.free.intro',
-    href: '?chips=free',
-    predicate: (listing) => listing.price?.free === true || (typeof listing.price?.amount === 'number' && listing.price.amount <= 10),
+    href: '?chips=low-cost',
+    predicate: isLowCost,
   },
   {
     id: 'rainy-day',
@@ -694,7 +747,7 @@ ${related}
         ${relatedHtml}
         <div class="button-row">
           <a class="button secondary" href="../../organizers/${escapeHtml(organizer.slug)}/" data-i18n="organizer.viewProfile">View organizer profile</a>
-          <a class="text-link" href="${escapeHtml(organizerClaimUrl(organizer))}" rel="noopener noreferrer" data-analytics="organizer_claim_click" data-i18n="organizer.claim">Claim this profile</a>
+          <a class="text-link" href="${escapeHtml(organizerClaimHref('../..', organizer))}" data-analytics="organizer_claim_click" data-i18n="organizer.claim">Claim this profile</a>
         </div>
       </section>`;
 }
@@ -1043,6 +1096,7 @@ function shortlistPage() {
           <div class="button-row">
             <a class="button secondary" href="../collections/weekend-ideas/" data-i18n="shortlist.findMore">Find more ideas</a>
             <button type="button" class="button secondary" data-share-shortlist data-i18n="shortlist.share">Copy share link</button>
+            <button type="button" class="button secondary" data-export-shortlist-calendar data-i18n="shortlist.calendar.export">Export calendar</button>
             <button type="button" class="text-link shortlist-print" data-print-shortlist data-i18n="shortlist.print">Print</button>
             <button type="button" class="text-link shortlist-clear" data-clear-shortlist data-i18n="shortlist.clear">Clear shortlist</button>
           </div>
@@ -1051,6 +1105,7 @@ function shortlistPage() {
         <dl class="hero-stats" aria-label="Shortlist overview">
           <div><dt data-save-count>0</dt><dd data-i18n="shortlist.savedCount">saved</dd></div>
           <div><dt>local</dt><dd data-i18n="shortlist.storage">on this device</dd></div>
+          <div><dt data-shortlist-calendar-count>0</dt><dd data-i18n="shortlist.calendar.ready">calendar-ready</dd></div>
           <div><dt>0</dt><dd data-shortlist-town-count data-i18n="organizer.stats.towns">towns</dd></div>
         </dl>
       </header>
@@ -1065,6 +1120,9 @@ function shortlistPage() {
       </section>
 
 ${digestSignupHtml({ headingId: 'shortlist-digest-heading', city: primaryCity, interest: 'shortlist' })}
+
+      <div id="shortlist-missing-root"></div>
+      <div id="shortlist-planner-root"></div>
 
       <div id="shortlist-listings"></div>
     </main>`;
@@ -1107,6 +1165,12 @@ function cityPage(city) {
         : '';
       return `<option value="${escapeHtml(c)}"${i18n}>${escapeHtml(c)}</option>`;
     }).join('');
+
+  const activeSectionIds = new Set(cityActivities.map((a) => a.section).filter(Boolean));
+  const sectionOptions = sections
+    .filter((section) => activeSectionIds.has(section.id))
+    .map((section) => `<option value="${escapeHtml(section.id)}" data-i18n="section.${escapeHtml(section.id)}.label">${escapeHtml(section.label)}</option>`)
+    .join('');
 
   const chipsHtml = CHIP_DEFINITIONS
     .map((c) => `<button type="button" class="chip" data-chip-id="${c.id}" data-i18n="${escapeHtml(c.labelKey)}" aria-pressed="false">${escapeHtml(c.label)}</button>`)
@@ -1198,6 +1262,13 @@ ${digestSignupHtml({ headingId: 'city-digest-heading', city, interest: city.slug
             </select>
           </label>
           <label>
+            <span data-i18n="city.filters.section.label">Activity type</span>
+            <select name="section">
+              <option value="" data-i18n="city.filters.section.all">All activity types</option>
+              ${sectionOptions}
+            </select>
+          </label>
+          <label>
             <span data-i18n="city.filters.day.label">Day</span>
             <select name="day">
               <option value="" data-i18n="city.filters.day.any">Any day</option>
@@ -1279,7 +1350,7 @@ ${citySubmissionForm(city, townOptions)}
   );
 }
 
-function organizerProfilePage(organizer) {
+export function organizerProfilePage(organizer) {
   const organizerActivities = activeActivitiesForOrganizer(organizer);
   const organizerStats = statsForActivities(organizerActivities);
   const primaryCity = organizerActivities[0] ? cityForTown(organizerActivities[0].town) : cities[0];
@@ -1297,7 +1368,16 @@ function organizerProfilePage(organizer) {
     .join('\n');
   const website = organizer.websiteUrl
     ? `<a class="text-link" href="${escapeHtml(organizer.websiteUrl)}" rel="noopener noreferrer" data-analytics="contact_click" data-i18n="organizer.website">Organizer website</a>`
-    : `<span class="muted" data-i18n="listing.contact.notListed">Not listed yet</span>`;
+    : '';
+  const profileRows = organizerProfileRows(organizer);
+  const profilePanel = profileRows
+    ? `      <section class="panel organizer-profile-panel" aria-labelledby="organizer-profile-heading">
+        <h2 id="organizer-profile-heading" data-i18n="organizer.profile.heading">Profile snapshot</h2>
+        <dl class="planning-grid">
+${profileRows}
+        </dl>
+      </section>`
+    : '';
 
   const body = `    <main class="page stack">
       <header class="page-header hero-shell" style="--hero-image: url('../../assets/${escapeHtml(primaryCity.heroImage ?? 'meinkinderradar-hero.png')}')">
@@ -1318,28 +1398,19 @@ function organizerProfilePage(organizer) {
         </dl>
       </header>
 
-      <section class="panel organizer-profile-panel" aria-labelledby="organizer-profile-heading">
-        <h2 id="organizer-profile-heading" data-i18n="organizer.profile.heading">Profile snapshot</h2>
-        <dl class="planning-grid">
-          <div><dt data-i18n="organizer.profile.coverage">Coverage</dt><dd>${escapeHtml(organizer.towns.join(', '))}</dd></div>
-          <div><dt data-i18n="organizer.profile.categories">Categories</dt><dd>${escapeHtml(organizer.categories.join(', '))}</dd></div>
-          <div><dt data-i18n="field.contactMethod">Contact method:</dt><dd>${escapeHtml(organizer.contactMethod || 'Not specified')}</dd></div>
-        </dl>
-      </section>
+${profilePanel}
 
       <section id="claim-profile" class="panel organizer-upgrade-panel" aria-labelledby="claim-profile-heading">
-        <h2 id="claim-profile-heading" data-i18n="organizer.claim.heading">Claim or upgrade this profile</h2>
-        <p class="section-intro" data-i18n="organizer.claim.intro">Organizer profiles can become richer over time with a logo, gallery, priority contact links, trial-session notes, and sponsorship placement.</p>
-        <div class="button-row">
-          <a class="button" href="${escapeHtml(organizerClaimUrl(organizer))}" rel="noopener noreferrer" data-analytics="organizer_claim_click" data-i18n="organizer.claim.start">Start claim</a>
-          ${organizer.websiteUrl ? `<a class="text-link" href="${escapeHtml(organizer.websiteUrl)}" rel="noopener noreferrer" data-i18n="organizer.website">Organizer website</a>` : ''}
-        </div>
+        <h2 id="claim-profile-heading" data-i18n="organizer.claim.heading">Claim or update this profile</h2>
+        <p class="section-intro" data-i18n="organizer.claim.intro">Send a claim for review so contact details and profile information can be verified before anything public changes.</p>
+${organizerClaimForm(organizer)}
       </section>
 
 ${sectionPanels}
     </main>
 
-    <script type="module" src="../../assets/analytics.js"></script>`;
+    <script type="module" src="../../assets/analytics.js"></script>
+    <script type="module" src="../../assets/update-form.js"></script>`;
 
   return layoutHtml({
     title: `${organizer.name} | ${BRAND_EN} organizer profile`,
@@ -1352,7 +1423,7 @@ ${sectionPanels}
   });
 }
 
-function activityDetailPage(listing) {
+export function activityDetailPage(listing) {
   const badge = freshnessBadge(listing);
   const verifier = verifierLabel(listing.verifiedBy);
   const source = sourceSignal(listing);
@@ -1442,6 +1513,34 @@ function activityDetailPage(listing) {
 
   const contactLink = listing.contactUrl
     ? `<p><strong${i18nAttr('field.contactOrWebsite')}>Contact or website:</strong> <a class="text-link" href="${escapeHtml(listing.contactUrl)}" rel="noopener noreferrer" data-analytics="contact_click" data-i18n="listing.contact.organizer">Organizer website</a></p>`
+    : '';
+  const accessibility = normalizedAccessibility(listing);
+  const accessibilityPanel = accessibility
+    ? `      <section class="panel accessibility-panel" aria-labelledby="accessibility-heading">
+        <h2 id="accessibility-heading" data-i18n="accessibility.heading">Accessibility</h2>
+        <dl class="planning-grid">
+${accessibility.fields.map((item) => `          <div><dt data-i18n="${escapeHtml(item.i18nKey)}">${escapeHtml(item.label)}</dt><dd data-i18n="enum.bool.yes">Yes</dd></div>`).join('\n')}
+${accessibility.notes ? `          <div><dt data-i18n="accessibility.notes">Notes</dt><dd>${freeValue(accessibility.notes)}</dd></div>` : ''}
+        </dl>
+      </section>`
+    : '';
+  const location = normalizedLocation(listing);
+  const locationRows = location
+    ? [
+      location.address ? { key: 'location.address', label: 'Address', value: freeValue(location.address) } : null,
+      location.latitude !== null && location.longitude !== null
+        ? { key: 'location.coordinates', label: 'Coordinates', value: `${escapeHtml(location.latitude)}, ${escapeHtml(location.longitude)}` }
+        : null,
+      location.locationAccuracy ? { key: 'location.accuracy', label: 'Location accuracy', value: freeValue(location.locationAccuracy) } : null,
+    ].filter(Boolean)
+    : [];
+  const locationPanel = locationRows.length
+    ? `      <section class="panel location-panel" aria-labelledby="location-heading">
+        <h2 id="location-heading" data-i18n="location.heading">Location details</h2>
+        <dl class="planning-grid">
+${locationRows.map((row) => `          <div><dt data-i18n="${escapeHtml(row.key)}">${escapeHtml(row.label)}</dt><dd>${row.value}</dd></div>`).join('\n')}
+        </dl>
+      </section>`
     : '';
 
   const bookingValue = listing.bookingRequired === true
@@ -1555,7 +1654,9 @@ ${checklist.map((item) => `          <li data-i18n="${escapeHtml(item.key)}">${e
         </div>
         <div class="button-row">
           <button type="button" class="button secondary save-button" data-save-activity="${escapeHtml(listing.slug)}" aria-pressed="false"><span data-save-label data-i18n="shortlist.save">Save</span></button>
+          <button type="button" class="button secondary calendar-button" data-export-calendar="${escapeHtml(listing.slug)}" data-i18n="activity.calendar.export">Add to calendar</button>
         </div>
+        <p class="form-status" data-calendar-status aria-live="polite"></p>
         ${closedBanner}
         ${verifierLine}
       </header>
@@ -1568,6 +1669,10 @@ ${contactLink}
 ${activityOrganizerHtml(listing)}
 
 ${planningPanel}
+
+${accessibilityPanel}
+
+${locationPanel}
 
 ${checklistPanel}
 

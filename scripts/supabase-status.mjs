@@ -1,49 +1,34 @@
-import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-function parseEnv(contents) {
-  const env = {};
-  for (const rawLine of contents.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith('#')) continue;
-    const index = line.indexOf('=');
-    if (index === -1) continue;
-    env[line.slice(0, index).trim()] = line.slice(index + 1).trim().replace(/^['"]|['"]$/g, '');
-  }
-  return env;
-}
-
-async function loadEnv() {
-  const env = parseEnv(await readFile(new URL('../.env', import.meta.url), 'utf8'));
-  const url = env.SUPABASE_URL;
-  const key = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_PUBLISHABLE_KEY;
-
-  if (!url || !key) {
-    throw new Error('Set SUPABASE_URL and a Supabase key in .env first.');
-  }
-
-  return { url: url.replace(/\/$/, ''), key };
-}
+import { loadSupabaseEnv, supabaseFetch, supabaseHeaders } from './supabase-client.mjs';
 
 async function countRows(config, table) {
-  const response = await fetch(`${config.url}/rest/v1/${table}?select=*`, {
+  const response = await supabaseFetch(config, `/rest/v1/${table}?select=*`, {
     headers: {
-      apikey: config.key,
-      authorization: `Bearer ${config.key}`,
+      ...supabaseHeaders(config.key),
       range: '0-0',
       prefer: 'count=exact',
     },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to count ${table}: ${response.status} ${await response.text()}`);
-  }
+  }, `Count rows in ${table}`);
 
   const range = response.headers.get('content-range') ?? '';
   const count = range.includes('/') ? range.split('/').at(-1) : 'unknown';
   return count;
 }
 
-const config = await loadEnv();
-for (const table of ['cities', 'towns', 'organizers', 'activities', 'activity_sources', 'feed_items', 'activity_updates']) {
-  console.log(`${table}: ${await countRows(config, table)}`);
+export async function main() {
+  const config = await loadSupabaseEnv({ action: 'checking Supabase status' });
+  for (const table of ['cities', 'towns', 'organizers', 'activities', 'activity_sources', 'feed_items', 'activity_updates', 'digest_subscribers']) {
+    console.log(`${table}: ${await countRows(config, table)}`);
+  }
+}
+
+if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
+  try {
+    await main();
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
 }

@@ -9,8 +9,11 @@ import {
   sourceSignal,
   confidenceSignal,
   escapeHtml,
+  normalizedAccessibility,
+  normalizedLocation,
   renderListingHtml,
 } from '../assets/render.mjs';
+import { activityDetailPage, organizerProfilePage } from '../scripts/build.mjs';
 
 test('slugify produces kebab-case', () => {
   assert.equal(slugify('Rookie Swim Start'), 'rookie-swim-start');
@@ -92,6 +95,29 @@ test('sourceSignal and confidenceSignal summarize trust cues', () => {
     lastVerified: '2026-06-10',
     verifiedBy: 'editor',
   }, now).tone, 'caution');
+});
+
+test('metadata helpers normalize optional accessibility and location data', () => {
+  assert.equal(normalizedAccessibility({}), null);
+  assert.deepEqual(normalizedAccessibility({
+    accessibility: {
+      strollerFriendly: true,
+      parkingNearby: false,
+      notes: 'Step-free side entrance',
+    },
+  }), {
+    fields: [{ label: 'Stroller friendly', i18nKey: 'accessibility.strollerFriendly' }],
+    notes: 'Step-free side entrance',
+  });
+  assert.deepEqual(normalizedLocation({
+    address: 'Lake Road 1',
+    geo: { lat: 51.75, lng: 7.18, accuracy: 'venue' },
+  }), {
+    address: 'Lake Road 1',
+    latitude: 51.75,
+    longitude: 7.18,
+    locationAccuracy: 'venue',
+  });
 });
 
 const sampleListing = {
@@ -182,4 +208,82 @@ test('renderListingHtml emits data-i18n attributes for translation', () => {
   assert.match(html, /data-i18n="section\.weekly-activities\.tag"/);
   assert.match(html, /data-i18n="listing\.viewDetails"/);
   assert.match(html, /data-i18n="listing\.suggestUpdate"/);
+  assert.match(html, /data-export-calendar="demo"/);
+  assert.match(html, /data-i18n="activity\.calendar\.export"/);
+});
+
+test('activity detail page hides empty accessibility/location sections', () => {
+  const html = activityDetailPage(sampleListing);
+  assert.doesNotMatch(html, /accessibility-heading/);
+  assert.doesNotMatch(html, /location-heading/);
+});
+
+test('activity detail page renders accessibility and location when present', () => {
+  const html = activityDetailPage({
+    ...sampleListing,
+    accessibility: {
+      wheelchairAccessible: true,
+      strollerFriendly: true,
+      notes: 'Use the side entrance.',
+    },
+    address: 'Lake Road 1',
+    geo: { lat: 51.75, lng: 7.18, accuracy: 'venue' },
+  });
+  assert.match(html, /accessibility-heading/);
+  assert.match(html, /data-i18n="accessibility\.wheelchairAccessible"/);
+  assert.match(html, /Use the side entrance\./);
+  assert.match(html, /location-heading/);
+  assert.match(html, /Lake Road 1/);
+  assert.match(html, /51\.75, 7\.18/);
+});
+
+test('organizer profile omits empty optional metadata and renders claim form', () => {
+  const html = organizerProfilePage({
+    slug: 'sample-organizer',
+    name: 'Sample Organizer',
+    host: '',
+    websiteUrl: '',
+    contactMethod: '',
+    activitySlugs: [],
+    towns: [],
+    categories: [],
+    claimed: false,
+    sponsorship: null,
+    activityCount: 0,
+  });
+
+  assert.match(html, /data-update-type="organizer_claim"/);
+  assert.match(html, /data-organizer-id="sample-organizer"/);
+  assert.doesNotMatch(html, /Not specified/);
+  assert.doesNotMatch(html, /listing\.contact\.notListed/);
+});
+
+test('organizer profile renders optional metadata when present', () => {
+  const html = organizerProfilePage({
+    slug: 'sample-organizer',
+    name: 'Sample Organizer',
+    host: 'example.org',
+    websiteUrl: 'https://example.org/',
+    contactEmail: 'info@example.org',
+    phone: '+49 123',
+    address: 'Market 1',
+    logoUrl: 'https://example.org/logo.png',
+    description: 'Local youth club.',
+    verificationStatus: 'verified',
+    contactMethod: 'email',
+    activitySlugs: [],
+    towns: ['Dülmen'],
+    categories: ['Sports'],
+    claimed: true,
+    sponsorship: null,
+    activityCount: 0,
+  });
+
+  assert.match(html, /https:\/\/example\.org\//);
+  assert.match(html, /info@example\.org/);
+  assert.match(html, /\+49 123/);
+  assert.match(html, /Market 1/);
+  assert.match(html, /Local youth club\./);
+  assert.match(html, /data-i18n="organizer\.profile\.verification"/);
+  assert.match(html, /Claimed/);
 });

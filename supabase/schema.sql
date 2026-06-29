@@ -125,7 +125,25 @@ create table if not exists public.activity_updates (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint activity_updates_status_check check (status in ('new', 'needs_review', 'accepted', 'rejected', 'applied')),
-  constraint activity_updates_type_check check (update_type in ('submission', 'update', 'closed', 'confirm', 'claim'))
+  constraint activity_updates_type_check check (update_type in ('submission', 'update', 'closed', 'confirm', 'claim', 'organizer_claim'))
+);
+
+create table if not exists public.digest_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  locale text,
+  source jsonb not null default '{}'::jsonb,
+  consent_at timestamptz not null,
+  unsubscribe_token text not null unique,
+  unsubscribed_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint digest_subscribers_email_check check (
+    email = lower(email)
+    and length(email) between 3 and 254
+    and position('@' in email) > 1
+  ),
+  constraint digest_subscribers_unsubscribe_token_check check (length(unsubscribe_token) >= 24)
 );
 
 create table if not exists public.feed_items (
@@ -150,6 +168,7 @@ create index if not exists activities_category_idx on public.activities(category
 create index if not exists activities_last_verified_idx on public.activities(last_verified desc);
 create index if not exists feed_items_city_status_idx on public.feed_items(city_slug, status, published_at desc);
 create index if not exists activity_updates_status_idx on public.activity_updates(status, created_at desc);
+create index if not exists digest_subscribers_unsubscribed_idx on public.digest_subscribers(unsubscribed_at);
 
 drop trigger if exists cities_set_updated_at on public.cities;
 create trigger cities_set_updated_at before update on public.cities
@@ -179,6 +198,10 @@ drop trigger if exists activity_updates_set_updated_at on public.activity_update
 create trigger activity_updates_set_updated_at before update on public.activity_updates
 for each row execute function public.set_updated_at();
 
+drop trigger if exists digest_subscribers_set_updated_at on public.digest_subscribers;
+create trigger digest_subscribers_set_updated_at before update on public.digest_subscribers
+for each row execute function public.set_updated_at();
+
 drop trigger if exists feed_items_set_updated_at on public.feed_items;
 create trigger feed_items_set_updated_at before update on public.feed_items
 for each row execute function public.set_updated_at();
@@ -191,6 +214,7 @@ alter table public.activities enable row level security;
 alter table public.activity_sources enable row level security;
 alter table public.verification_events enable row level security;
 alter table public.activity_updates enable row level security;
+alter table public.digest_subscribers enable row level security;
 alter table public.feed_items enable row level security;
 
 grant usage on schema public to anon, authenticated;
@@ -201,6 +225,7 @@ grant select on public.activities to anon, authenticated;
 grant select on public.activity_sources to anon, authenticated;
 grant select on public.feed_items to anon, authenticated;
 grant insert on public.activity_updates to anon, authenticated;
+grant insert on public.digest_subscribers to anon, authenticated;
 
 drop policy if exists "public read cities" on public.cities;
 create policy "public read cities" on public.cities
@@ -238,3 +263,14 @@ create policy "public submit updates" on public.activity_updates
 for insert
 to anon, authenticated
 with check (status = 'new');
+
+drop policy if exists "public subscribe digest" on public.digest_subscribers;
+create policy "public subscribe digest" on public.digest_subscribers
+for insert
+to anon, authenticated
+with check (
+  email = lower(email)
+  and consent_at is not null
+  and unsubscribe_token is not null
+  and unsubscribed_at is null
+);

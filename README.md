@@ -130,8 +130,8 @@ Renaming an event = breaking history. Add a new event instead.
 
 Each listing detail page and the city page include Supabase-backed forms.
 Parents and organizers can submit, update, confirm, claim, or report closures
-without an account. Every report lands in `activity_updates` with
-`status: "new"` for review.
+without an account. Activity reports land in `activity_updates` with
+`status: "new"` for review; digest signups land in `digest_subscribers`.
 
 ### Review workflow
 

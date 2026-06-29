@@ -81,6 +81,15 @@ For now, review and apply updates in Supabase Studio, then run:
 npm run build:supabase
 ```
 
+## Digest Subscribers
+
+Digest signups are stored separately in `digest_subscribers` so they do not
+pollute the activity review queue. The public site inserts only the normalized
+email, locale, source context, consent timestamp, and unsubscribe token.
+
+If your schema was created before this table was added, run
+`supabase/patch-digest-subscribers.sql` once in Supabase SQL Editor.
+
 ## Product Shape
 
 Supabase should become the back office source of truth. The public static site

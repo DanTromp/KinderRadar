@@ -1,13 +1,5 @@
 import { track } from './analytics.js';
-
-function config() {
-  const cfg = window.MEINKINDERRADAR_SUPABASE;
-  if (!cfg?.url || !cfg?.publishableKey) return null;
-  return {
-    url: String(cfg.url).replace(/\/$/, ''),
-    key: String(cfg.publishableKey),
-  };
-}
+import { postActivityUpdate } from './supabase-public.js';
 
 function value(form, name) {
   return String(new FormData(form).get(name) ?? '').trim();
@@ -26,6 +18,33 @@ function updateType(form) {
 
 function payloadFor(form) {
   const type = updateType(form);
+  const organizerId = form.dataset.organizerId || value(form, 'organizerId');
+  const organizerName = form.dataset.organizerName || value(form, 'organizerName');
+  const claimantName = value(form, 'claimantName');
+  const claimantEmail = value(form, 'claimantEmail') || value(form, 'reporterEmail');
+  const claimantRole = value(form, 'claimantRole');
+  const verificationUrl = value(form, 'verificationUrl') || value(form, 'evidenceUrl');
+  const message = value(form, 'message') || value(form, 'notes');
+
+  if (type === 'organizer_claim') {
+    return {
+      update_type: type,
+      organizer_id: organizerId,
+      evidence_url: verificationUrl || null,
+      reporter_email: claimantEmail || null,
+      payload: {
+        organizerId,
+        organizerName,
+        claimantName,
+        claimantEmail,
+        claimantRole,
+        verificationUrl,
+        message,
+        pageUrl: window.location.href,
+      },
+    };
+  }
+
   const activitySlug = form.dataset.activitySlug || null;
   const activityName = form.dataset.activityName || value(form, 'activityName');
   const town = form.dataset.town || value(form, 'town');
@@ -64,29 +83,21 @@ function validate(form) {
     if (!value(form, 'sourceUrl')) return 'Please add a source or organizer URL.';
   }
 
+  if (type === 'organizer_claim') {
+    if (!form.dataset.organizerId && !value(form, 'organizerId')) return 'This claim is missing an organizer reference. Please reload the page and try again.';
+    if (!form.dataset.organizerName && !value(form, 'organizerName')) return 'This claim is missing the organizer name. Please reload the page and try again.';
+    if (!value(form, 'claimantName')) return 'Please add your name.';
+    if (!value(form, 'claimantEmail')) return 'Please add a valid email address.';
+    if (!value(form, 'claimantRole') && !value(form, 'verificationUrl') && !value(form, 'message')) {
+      return 'Please add your role, a verification URL, or a short message.';
+    }
+  }
+
   return '';
 }
 
 async function submitUpdate(form) {
-  const cfg = config();
-  if (!cfg) {
-    throw new Error('Supabase is not configured for public updates.');
-  }
-
-  const response = await fetch(`${cfg.url}/rest/v1/activity_updates`, {
-    method: 'POST',
-    headers: {
-      apikey: cfg.key,
-      authorization: `Bearer ${cfg.key}`,
-      'content-type': 'application/json',
-      prefer: 'return=minimal',
-    },
-    body: JSON.stringify(payloadFor(form)),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Could not send update (${response.status}).`);
-  }
+  await postActivityUpdate(payloadFor(form), { purpose: 'public updates' });
 }
 
 function wireForm(form) {

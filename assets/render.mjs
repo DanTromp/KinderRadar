@@ -123,6 +123,54 @@ export function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function isPlainObject(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function normalizedAccessibility(listing) {
+  const raw = listing?.accessibility;
+  if (!raw) return null;
+
+  if (typeof raw === 'string') {
+    const notes = raw.trim();
+    return notes ? { fields: [], notes } : null;
+  }
+
+  if (!isPlainObject(raw)) return null;
+
+  const fields = [
+    ['wheelchairAccessible', 'Wheelchair accessible', 'accessibility.wheelchairAccessible'],
+    ['strollerFriendly', 'Stroller friendly', 'accessibility.strollerFriendly'],
+    ['parkingNearby', 'Parking nearby', 'accessibility.parkingNearby'],
+    ['publicTransportNearby', 'Public transport nearby', 'accessibility.publicTransportNearby'],
+    ['indoorAccess', 'Indoor access', 'accessibility.indoorAccess'],
+  ]
+    .filter(([key]) => raw[key] === true)
+    .map(([, label, i18nKey]) => ({ label, i18nKey }));
+
+  const notes = typeof raw.notes === 'string' ? raw.notes.trim() : '';
+  if (fields.length === 0 && !notes) return null;
+  return { fields, notes };
+}
+
+export function normalizedLocation(listing) {
+  const location = isPlainObject(listing?.location) ? listing.location : {};
+  const geo = isPlainObject(listing?.geo) ? listing.geo : {};
+  const address = String(listing?.address ?? location.address ?? '').trim();
+  const lat = listing?.latitude ?? location.latitude ?? geo.lat;
+  const lng = listing?.longitude ?? location.longitude ?? geo.lng;
+  const hasCoordinates = typeof lat === 'number' && typeof lng === 'number';
+  const accuracy = String(listing?.locationAccuracy ?? location.accuracy ?? geo.accuracy ?? '').trim();
+
+  if (!address && !hasCoordinates && !accuracy) return null;
+  return {
+    address,
+    latitude: hasCoordinates ? lat : null,
+    longitude: hasCoordinates ? lng : null,
+    locationAccuracy: accuracy,
+  };
+}
+
 function tagInfoForSection(section, sections) {
   const found = sections.find((s) => s.id === section);
   if (!found) return { label: 'Activity', i18nKey: null };
@@ -262,6 +310,7 @@ export function renderListingHtml(listing, {
       <p class="listing-actions">
         <a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/" data-i18n="listing.viewDetails">View details</a>
         <button type="button" class="text-link muted-link save-button" data-save-activity="${escapeHtml(listing.slug)}" aria-pressed="false"><span data-save-label data-i18n="shortlist.save">Save</span></button>
+        <button type="button" class="text-link muted-link calendar-button" data-export-calendar="${escapeHtml(listing.slug)}" data-i18n="activity.calendar.export">Add to calendar</button>
         <a class="text-link muted-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a>
       </p>
     </article>`;

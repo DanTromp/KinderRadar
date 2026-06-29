@@ -1118,7 +1118,7 @@ a {
 
 .filters {
   display: grid;
-  grid-template-columns: minmax(15rem, 1.6fr) repeat(5, minmax(8.8rem, 1fr));
+  grid-template-columns: minmax(15rem, 1.6fr) repeat(auto-fit, minmax(8.8rem, 1fr));
   gap: 0.65rem;
 }
 
@@ -1413,6 +1413,7 @@ a {
 }
 
 .listing-actions .save-button,
+.listing-actions .calendar-button,
 .shortlist-clear,
 .shortlist-print {
   border: 0;
@@ -1420,6 +1421,47 @@ a {
   padding: 0;
   font: inherit;
   cursor: pointer;
+}
+
+.shortlist-planner {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.shortlist-day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+}
+
+.shortlist-day-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  padding: 0.85rem;
+}
+
+.shortlist-day-group h3 {
+  margin: 0 0 0.55rem;
+  font-size: 1rem;
+}
+
+.shortlist-day-group ul {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shortlist-day-group li {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.shortlist-day-group span {
+  color: var(--muted);
+  font-size: 0.86rem;
 }
 
 .save-button[aria-pressed='true'] {
@@ -1542,6 +1584,10 @@ a {
 .contribution-form {
   display: grid;
   gap: 0.75rem;
+}
+
+.contribution-form .full-span {
+  grid-column: 1 / -1;
 }
 
 .contribution-form textarea {
