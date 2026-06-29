@@ -8,6 +8,9 @@ import {
   matchesSearch,
   sortByFreshness,
   CHIP_DEFINITIONS,
+  filterSearchParams,
+  normalizeChipIds,
+  normalizeFilterSelection,
 } from './filtering.mjs';
 import { renderSectionHtml } from './render.mjs';
 import { analytics } from './analytics.js';
@@ -27,45 +30,67 @@ function townsForCity(citySlug) {
   return raw.split('|').map((t) => t.trim()).filter(Boolean);
 }
 
-function readSelectedFilters(form) {
-  const formData = new FormData(form);
+function filterOptionsFromForm(form) {
+  if (!form) return {};
+  const valuesFor = (name) => Array.from(form.elements[name]?.options ?? [])
+    .map((option) => option.value)
+    .filter(Boolean);
+
   return {
-    age: String(formData.get('age') ?? ''),
-    town: String(formData.get('town') ?? ''),
-    category: String(formData.get('category') ?? ''),
-    day: String(formData.get('day') ?? ''),
-    beginnerFriendly: String(formData.get('beginnerFriendly') ?? ''),
-    sort: String(formData.get('sort') ?? 'freshness'),
+    towns: valuesFor('town'),
+    categories: valuesFor('category'),
+    sections: valuesFor('section'),
   };
 }
 
+function readSelectedFilters(form) {
+  const formData = new FormData(form);
+  return normalizeFilterSelection({
+    age: String(formData.get('age') ?? ''),
+    town: String(formData.get('town') ?? ''),
+    category: String(formData.get('category') ?? ''),
+    section: String(formData.get('section') ?? ''),
+    day: String(formData.get('day') ?? ''),
+    beginnerFriendly: String(formData.get('beginnerFriendly') ?? ''),
+    sort: String(formData.get('sort') ?? 'freshness'),
+  }, filterOptionsFromForm(form));
+}
+
 function readActiveChips(container) {
-  return Array.from(container.querySelectorAll('.chip[aria-pressed="true"]'))
+  return normalizeChipIds(Array.from(container.querySelectorAll('.chip[aria-pressed="true"]'))
     .map((el) => el.dataset.chipId)
-    .filter(Boolean);
+    .filter(Boolean));
 }
 
 function syncUrlState({ selected, chips, query }) {
-  const params = new URLSearchParams();
-  for (const [k, v] of Object.entries(selected)) {
-    if (v && !(k === 'sort' && v === 'freshness')) params.set(k, v);
-  }
-  if (chips.length) params.set('chips', chips.join(','));
-  if (query) params.set('q', query);
-  const search = params.toString();
+  const search = filterSearchParams(window.location.search, {
+    selected,
+    chips,
+    query,
+    options: filterOptionsFromForm(document.getElementById('activity-filters')),
+  });
   const newUrl = `${window.location.pathname}${search ? '?' + search : ''}`;
   window.history.replaceState(null, '', newUrl);
 }
 
 function applyUrlStateToControls(form, chipContainer, searchInput) {
   const params = new URLSearchParams(window.location.search);
-  for (const name of ['age', 'town', 'category', 'day', 'beginnerFriendly', 'sort']) {
-    const v = params.get(name);
-    if (v && form.elements[name]) form.elements[name].value = v;
+  const selected = normalizeFilterSelection({
+    age: params.get('age'),
+    town: params.get('town'),
+    category: params.get('category'),
+    section: params.get('section'),
+    day: params.get('day'),
+    beginnerFriendly: params.get('beginnerFriendly'),
+    sort: params.get('sort'),
+  }, filterOptionsFromForm(form));
+
+  for (const [name, value] of Object.entries(selected)) {
+    if (form.elements[name]) form.elements[name].value = value;
   }
   const chipParam = params.get('chips');
   if (chipParam) {
-    const activeIds = new Set(chipParam.split(',').filter(Boolean));
+    const activeIds = new Set(normalizeChipIds(chipParam));
     chipContainer.querySelectorAll('.chip').forEach((el) => {
       el.setAttribute('aria-pressed', activeIds.has(el.dataset.chipId) ? 'true' : 'false');
     });
@@ -182,7 +207,7 @@ function init() {
   };
 
   // --- Analytics wiring -----------------------------------------------------
-  const lastValues = { age: '', town: '', category: '', day: '', beginnerFriendly: '', sort: '' };
+  const lastValues = { age: '', town: '', category: '', section: '', day: '', beginnerFriendly: '', sort: '' };
   let zeroFiredFor = null;
   let lastTrackedQuery = '';
   let searchTimer = null;
@@ -250,6 +275,16 @@ function init() {
         labelKey: 'city.empty.clearCategory',
         apply() {
           form.elements.category.value = '';
+        },
+      });
+    }
+    if (selected.section) {
+      actions.push({
+        id: 'clear-section',
+        label: 'Show all sections',
+        labelKey: 'city.empty.clearSection',
+        apply() {
+          form.elements.section.value = '';
         },
       });
     }
@@ -350,7 +385,7 @@ function init() {
     }
 
     // Emit filter_change events for any filter whose value changed.
-    for (const key of ['age', 'town', 'category', 'day', 'beginnerFriendly', 'sort']) {
+    for (const key of ['age', 'town', 'category', 'section', 'day', 'beginnerFriendly', 'sort']) {
       if (selected[key] !== lastValues[key]) {
         if (source !== 'init') analytics.filterChange(key, selected[key], visibleCount);
         lastValues[key] = selected[key];

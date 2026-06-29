@@ -1,16 +1,12 @@
 import { track } from './analytics.js';
-
-function config() {
-  const cfg = window.MEINKINDERRADAR_SUPABASE;
-  if (!cfg?.url || !cfg?.publishableKey) return null;
-  return {
-    url: String(cfg.url).replace(/\/$/, ''),
-    key: String(cfg.publishableKey),
-  };
-}
+import { postDigestSignup } from './supabase-public.js';
 
 function value(form, name) {
   return String(new FormData(form).get(name) ?? '').trim();
+}
+
+function locale() {
+  return document.documentElement.lang || (typeof navigator !== 'undefined' ? navigator.language?.slice(0, 2) : '') || '';
 }
 
 function setStatus(form, message, tone = 'neutral') {
@@ -33,19 +29,13 @@ function validate(form) {
 
 function payloadFor(form) {
   return {
-    activity_slug: null,
-    update_type: 'submission',
-    status: 'new',
-    evidence_url: null,
-    reporter_email: value(form, 'email'),
-    payload: {
-      type: 'digest_signup',
-      citySlug: value(form, 'citySlug'),
-      cityName: value(form, 'cityName'),
-      interest: value(form, 'interest'),
-      sourcePage: window.location.href,
-      consent: true,
-    },
+    email: value(form, 'email'),
+    citySlug: value(form, 'citySlug'),
+    cityName: value(form, 'cityName'),
+    interest: value(form, 'interest'),
+    sourcePage: window.location.href,
+    locale: locale(),
+    consent: Boolean(new FormData(form).get('consent')),
   };
 }
 
@@ -58,25 +48,7 @@ function syncCityName(form) {
 }
 
 async function submitDigest(form) {
-  const cfg = config();
-  if (!cfg) {
-    throw new Error('Supabase is not configured for digest signups.');
-  }
-
-  const response = await fetch(`${cfg.url}/rest/v1/activity_updates`, {
-    method: 'POST',
-    headers: {
-      apikey: cfg.key,
-      authorization: `Bearer ${cfg.key}`,
-      'content-type': 'application/json',
-      prefer: 'return=minimal',
-    },
-    body: JSON.stringify(payloadFor(form)),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Could not save signup (${response.status}).`);
-  }
+  await postDigestSignup(payloadFor(form));
 }
 
 function wireForm(form) {

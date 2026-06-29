@@ -10,6 +10,11 @@ import {
   chipById,
   parseDayList,
   matchesDayFilter,
+  filterActivities,
+  filterSearchParams,
+  isLowCost,
+  normalizeChipIds,
+  normalizeFilterSelection,
 } from '../assets/filtering.mjs';
 import { activities } from '../assets/activities-data.mjs';
 
@@ -18,6 +23,7 @@ const sampleListing = {
   ageMax: 12,
   town: 'Haltern am See',
   category: 'Sports',
+  section: 'weekly-activities',
   beginnerFriendly: true,
 };
 
@@ -56,6 +62,16 @@ test('supports category and beginner-friendly filtering', () => {
   }), false);
 });
 
+test('supports section filtering', () => {
+  assert.equal(matchesFilters(sampleListing, {
+    age: '', town: '', category: '', section: 'weekly-activities', beginnerFriendly: '',
+  }), true);
+
+  assert.equal(matchesFilters(sampleListing, {
+    age: '', town: '', category: '', section: 'school-holiday-activities', beginnerFriendly: '',
+  }), false);
+});
+
 test('supports day and category filtering together', () => {
   assert.equal(matchesFilters({ ...sampleListing, dayOfWeek: 'Saturday' }, {
     age: '', town: '', category: 'Sports', day: 'weekend', beginnerFriendly: '',
@@ -67,6 +83,15 @@ test('supports day and category filtering together', () => {
 
   assert.equal(matchesFilters({ ...sampleListing, dayOfWeek: 'Tuesday' }, {
     age: '', town: '', category: 'Sports', day: 'weekend', beginnerFriendly: '',
+  }), false);
+});
+
+test('age filtering handles missing age metadata safely', () => {
+  assert.equal(matchesFilters({ ...sampleListing, ageMin: undefined }, {
+    age: '6-10', town: '', category: '', section: '', day: '', beginnerFriendly: '',
+  }), false);
+  assert.equal(matchesFilters({ ...sampleListing, ageMax: undefined }, {
+    age: '6-10', town: '', category: '', section: '', day: '', beginnerFriendly: '',
   }), false);
 });
 
@@ -138,6 +163,13 @@ test('"free" chip matches price.free === true', () => {
   assert.equal(matchesChips({}, ['free']), false);
 });
 
+test('"low-cost" chip matches free and gentle paid options', () => {
+  assert.equal(isLowCost({ price: { free: true } }), true);
+  assert.equal(isLowCost({ price: { free: false, amount: 8 } }), true);
+  assert.equal(isLowCost({ price: { free: false, amount: 25 } }), false);
+  assert.equal(matchesChips({ price: { free: false, amount: 8 } }, ['low-cost']), true);
+});
+
 test('"no-membership" excludes membership pricing', () => {
   assert.equal(matchesChips({ price: { unit: 'membership' } }, ['no-membership']), false);
   assert.equal(matchesChips({ price: { unit: 'per-session' } }, ['no-membership']), true);
@@ -161,6 +193,11 @@ test('chipById returns the right chip or null', () => {
   assert.equal(chipById('does-not-exist'), null);
 });
 
+test('invalid chip ids are ignored safely', () => {
+  assert.deepEqual(normalizeChipIds('free,does-not-exist,low-cost,free'), ['free', 'low-cost']);
+  assert.equal(matchesChips({ price: { free: true } }, ['does-not-exist']), true);
+});
+
 // ---- Phase 3: search ------------------------------------------------------
 
 test('search matches case-insensitively across name/category/town', () => {
@@ -171,6 +208,106 @@ test('search matches case-insensitively across name/category/town', () => {
   assert.equal(matchesSearch(l, 'pottery'), false);
   assert.equal(matchesSearch(l, ''), true);
   assert.equal(matchesSearch(l, '   '), true);
+});
+
+test('filterActivities narrows by place, category, section, day, chips, and search', () => {
+  const listings = [
+    {
+      name: 'Lake Swim',
+      town: 'Haltern am See',
+      category: 'Swimming',
+      section: 'weekly-activities',
+      ageMin: 5,
+      ageMax: 9,
+      dayOfWeek: 'Saturday',
+      price: { free: false, amount: 8 },
+    },
+    {
+      name: 'Studio Music',
+      town: 'Dülmen',
+      category: 'Music',
+      section: 'school-holiday-activities',
+      ageMin: 6,
+      ageMax: 12,
+      dayOfWeek: 'Tuesday',
+      price: { free: false, amount: 40 },
+    },
+  ];
+
+  const matches = filterActivities(listings, {
+    selected: {
+      town: 'Haltern am See',
+      category: 'Swimming',
+      section: 'weekly-activities',
+      day: 'weekend',
+      age: '6-10',
+    },
+    chips: ['low-cost'],
+    query: 'lake',
+    options: {
+      towns: ['Haltern am See', 'Dülmen'],
+      categories: ['Swimming', 'Music'],
+      sections: ['weekly-activities', 'school-holiday-activities'],
+    },
+  });
+
+  assert.deepEqual(matches.map((listing) => listing.name), ['Lake Swim']);
+});
+
+test('filterActivities returns an empty result set for no matches', () => {
+  const matches = filterActivities([sampleListing], {
+    selected: { town: 'Sythen', age: '0-3' },
+    options: { towns: ['Haltern am See', 'Sythen'], categories: ['Sports'], sections: ['weekly-activities'] },
+  });
+
+  assert.deepEqual(matches, []);
+});
+
+test('invalid query filter values are ignored safely', () => {
+  const selected = normalizeFilterSelection({
+    town: 'unknown-place',
+    category: 'Unknown',
+    section: 'bad-section',
+    day: 'funday',
+    age: 'all',
+    beginnerFriendly: 'maybe',
+    sort: 'random',
+  }, {
+    towns: ['Haltern am See'],
+    categories: ['Sports'],
+    sections: ['weekly-activities'],
+  });
+
+  assert.deepEqual(selected, {
+    age: '',
+    town: '',
+    category: '',
+    section: '',
+    day: '',
+    beginnerFriendly: '',
+    sort: 'freshness',
+  });
+});
+
+test('filter URL state preserves saved shortlist query params', () => {
+  const search = filterSearchParams('?saved=lake-swim&unknown=keep&town=Bad', {
+    selected: { town: 'Dülmen', section: 'weekly-activities', sort: 'name' },
+    chips: ['low-cost', 'does-not-exist'],
+    query: 'swim',
+    options: {
+      towns: ['Dülmen'],
+      categories: ['Sports'],
+      sections: ['weekly-activities'],
+    },
+  });
+
+  const params = new URLSearchParams(search);
+  assert.equal(params.get('saved'), 'lake-swim');
+  assert.equal(params.get('unknown'), 'keep');
+  assert.equal(params.get('town'), 'Dülmen');
+  assert.equal(params.get('section'), 'weekly-activities');
+  assert.equal(params.get('chips'), 'low-cost');
+  assert.equal(params.get('q'), 'swim');
 });
 
 // ---- Phase 4: sort --------------------------------------------------------

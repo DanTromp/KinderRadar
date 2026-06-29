@@ -7,13 +7,17 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { activities, sections, categories, cities } from '../assets/activities-data.mjs';
-import { freshnessCoverage } from '../assets/render.mjs';
+import { freshnessCoverage, normalizedAccessibility, normalizedLocation } from '../assets/render.mjs';
 
 const requiredFiles = [
   'assets/styles.css',
   'assets/filters.js',
   'assets/update-form.js',
   'assets/digest-form.js',
+  'assets/calendar.mjs',
+  'assets/shortlist.mjs',
+  'assets/supabase-public.js',
+  'assets/submissions.js',
   'assets/saved.js',
   'assets/analytics.js',
   'assets/theme.js',
@@ -43,6 +47,13 @@ const FRESHNESS_TARGETS = {
   checked90Pct: 80,
   fresh30Pct: 35,
 };
+const ACCESSIBILITY_FIELDS = new Set([
+  'wheelchairAccessible',
+  'strollerFriendly',
+  'parkingNearby',
+  'publicTransportNearby',
+  'indoorAccess',
+]);
 
 function validUrl(value) {
   if (typeof value !== 'string') return false;
@@ -54,7 +65,18 @@ function validUrl(value) {
   }
 }
 
-function validateActivity(a, sectionIds) {
+function validateCoordinates(lat, lng) {
+  return typeof lat === 'number'
+    && typeof lng === 'number'
+    && Number.isFinite(lat)
+    && Number.isFinite(lng)
+    && lat >= -90
+    && lat <= 90
+    && lng >= -180
+    && lng <= 180;
+}
+
+export function validateActivity(a, sectionIds) {
   const errors = [];
   const required = ['slug', 'name', 'section', 'category', 'ageRange',
     'ageMin', 'ageMax', 'town', 'timing', 'cost', 'lastVerified'];
@@ -143,6 +165,55 @@ function validateActivity(a, sectionIds) {
     if (typeof a.geo !== 'object' || a.geo === null
         || typeof a.geo.lat !== 'number' || typeof a.geo.lng !== 'number') {
       errors.push('geo must be { lat: number, lng: number }');
+    } else if (!validateCoordinates(a.geo.lat, a.geo.lng)) {
+      errors.push('geo coordinates must be valid latitude/longitude values');
+    }
+    if (a.geo?.accuracy !== undefined && typeof a.geo.accuracy !== 'string') {
+      errors.push('geo.accuracy must be a string when provided');
+    }
+  }
+  if (a.latitude !== undefined || a.longitude !== undefined) {
+    if (!validateCoordinates(a.latitude, a.longitude)) {
+      errors.push('latitude/longitude must be valid numbers in range');
+    }
+  }
+  if (a.location !== undefined) {
+    if (typeof a.location !== 'object' || a.location === null || Array.isArray(a.location)) {
+      errors.push('location must be an object when provided');
+    } else {
+      if (a.location.address !== undefined && typeof a.location.address !== 'string') {
+        errors.push('location.address must be a string when provided');
+      }
+      if (a.location.latitude !== undefined || a.location.longitude !== undefined) {
+        if (!validateCoordinates(a.location.latitude, a.location.longitude)) {
+          errors.push('location latitude/longitude must be valid numbers in range');
+        }
+      }
+      if (a.location.accuracy !== undefined && typeof a.location.accuracy !== 'string') {
+        errors.push('location.accuracy must be a string when provided');
+      }
+    }
+  }
+  if (a.address !== undefined && typeof a.address !== 'string') {
+    errors.push('address must be a string when provided');
+  }
+  if (a.locationAccuracy !== undefined && typeof a.locationAccuracy !== 'string') {
+    errors.push('locationAccuracy must be a string when provided');
+  }
+  if (a.accessibility !== undefined) {
+    if (typeof a.accessibility === 'string') {
+      // Legacy/free-text notes are allowed.
+    } else if (typeof a.accessibility !== 'object' || a.accessibility === null || Array.isArray(a.accessibility)) {
+      errors.push('accessibility must be a string or object when provided');
+    } else {
+      for (const [key, value] of Object.entries(a.accessibility)) {
+        if (ACCESSIBILITY_FIELDS.has(key) && typeof value !== 'boolean') {
+          errors.push(`accessibility.${key} must be a boolean when provided`);
+        }
+      }
+      if (a.accessibility.notes !== undefined && typeof a.accessibility.notes !== 'string') {
+        errors.push('accessibility.notes must be a string when provided');
+      }
     }
   }
   return errors;
@@ -300,6 +371,25 @@ export function collectWarnings(now = new Date()) {
     if (coverage.checked90Pct < FRESHNESS_TARGETS.checked90Pct) {
       warnings.push(`category "${cat}" freshness coverage is ${coverage.checked90Pct}% within 90 days (<${FRESHNESS_TARGETS.checked90Pct}%)`);
     }
+  }
+
+  const qualityMissing = {
+    accessibility: active.filter((a) => !normalizedAccessibility(a)).length,
+    geodata: active.filter((a) => !normalizedLocation(a)).length,
+    dayOfWeek: active.filter((a) => !a.dayOfWeek).length,
+    startTime: active.filter((a) => !a.startTime).length,
+  };
+  if (qualityMissing.accessibility > 0) {
+    warnings.push(`metadata quality: ${qualityMissing.accessibility}/${active.length} active listings missing accessibility metadata`);
+  }
+  if (qualityMissing.geodata > 0) {
+    warnings.push(`metadata quality: ${qualityMissing.geodata}/${active.length} active listings missing address/geodata`);
+  }
+  if (qualityMissing.dayOfWeek > 0) {
+    warnings.push(`schedule quality: ${qualityMissing.dayOfWeek}/${active.length} active listings missing dayOfWeek`);
+  }
+  if (qualityMissing.startTime > 0) {
+    warnings.push(`schedule quality: ${qualityMissing.startTime}/${active.length} active listings missing startTime`);
   }
 
   return warnings;

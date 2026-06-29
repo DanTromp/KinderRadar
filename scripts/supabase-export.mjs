@@ -58,6 +58,7 @@ function compactObject(value) {
 
 function activityFromRow(row) {
   const raw = row.raw_data && typeof row.raw_data === 'object' ? row.raw_data : {};
+  const accessibility = row.accessibility ?? raw.accessibility;
   return compactObject({
     ...raw,
     slug: row.slug,
@@ -82,7 +83,7 @@ function activityFromRow(row) {
     setting: row.setting,
     parentParticipation: row.parent_participation,
     language: row.language,
-    accessibility: row.accessibility,
+    accessibility,
     contactUrl: row.contact_url,
     contactMethod: row.contact_method,
     sourceUrl: row.source_url,

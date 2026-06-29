@@ -16,10 +16,57 @@ export function parseAgeBand(ageBand) {
   return { min, max };
 }
 
+export const FILTER_QUERY_KEYS = ['age', 'town', 'category', 'section', 'day', 'beginnerFriendly', 'sort', 'chips', 'q'];
+
+const AGE_FILTER_VALUES = new Set(['0-3', '3-6', '6-10', '10-14']);
+const DAY_FILTER_VALUES = new Set(['weekend', 'weekday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']);
+const BEGINNER_FILTER_VALUES = new Set(['true', 'false']);
+const SORT_VALUES = new Set(['freshness', 'name']);
+
+function stringValue(value) {
+  return String(value ?? '').trim();
+}
+
+function optionAllowed(value, allowedValues) {
+  if (!value) return '';
+  if (!allowedValues || allowedValues.size === 0) return value;
+  return allowedValues.has(value) ? value : '';
+}
+
+function optionSet(values) {
+  return new Set(Array.isArray(values) ? values.map(stringValue).filter(Boolean) : []);
+}
+
+export function normalizeFilterSelection(selected = {}, {
+  towns = [],
+  categories = [],
+  sections = [],
+} = {}) {
+  const townOptions = optionSet(towns);
+  const categoryOptions = optionSet(categories);
+  const sectionOptions = optionSet(sections);
+  const sort = stringValue(selected.sort);
+
+  return {
+    age: optionAllowed(stringValue(selected.age), AGE_FILTER_VALUES),
+    town: optionAllowed(stringValue(selected.town), townOptions),
+    category: optionAllowed(stringValue(selected.category), categoryOptions),
+    section: optionAllowed(stringValue(selected.section), sectionOptions),
+    day: optionAllowed(stringValue(selected.day).toLowerCase(), DAY_FILTER_VALUES),
+    beginnerFriendly: optionAllowed(stringValue(selected.beginnerFriendly), BEGINNER_FILTER_VALUES),
+    sort: SORT_VALUES.has(sort) ? sort : 'freshness',
+  };
+}
+
 export function matchesFilters(listing, selected) {
   const ageBand = parseAgeBand(selected.age);
-  if (ageBand && (listing.ageMax < ageBand.min || listing.ageMin > ageBand.max)) {
-    return false;
+  if (ageBand) {
+    const min = listing.ageMin;
+    const max = listing.ageMax;
+    if (typeof min !== 'number' || typeof max !== 'number') {
+      return false;
+    }
+    if (max < ageBand.min || min > ageBand.max) return false;
   }
 
   if (selected.town && listing.town !== selected.town) {
@@ -27,6 +74,10 @@ export function matchesFilters(listing, selected) {
   }
 
   if (selected.category && listing.category !== selected.category) {
+    return false;
+  }
+
+  if (selected.section && listing.section !== selected.section) {
     return false;
   }
 
@@ -137,6 +188,11 @@ function startMinutes(listing) {
   return h * 60 + m;
 }
 
+export function isLowCost(listing) {
+  if (listing?.price?.free === true) return true;
+  return typeof listing?.price?.amount === 'number' && listing.price.amount <= 10;
+}
+
 export const CHIP_DEFINITIONS = [
   {
     id: 'this-weekend',
@@ -160,6 +216,12 @@ export const CHIP_DEFINITIONS = [
     label: 'Free',
     labelKey: 'chip.free',
     predicate: (l) => l.price?.free === true,
+  },
+  {
+    id: 'low-cost',
+    label: 'Free or low-cost',
+    labelKey: 'chip.low-cost',
+    predicate: isLowCost,
   },
   {
     id: 'beginner-friendly',
@@ -191,9 +253,20 @@ export function chipById(id) {
   return CHIP_DEFINITIONS.find((c) => c.id === id) ?? null;
 }
 
+export function normalizeChipIds(chipIds) {
+  const known = new Set(CHIP_DEFINITIONS.map((chip) => chip.id));
+  const raw = Array.isArray(chipIds) ? chipIds : String(chipIds ?? '').split(',');
+  const normalized = [];
+  for (const id of raw.map(stringValue).filter(Boolean)) {
+    if (known.has(id) && !normalized.includes(id)) normalized.push(id);
+  }
+  return normalized;
+}
+
 export function matchesChips(listing, activeChipIds) {
-  if (!activeChipIds || activeChipIds.length === 0) return true;
-  for (const id of activeChipIds) {
+  const normalized = normalizeChipIds(activeChipIds);
+  if (normalized.length === 0) return true;
+  for (const id of normalized) {
     const chip = chipById(id);
     if (chip && !chip.predicate(listing)) return false;
   }
@@ -218,6 +291,46 @@ export function matchesSearch(listing, query) {
     .join(' ')
     .toLowerCase();
   return haystack.includes(q);
+}
+
+export function filterActivities(listings, {
+  selected = {},
+  chips = [],
+  query = '',
+  options = {},
+} = {}) {
+  const normalizedSelected = normalizeFilterSelection(selected, options);
+  const normalizedChips = normalizeChipIds(chips);
+  return (Array.isArray(listings) ? listings : []).filter((listing) => (
+    matchesFilters(listing, normalizedSelected)
+    && matchesChips(listing, normalizedChips)
+    && matchesSearch(listing, query)
+  ));
+}
+
+export function filterSearchParams(currentSearch = '', {
+  selected = {},
+  chips = [],
+  query = '',
+  options = {},
+} = {}) {
+  const params = new URLSearchParams(currentSearch);
+  for (const key of FILTER_QUERY_KEYS) params.delete(key);
+
+  const normalizedSelected = normalizeFilterSelection(selected, options);
+  for (const [key, value] of Object.entries(normalizedSelected)) {
+    if (value && !(key === 'sort' && value === 'freshness')) {
+      params.set(key, value);
+    }
+  }
+
+  const normalizedChips = normalizeChipIds(chips);
+  if (normalizedChips.length) params.set('chips', normalizedChips.join(','));
+
+  const q = stringValue(query);
+  if (q) params.set('q', q);
+
+  return params.toString();
 }
 
 // Default ordering: closed activities sink, then fresher entries surface first,

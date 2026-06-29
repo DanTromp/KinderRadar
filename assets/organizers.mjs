@@ -74,17 +74,25 @@ export function buildOrganizers(items = activities) {
     const slug = organizerSlugForActivity(activity);
     const host = hostForActivity(activity);
     const name = organizerNameForActivity(activity);
+    const source = activity?.organizer ?? {};
     const existing = bySlug.get(slug) ?? {
       slug,
       name,
       host,
-      websiteUrl: activity.contactUrl || activity.sourceUrl || '',
+      websiteUrl: source.websiteUrl || source.website || activity.contactUrl || activity.sourceUrl || '',
+      contactEmail: source.contactEmail || source.email || '',
+      phone: source.phone || '',
+      address: source.address || '',
+      location: source.location ?? null,
+      logoUrl: source.logoUrl || '',
+      description: source.description || '',
+      verificationStatus: source.verificationStatus || '',
       contactMethod: activity.contactMethod ?? '',
       activitySlugs: [],
       towns: [],
       categories: [],
-      claimed: false,
-      sponsorship: null,
+      claimed: source.claimed === true,
+      sponsorship: source.sponsorship ?? null,
     };
 
     existing.activitySlugs.push(activity.slug);
@@ -92,6 +100,15 @@ export function buildOrganizers(items = activities) {
     existing.categories = [...new Set([...existing.categories, activity.category].filter(Boolean))].sort();
     if (!existing.websiteUrl) existing.websiteUrl = activity.contactUrl || activity.sourceUrl || '';
     if (!existing.contactMethod) existing.contactMethod = activity.contactMethod ?? '';
+    if (!existing.contactEmail) existing.contactEmail = source.contactEmail || source.email || '';
+    if (!existing.phone) existing.phone = source.phone || '';
+    if (!existing.address) existing.address = source.address || '';
+    if (!existing.location) existing.location = source.location ?? null;
+    if (!existing.logoUrl) existing.logoUrl = source.logoUrl || '';
+    if (!existing.description) existing.description = source.description || '';
+    if (!existing.verificationStatus) existing.verificationStatus = source.verificationStatus || '';
+    if (source.claimed === true) existing.claimed = true;
+    if (!existing.sponsorship && source.sponsorship) existing.sponsorship = source.sponsorship;
     bySlug.set(slug, existing);
   }
 
