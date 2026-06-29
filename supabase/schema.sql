@@ -125,7 +125,7 @@ create table if not exists public.activity_updates (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint activity_updates_status_check check (status in ('new', 'needs_review', 'accepted', 'rejected', 'applied')),
-  constraint activity_updates_type_check check (update_type in ('submission', 'update', 'closed', 'confirm', 'claim'))
+  constraint activity_updates_type_check check (update_type in ('submission', 'update', 'closed', 'confirm', 'claim', 'organizer_claim'))
 );
 
 create table if not exists public.digest_subscribers (

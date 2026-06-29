@@ -19,7 +19,7 @@ async function countRows(config, table) {
 
 export async function main() {
   const config = await loadSupabaseEnv({ action: 'checking Supabase status' });
-  for (const table of ['cities', 'towns', 'organizers', 'activities', 'activity_sources', 'feed_items', 'activity_updates']) {
+  for (const table of ['cities', 'towns', 'organizers', 'activities', 'activity_sources', 'feed_items', 'activity_updates', 'digest_subscribers']) {
     console.log(`${table}: ${await countRows(config, table)}`);
   }
 }

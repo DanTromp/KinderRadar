@@ -35,7 +35,7 @@
   "shortlist.calendar.ready": "calendar-ready",
   "shortlist.calendar.empty": "Save at least one activity before exporting a calendar.",
   "shortlist.calendar.none": "No saved activities have enough schedule data for calendar export.",
-  "shortlist.calendar.exported": "Calendar file created with {included} activity/activity(s); {skipped} skipped.",
+  "shortlist.calendar.exported": "Calendar file created with {included} activities; {skipped} skipped.",
   "shortlist.print": "Print",
   "shortlist.clear": "Clear shortlist",
   "shortlist.share.empty": "Save at least one activity before sharing.",

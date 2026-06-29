@@ -227,7 +227,7 @@ function exportCalendar(items, {
 
   downloadIcs(name, result.ics);
   const params = { included: result.included.length, skipped: result.skipped.length };
-  const fallback = `Calendar file created with ${params.included} activity/activity(s); ${params.skipped} skipped.`;
+  const fallback = `Calendar file created with ${params.included} activities; ${params.skipped} skipped.`;
   setTranslatedStatus(statusTarget, 'shortlist.calendar.exported', fallback, params, 'success');
   track('calendar_export', params);
   return result;

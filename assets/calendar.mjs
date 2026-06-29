@@ -58,7 +58,16 @@ function formatUtcStamp(date) {
 function nextDateForDay(day, now) {
   const target = DAY_TO_INDEX[day];
   if (target === undefined) return null;
-  const base = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const localParts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: CALENDAR_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const year = Number(localParts.find(p => p.type === 'year').value);
+  const month = Number(localParts.find(p => p.type === 'month').value) - 1;
+  const date = Number(localParts.find(p => p.type === 'day').value);
+  const base = new Date(Date.UTC(year, month, date));
   const current = base.getUTCDay();
   const offset = (target - current + 7) % 7;
   base.setUTCDate(base.getUTCDate() + offset);
