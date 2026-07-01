@@ -12,6 +12,7 @@ import { buildOrganizers, organizerSlugForActivity } from '../assets/organizers.
 import {
   daysSince,
   freshnessCoverage,
+  freshnessStatus,
   normalizedAccessibility,
   normalizedLocation,
   slugify,
@@ -96,8 +97,8 @@ function metadataGaps(items) {
 function verificationSummary(items, now) {
   const coverage = freshnessCoverage(items, now);
   const staleOver90 = items.filter((activity) => {
-    const days = daysSince(activity.lastVerified, now);
-    return days === null || days > STALE_DAYS;
+    const status = freshnessStatus(activity, now);
+    return status.status === 'stale' || status.status === 'missing_verification';
   }).length;
   const oldest = [...items]
     .map((activity) => ({

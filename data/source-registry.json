@@ -1,0 +1,57 @@
+[
+  {
+    "id": "haltern-city",
+    "town": "Haltern am See",
+    "sourceType": "municipal",
+    "organizerName": "Stadt Haltern am See",
+    "url": "https://www.haltern-am-see.de/",
+    "trustLevel": "official",
+    "crawlFrequency": "monthly",
+    "active": true,
+    "notes": "Official city entry point; use as a stable starting source when deeper family pages move."
+  },
+  {
+    "id": "haltern-st-sixtus",
+    "town": "Haltern am See",
+    "sourceType": "organizer",
+    "organizerName": "Pfarrei St. Sixtus",
+    "url": "https://www.st-sixtus.de/",
+    "trustLevel": "organizer",
+    "crawlFrequency": "monthly",
+    "active": true,
+    "notes": "Organizer page for youth groups and community activities."
+  },
+  {
+    "id": "haltern-dlrg",
+    "town": "Haltern am See",
+    "sourceType": "organizer",
+    "organizerName": "DLRG Haltern am See",
+    "url": "https://haltern.dlrg.de/",
+    "trustLevel": "organizer",
+    "crawlFrequency": "monthly",
+    "active": true,
+    "notes": "Organizer page for swimming courses and youth water-safety activity changes."
+  },
+  {
+    "id": "duelmen-vhs",
+    "town": "Dülmen",
+    "sourceType": "course_provider",
+    "organizerName": "VHS Dülmen",
+    "url": "https://www.vhs-duelmen.de/",
+    "trustLevel": "organizer",
+    "crawlFrequency": "monthly",
+    "active": true,
+    "notes": "Course catalogue source; monitor for new children and holiday course blocks."
+  },
+  {
+    "id": "dorsten-city",
+    "town": "Dorsten",
+    "sourceType": "municipal",
+    "organizerName": "Stadt Dorsten",
+    "url": "https://www.dorsten.de/",
+    "trustLevel": "official",
+    "crawlFrequency": "monthly",
+    "active": true,
+    "notes": "Official city entry point; monitor for changed family, library, sport, and holiday programme navigation."
+  }
+]

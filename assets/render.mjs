@@ -10,6 +10,11 @@
 // JS while letting us add German translations entirely via JSON files.
 
 const MS_PER_DAY = 86_400_000;
+export const FRESHNESS_THRESHOLDS = Object.freeze({
+  freshDays: 30,
+  staleSoonDays: 75,
+  staleDays: 90,
+});
 
 export function slugify(text) {
   return String(text)
@@ -21,10 +26,46 @@ export function slugify(text) {
 }
 
 export function daysSince(isoDate, now = new Date()) {
+  const days = verificationAgeDays(isoDate, now);
+  return days === null ? null : Math.max(0, days);
+}
+
+export function verificationAgeDays(isoDate, now = new Date()) {
   if (typeof isoDate !== 'string') return null;
   const t = Date.parse(isoDate);
   if (Number.isNaN(t)) return null;
-  return Math.max(0, Math.floor((now.getTime() - t) / MS_PER_DAY));
+  return Math.floor((now.getTime() - t) / MS_PER_DAY);
+}
+
+export function freshnessStatus(listing, now = new Date(), thresholds = FRESHNESS_THRESHOLDS) {
+  const lastVerified = typeof listing === 'string' ? listing : listing?.lastVerified;
+  const days = verificationAgeDays(lastVerified, now);
+  if (days === null) {
+    return {
+      status: 'missing_verification',
+      days: null,
+      issue: lastVerified ? 'invalid_last_verified' : 'missing_last_verified',
+      lastVerified: lastVerified ?? null,
+    };
+  }
+  if (days < 0) {
+    return {
+      status: 'missing_verification',
+      days,
+      issue: 'future_last_verified',
+      lastVerified,
+    };
+  }
+  if (days < thresholds.freshDays) {
+    return { status: 'fresh', days, issue: null, lastVerified };
+  }
+  if (days < thresholds.staleSoonDays) {
+    return { status: 'aging', days, issue: null, lastVerified };
+  }
+  if (days <= thresholds.staleDays) {
+    return { status: 'needs_verification_soon', days, issue: null, lastVerified };
+  }
+  return { status: 'stale', days, issue: null, lastVerified };
 }
 
 // Trust/freshness classification driven by lastVerified + status.
@@ -34,16 +75,17 @@ export function freshnessBadge(listing, now = new Date()) {
   if (listing?.status === 'reported-closed') {
     return { tone: 'closed', label: 'Reported closed', i18nKey: 'freshness.closed', i18nParams: null };
   }
-  const days = daysSince(listing?.lastVerified, now);
-  if (days === null) {
+  const freshness = freshnessStatus(listing, now);
+  const days = freshness.days;
+  if (days === null || days < 0) {
     return { tone: 'stale', label: 'Verification unknown', i18nKey: 'freshness.unknown', i18nParams: null };
   }
-  if (days < 30) {
+  if (freshness.status === 'fresh') {
     const i18nKey = days === 1 ? 'freshness.fresh.one' : 'freshness.fresh.other';
     const label = `Verified ${days} day${days === 1 ? '' : 's'} ago`;
     return { tone: 'fresh', label, i18nKey, i18nParams: { days } };
   }
-  if (days <= 90) {
+  if (freshness.status === 'aging' || freshness.status === 'needs_verification_soon') {
     return { tone: 'neutral', label: `Verified ${days} days ago`, i18nKey: 'freshness.neutral', i18nParams: { days } };
   }
   return { tone: 'stale', label: 'Needs update', i18nKey: 'freshness.stale', i18nParams: null };
@@ -59,9 +101,9 @@ export function freshnessCoverage(listings, now = new Date()) {
   for (const listing of items) {
     if (!listing || listing.status === 'reported-closed') continue;
     total += 1;
-    const days = daysSince(listing.lastVerified, now);
-    if (days !== null && days < 30) fresh30 += 1;
-    if (days !== null && days <= 90) checked90 += 1;
+    const freshness = freshnessStatus(listing, now);
+    if (freshness.status === 'fresh') fresh30 += 1;
+    if (['fresh', 'aging', 'needs_verification_soon'].includes(freshness.status)) checked90 += 1;
     else stale += 1;
   }
 
@@ -225,19 +267,8 @@ function enumSpan(prefix, rawValue) {
   return `<span${i18nAttrs(key)}>${escapeHtml(rawValue)}</span>`;
 }
 
-function suggestUpdateUrl(listing, repoSlug) {
-  // GitHub Issue template prefill. repoSlug like "owner/name".
-  const base = repoSlug
-    ? `https://github.com/${repoSlug}/issues/new`
-    : '#';
-  const params = new URLSearchParams({
-    template: 'suggest-update.yml',
-    title: `[Update] ${listing.name}`,
-    slug: listing.slug ?? '',
-    activity: listing.name ?? '',
-    town: listing.town ?? '',
-  });
-  return `${base}?${params.toString()}`;
+function suggestUpdateUrl(listing, activityHrefPrefix) {
+  return `${activityHrefPrefix}/${listing.slug}/#activity-update`;
 }
 
 // Build a single listing card as an HTML string. Used both at build time
@@ -311,7 +342,7 @@ export function renderListingHtml(listing, {
         <a class="text-link" href="${escapeHtml(activityHrefPrefix)}/${escapeHtml(listing.slug)}/" data-i18n="listing.viewDetails">View details</a>
         <button type="button" class="text-link muted-link save-button" data-save-activity="${escapeHtml(listing.slug)}" aria-pressed="false"><span data-save-label data-i18n="shortlist.save">Save</span></button>
         <button type="button" class="text-link muted-link calendar-button" data-export-calendar="${escapeHtml(listing.slug)}" data-i18n="activity.calendar.export">Add to calendar</button>
-        <a class="text-link muted-link" href="${escapeHtml(suggestUpdateUrl(listing, repoSlug))}" rel="noopener noreferrer" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a>
+        <a class="text-link muted-link" href="${escapeHtml(suggestUpdateUrl(listing, activityHrefPrefix))}" data-analytics="suggest_update_click"${i18nAttrs('listing.suggestUpdate')}>Suggest an update</a>
       </p>
     </article>`;
 }
