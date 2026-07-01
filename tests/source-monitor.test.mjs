@@ -1,5 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFile } from 'node:child_process';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
 import {
   buildSourceMonitorReport,
@@ -8,6 +14,8 @@ import {
   renderSourceMonitorReport,
   validateSourceRegistry,
 } from '../scripts/source-monitor.mjs';
+
+const execFileAsync = promisify(execFile);
 
 function source(overrides = {}) {
   return {
@@ -208,4 +216,27 @@ test('markdown report includes stable summary and review-only notice', async () 
   assert.match(markdown, /Sources checked: 1\/1/);
   assert.match(markdown, /\| changed \| Haltern am See \| content_changed \| medium \|/);
   assert.match(markdown, /does not publish activities, update Supabase, or modify live activity data/);
+});
+
+test('CLI prints a concise error and exits non-zero on runtime failure', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'kr-source-monitor-'));
+  try {
+    const missingRegistryPath = join(dir, 'missing-registry.json');
+
+    await assert.rejects(
+      execFileAsync(process.execPath, [
+        'scripts/source-monitor.mjs',
+        '--no-write',
+        `--registry=${missingRegistryPath}`,
+      ], { cwd: fileURLToPath(new URL('..', import.meta.url)) }),
+      (error) => {
+        assert.equal(error.code, 1);
+        assert.match(error.stderr, /ENOENT|no such file/i);
+        assert.doesNotMatch(error.stderr, /UnhandledPromiseRejection|at .*source-monitor\.mjs/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
