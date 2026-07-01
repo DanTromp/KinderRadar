@@ -34,6 +34,7 @@ const RECURRING_VALUES = new Set(['weekly', 'monthly', 'one-off']);
 const SETTING_VALUES = new Set(['indoor', 'outdoor', 'mixed']);
 const PARENT_VALUES = new Set(['required', 'optional', 'none']);
 const VERIFIED_BY = new Set(['organizer', 'parent', 'editor']);
+const VERIFICATION_METHODS = new Set(['source_check', 'organizer_confirmation', 'parent_confirmation', 'editor_review', 'phone', 'email', 'form']);
 const STATUS_VALUES = new Set(['active', 'needs-update', 'reported-closed']);
 const CONTACT_METHODS = new Set(['email', 'phone', 'form', 'whatsapp']);
 const PRICE_UNITS = new Set([
@@ -134,6 +135,20 @@ export function validateActivity(a, sectionIds) {
   }
   if (a.verifiedBy !== undefined && !VERIFIED_BY.has(a.verifiedBy)) {
     errors.push(`verifiedBy "${a.verifiedBy}" must be one of ${[...VERIFIED_BY].join(', ')}`);
+  }
+  if (a.verifiedAt !== undefined) {
+    if (typeof a.verifiedAt !== 'string' || !ISO_DATE.test(a.verifiedAt)) {
+      errors.push(`verifiedAt "${a.verifiedAt}" must be YYYY-MM-DD when provided`);
+    }
+  }
+  if (a.verificationSource !== undefined && !validUrl(a.verificationSource)) {
+    errors.push(`verificationSource "${a.verificationSource}" is not a valid http(s) URL`);
+  }
+  if (a.verificationMethod !== undefined && !VERIFICATION_METHODS.has(a.verificationMethod)) {
+    errors.push(`verificationMethod "${a.verificationMethod}" must be one of ${[...VERIFICATION_METHODS].join(', ')}`);
+  }
+  if (a.verificationNotes !== undefined && (typeof a.verificationNotes !== 'string' || a.verificationNotes.length > 500)) {
+    errors.push('verificationNotes must be a string of 500 characters or fewer when provided');
   }
   if (a.status !== undefined && !STATUS_VALUES.has(a.status)) {
     errors.push(`status "${a.status}" must be one of ${[...STATUS_VALUES].join(', ')}`);

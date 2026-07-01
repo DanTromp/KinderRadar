@@ -113,3 +113,49 @@ test('accessibility object values are validated without requiring every listing 
   }, sectionIds);
   assert.ok(errors.some((error) => /accessibility\.strollerFriendly/.test(error)));
 });
+
+test('optional verification metadata is validated without requiring it on every listing', () => {
+  const sectionIds = new Set(sections.map((s) => s.id));
+  const valid = validateActivity({
+    slug: 'verification-meta',
+    name: 'Verification Meta',
+    section: sections[0].id,
+    category: 'Sports',
+    ageRange: '4-8',
+    ageMin: 4,
+    ageMax: 8,
+    town: cities[0].nearbyTowns[0],
+    timing: 'Tuesday 16:00',
+    cost: 'Free',
+    beginnerFriendly: true,
+    lastVerified: '2026-06-20',
+    verifiedAt: '2026-06-20',
+    verificationSource: 'https://example.test/source',
+    verificationMethod: 'source_check',
+    verificationNotes: 'Public non-sensitive note.',
+  }, sectionIds);
+  assert.deepEqual(valid, []);
+
+  const invalid = validateActivity({
+    slug: 'bad-verification-meta',
+    name: 'Bad Verification Meta',
+    section: sections[0].id,
+    category: 'Sports',
+    ageRange: '4-8',
+    ageMin: 4,
+    ageMax: 8,
+    town: cities[0].nearbyTowns[0],
+    timing: 'Tuesday 16:00',
+    cost: 'Free',
+    beginnerFriendly: true,
+    lastVerified: '2026-06-20',
+    verifiedAt: 'bad-date',
+    verificationSource: 'not a url',
+    verificationMethod: 'magic',
+    verificationNotes: 'x'.repeat(501),
+  }, sectionIds);
+  assert.ok(invalid.some((error) => /verifiedAt/.test(error)));
+  assert.ok(invalid.some((error) => /verificationSource/.test(error)));
+  assert.ok(invalid.some((error) => /verificationMethod/.test(error)));
+  assert.ok(invalid.some((error) => /verificationNotes/.test(error)));
+});

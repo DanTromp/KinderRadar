@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   slugify,
   daysSince,
+  freshnessStatus,
+  verificationAgeDays,
   freshnessBadge,
   freshnessCoverage,
   verifierLabel,
@@ -33,6 +35,18 @@ test('daysSince computes whole-day differences', () => {
   assert.equal(daysSince('2026-06-15', now), 0);
   assert.equal(daysSince('2026-06-10', now), 5);
   assert.equal(daysSince('not-a-date', now), null);
+});
+
+test('freshnessStatus classifies operational freshness windows', () => {
+  const now = new Date('2026-07-01T12:00:00Z');
+  assert.equal(freshnessStatus({ lastVerified: '2026-06-20' }, now).status, 'fresh');
+  assert.equal(freshnessStatus({ lastVerified: '2026-05-20' }, now).status, 'aging');
+  assert.equal(freshnessStatus({ lastVerified: '2026-04-10' }, now).status, 'needs_verification_soon');
+  assert.equal(freshnessStatus({ lastVerified: '2026-03-01' }, now).status, 'stale');
+  assert.equal(freshnessStatus({}, now).status, 'missing_verification');
+  assert.equal(freshnessStatus({ lastVerified: 'bad-date' }, now).issue, 'invalid_last_verified');
+  assert.equal(freshnessStatus({ lastVerified: '2026-07-10' }, now).issue, 'future_last_verified');
+  assert.equal(verificationAgeDays('2026-07-10', now), -9);
 });
 
 test('freshnessBadge classifies by age and status', () => {
@@ -167,6 +181,8 @@ test('renderListingHtml includes a freshness badge and a detail-page link', () =
   const html = renderListingHtml({ ...sampleListing, lastVerified: now.toISOString().slice(0, 10) }, { sections });
   assert.match(html, /class="freshness/);
   assert.match(html, /href="\/activities\/demo\/"/);
+  assert.match(html, /href="\/activities\/demo\/#activity-update"/);
+  assert.doesNotMatch(html, /github\.com/);
   assert.match(html, /trust-pill/);
 });
 
@@ -176,6 +192,7 @@ test('renderListingHtml supports relative activity links for project-page hostin
     activityHrefPrefix: '../../activities',
   });
   assert.match(html, /href="\.\.\/\.\.\/activities\/demo\/"/);
+  assert.match(html, /href="\.\.\/\.\.\/activities\/demo\/#activity-update"/);
 });
 
 test('renderListingHtml renders a closed banner when status is reported-closed', () => {
@@ -214,6 +231,7 @@ test('renderListingHtml emits data-i18n attributes for translation', () => {
 
 test('activity detail page hides empty accessibility/location sections', () => {
   const html = activityDetailPage(sampleListing);
+  assert.match(html, /id="activity-update"/);
   assert.doesNotMatch(html, /accessibility-heading/);
   assert.doesNotMatch(html, /location-heading/);
 });

@@ -241,7 +241,7 @@ function citySubmissionForm(city, townOptions) {
 }
 
 function activityUpdateForm(listing) {
-  return `      <section class="panel contribution-panel" aria-labelledby="activity-update-heading">
+  return `      <section id="activity-update" class="panel contribution-panel" aria-labelledby="activity-update-heading">
         <h2 id="activity-update-heading">Help keep this accurate</h2>
         <form class="contribution-form" data-meinkinderradar-update data-activity-slug="${escapeHtml(listing.slug)}" data-activity-name="${escapeHtml(listing.name)}" data-town="${escapeHtml(listing.town)}" novalidate>
           <label>

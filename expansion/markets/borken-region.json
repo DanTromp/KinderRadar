@@ -1,0 +1,453 @@
+{
+  "id": "borken-region",
+  "name": "Borken Region",
+  "slug": "borken-region",
+  "country": "DE",
+  "state": "NRW",
+  "mainPlaceName": "Borken",
+  "status": "planning",
+  "targetListingCount": 80,
+  "notes": "First real expansion test market. Local planning only. No live activity data.",
+  "places": [
+    {
+      "id": "borken",
+      "slug": "borken",
+      "name": "Borken",
+      "town": "Borken",
+      "type": "city",
+      "priority": 1,
+      "active": true,
+      "aliases": []
+    },
+    {
+      "id": "gemen",
+      "slug": "gemen",
+      "name": "Gemen",
+      "town": "Gemen",
+      "type": "district",
+      "parentPlaceId": "borken",
+      "priority": 2,
+      "active": true,
+      "aliases": []
+    },
+    {
+      "id": "weseke",
+      "slug": "weseke",
+      "name": "Weseke",
+      "town": "Weseke",
+      "type": "district",
+      "parentPlaceId": "borken",
+      "priority": 3,
+      "active": true,
+      "aliases": []
+    },
+    {
+      "id": "burlo",
+      "slug": "burlo",
+      "name": "Burlo",
+      "town": "Burlo",
+      "type": "nearby_area",
+      "parentPlaceId": "borken",
+      "priority": 4,
+      "active": true,
+      "aliases": []
+    },
+    {
+      "id": "rhede",
+      "slug": "rhede",
+      "name": "Rhede",
+      "town": "Rhede",
+      "type": "town",
+      "parentPlaceId": null,
+      "priority": 5,
+      "active": true,
+      "aliases": []
+    },
+    {
+      "id": "heiden",
+      "slug": "heiden",
+      "name": "Heiden",
+      "town": "Heiden",
+      "type": "town",
+      "parentPlaceId": null,
+      "priority": 6,
+      "active": true,
+      "aliases": []
+    },
+    {
+      "id": "velen",
+      "slug": "velen",
+      "name": "Velen",
+      "town": "Velen",
+      "type": "town",
+      "parentPlaceId": null,
+      "priority": 7,
+      "active": true,
+      "aliases": []
+    }
+  ],
+  "sources": [],
+  "sourceChecklist": [
+    {
+      "id": "borken-official-city-family-youth-page",
+      "sourceType": "official_city_family_youth_page",
+      "placeId": "borken",
+      "sourceName": "Borken family and youth page",
+      "url": "",
+      "status": "missing",
+      "notes": "Find the official city family/youth entry point manually."
+    },
+    {
+      "id": "borken-ferienprogramm",
+      "sourceType": "ferienprogramm",
+      "placeId": "borken",
+      "sourceName": "Borken Ferienprogramm",
+      "url": "",
+      "status": "missing",
+      "notes": "Find the official holiday programme manually."
+    },
+    {
+      "id": "borken-sports-clubs",
+      "sourceType": "sports_clubs",
+      "placeId": "borken",
+      "sourceName": "Borken sports clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-music-schools",
+      "sourceType": "music_schools",
+      "placeId": "borken",
+      "sourceName": "Borken music schools",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-dance-schools",
+      "sourceType": "dance_schools",
+      "placeId": "borken",
+      "sourceName": "Borken dance schools",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-swimming-pools",
+      "sourceType": "swimming_pools",
+      "placeId": "borken",
+      "sourceName": "Borken swimming pools",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-libraries",
+      "sourceType": "libraries",
+      "placeId": "borken",
+      "sourceName": "Borken libraries",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-museums",
+      "sourceType": "museums",
+      "placeId": "borken",
+      "sourceName": "Borken museums",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-vhs-family-courses",
+      "sourceType": "vhs_family_courses",
+      "placeId": "borken",
+      "sourceName": "Borken VHS family courses",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-family-centers",
+      "sourceType": "family_centers",
+      "placeId": "borken",
+      "sourceName": "Borken family centers",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-church-community-groups",
+      "sourceType": "church_community_groups",
+      "placeId": "borken",
+      "sourceName": "Borken church and community groups",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-indoor-play",
+      "sourceType": "indoor_play",
+      "placeId": "borken",
+      "sourceName": "Borken indoor play",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-martial-arts",
+      "sourceType": "martial_arts",
+      "placeId": "borken",
+      "sourceName": "Borken martial arts",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-football-clubs",
+      "sourceType": "football_clubs",
+      "placeId": "borken",
+      "sourceName": "Borken football clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-tennis-clubs",
+      "sourceType": "tennis_clubs",
+      "placeId": "borken",
+      "sourceName": "Borken tennis clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "borken-gymnastics-clubs",
+      "sourceType": "gymnastics_clubs",
+      "placeId": "borken",
+      "sourceName": "Borken gymnastics clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-official-city-family-youth-page",
+      "sourceType": "official_city_family_youth_page",
+      "placeId": "rhede",
+      "sourceName": "Rhede family and youth page",
+      "url": "",
+      "status": "missing",
+      "notes": "Find the official town family/youth entry point manually."
+    },
+    {
+      "id": "rhede-ferienprogramm",
+      "sourceType": "ferienprogramm",
+      "placeId": "rhede",
+      "sourceName": "Rhede Ferienprogramm",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-sports-clubs",
+      "sourceType": "sports_clubs",
+      "placeId": "rhede",
+      "sourceName": "Rhede sports clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-music-schools",
+      "sourceType": "music_schools",
+      "placeId": "rhede",
+      "sourceName": "Rhede music schools",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-libraries",
+      "sourceType": "libraries",
+      "placeId": "rhede",
+      "sourceName": "Rhede libraries",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-family-centers",
+      "sourceType": "family_centers",
+      "placeId": "rhede",
+      "sourceName": "Rhede family centers",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-football-clubs",
+      "sourceType": "football_clubs",
+      "placeId": "rhede",
+      "sourceName": "Rhede football clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "rhede-gymnastics-clubs",
+      "sourceType": "gymnastics_clubs",
+      "placeId": "rhede",
+      "sourceName": "Rhede gymnastics clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-official-city-family-youth-page",
+      "sourceType": "official_city_family_youth_page",
+      "placeId": "heiden",
+      "sourceName": "Heiden family and youth page",
+      "url": "",
+      "status": "missing",
+      "notes": "Find the official town family/youth entry point manually."
+    },
+    {
+      "id": "heiden-ferienprogramm",
+      "sourceType": "ferienprogramm",
+      "placeId": "heiden",
+      "sourceName": "Heiden Ferienprogramm",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-sports-clubs",
+      "sourceType": "sports_clubs",
+      "placeId": "heiden",
+      "sourceName": "Heiden sports clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-music-schools",
+      "sourceType": "music_schools",
+      "placeId": "heiden",
+      "sourceName": "Heiden music schools",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-libraries",
+      "sourceType": "libraries",
+      "placeId": "heiden",
+      "sourceName": "Heiden libraries",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-family-centers",
+      "sourceType": "family_centers",
+      "placeId": "heiden",
+      "sourceName": "Heiden family centers",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-football-clubs",
+      "sourceType": "football_clubs",
+      "placeId": "heiden",
+      "sourceName": "Heiden football clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "heiden-gymnastics-clubs",
+      "sourceType": "gymnastics_clubs",
+      "placeId": "heiden",
+      "sourceName": "Heiden gymnastics clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-official-city-family-youth-page",
+      "sourceType": "official_city_family_youth_page",
+      "placeId": "velen",
+      "sourceName": "Velen family and youth page",
+      "url": "",
+      "status": "missing",
+      "notes": "Find the official town family/youth entry point manually."
+    },
+    {
+      "id": "velen-ferienprogramm",
+      "sourceType": "ferienprogramm",
+      "placeId": "velen",
+      "sourceName": "Velen Ferienprogramm",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-sports-clubs",
+      "sourceType": "sports_clubs",
+      "placeId": "velen",
+      "sourceName": "Velen sports clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-music-schools",
+      "sourceType": "music_schools",
+      "placeId": "velen",
+      "sourceName": "Velen music schools",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-libraries",
+      "sourceType": "libraries",
+      "placeId": "velen",
+      "sourceName": "Velen libraries",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-family-centers",
+      "sourceType": "family_centers",
+      "placeId": "velen",
+      "sourceName": "Velen family centers",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-football-clubs",
+      "sourceType": "football_clubs",
+      "placeId": "velen",
+      "sourceName": "Velen football clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    },
+    {
+      "id": "velen-gymnastics-clubs",
+      "sourceType": "gymnastics_clubs",
+      "placeId": "velen",
+      "sourceName": "Velen gymnastics clubs",
+      "url": "",
+      "status": "missing",
+      "notes": ""
+    }
+  ],
+  "candidates": []
+}

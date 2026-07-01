@@ -1,0 +1,48 @@
+name: Source monitor
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-monitor
+  cancel-in-progress: false
+
+jobs:
+  check-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci || npm install
+
+      - name: Restore previous source snapshot
+        uses: actions/cache@v4
+        with:
+          path: review/source-monitor/snapshot.json
+          key: source-monitor-${{ github.run_id }}
+          restore-keys: |
+            source-monitor-
+
+      - name: Check trusted sources
+        run: npm run sources:check
+
+      - name: Upload source monitor report
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-monitor-report
+          path: |
+            review/source-monitor/report.md
+            review/source-monitor/report.json
+            review/source-monitor/candidates.json
+            review/source-monitor/snapshot.json
+          if-no-files-found: error
+          retention-days: 30

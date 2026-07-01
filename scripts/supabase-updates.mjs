@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -18,6 +18,10 @@ Examples:
   npm run supabase:updates
   npm run supabase:updates -- --status=needs_review --format=markdown
   npm run supabase:review
+  npm run admin:review
+  npm run sources:review
+  npm run admin:review -- --freshness-candidates=review/freshness/candidates.json
+  npm run admin:review -- --verification-items=review/verification/candidates.json
 `);
   process.exit(0);
 }
@@ -38,10 +42,28 @@ async function fetchUpdates(config, status = 'new') {
   return response.json();
 }
 
-function render(updates, { status, format }) {
+async function loadCandidateReport(path, label) {
+  if (!path) return { candidates: [], warning: '' };
+  try {
+    return { candidates: JSON.parse(await readFile(path, 'utf8')), warning: '' };
+  } catch (error) {
+    if (error?.code === 'ENOENT') return { candidates: [], warning: '' };
+    return {
+      candidates: [],
+      warning: `Could not read ${label} candidates from ${path}: ${error.message}`,
+    };
+  }
+}
+
+function render(updates, { status, format, sourceCandidates = [], freshnessCandidates = [], verificationItems = [] }) {
   if (format === 'json') return `${JSON.stringify(updates, null, 2)}\n`;
   if (format === 'markdown' || format === 'md') return renderMarkdown(updates, { status });
-  if (format === 'admin-html') return renderAdminHtml(updates, { status });
+  if (format === 'admin-html') return renderAdminHtml(updates, {
+    status,
+    sourceCandidates,
+    freshnessCandidates,
+    verificationItems,
+  });
   if (format === 'html') return renderHtml(updates, { status });
   if (updates.length === 0) return `No ${status} activity updates.\n`;
   return `${updates.length} ${status} activity update(s):\n\n${updates.map(describeUpdate).join('\n\n')}\n`;
@@ -51,12 +73,43 @@ export async function main() {
   const status = arg('status', 'new');
   const format = arg('format', 'text');
   const out = arg('out');
-  const config = await loadSupabaseEnv({
-    requireServiceRole: true,
-    action: 'reviewing Supabase activity updates',
+  const sourceCandidatesPath = process.argv.includes('--no-source-candidates')
+    ? ''
+    : arg('source-candidates', 'review/source-monitor/candidates.json');
+  const freshnessCandidatesPath = process.argv.includes('--no-freshness-candidates')
+    ? ''
+    : arg('freshness-candidates', 'review/freshness/candidates.json');
+  const verificationItemsPath = process.argv.includes('--no-verification-items')
+    ? ''
+    : arg('verification-items', 'review/verification/candidates.json');
+  const sourceOnly = process.argv.includes('--source-only');
+  let updates = [];
+  if (!sourceOnly) {
+    const config = await loadSupabaseEnv({
+      requireServiceRole: true,
+      action: 'reviewing Supabase activity updates',
+    });
+    updates = await fetchUpdates(config, status);
+  }
+  const sourceReport = format === 'admin-html'
+    ? await loadCandidateReport(sourceCandidatesPath, 'source-monitor')
+    : { candidates: [], warning: '' };
+  const freshnessReport = format === 'admin-html'
+    ? await loadCandidateReport(freshnessCandidatesPath, 'freshness')
+    : { candidates: [], warning: '' };
+  const verificationReport = format === 'admin-html'
+    ? await loadCandidateReport(verificationItemsPath, 'verification')
+    : { candidates: [], warning: '' };
+  if (sourceReport.warning) console.warn(sourceReport.warning);
+  if (freshnessReport.warning) console.warn(freshnessReport.warning);
+  if (verificationReport.warning) console.warn(verificationReport.warning);
+  const output = render(updates, {
+    status,
+    format,
+    sourceCandidates: sourceReport.candidates,
+    freshnessCandidates: freshnessReport.candidates,
+    verificationItems: verificationReport.candidates,
   });
-  const updates = await fetchUpdates(config, status);
-  const output = render(updates, { status, format });
 
   if (out) {
     await mkdir(dirname(out), { recursive: true });
